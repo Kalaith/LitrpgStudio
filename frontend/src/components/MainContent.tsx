@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import TopBar from './TopBar';
-import DashboardView from './views/DashboardView';
-import CharacterManager from './views/CharacterManager';
-import SkillsView from './views/SkillsView';
-import TimelineView from './views/TimelineView';
-import EditorView from './views/EditorView';
-import TemplatesView from './views/TemplatesView';
-import ExportView from './views/ExportView';
+import DashboardView from '../pages/DashboardView';
+import CharacterManager from '../pages/CharacterManager';
+import SkillsView from '../pages/SkillsView';
+import TimelineView from '../pages/TimelineView';
+import EditorView from '../pages/EditorView';
+import TemplatesView from '../pages/TemplatesView';
+import ExportView from '../pages/ExportView';
 
 interface MainContentProps {
   activeView: string;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import CharacterForm from '../CharacterForm';
+import CharacterForm from '../components/CharacterForm';
 
 interface CharacterSkill {
   name: string;
