@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { motion } from 'framer-motion';
-import { Character } from '../types';
+import type { Character } from '../types';
+import { RELATIONSHIP_COLORS } from '../constants';
+import type { D3NodeDragEvent } from '../types/common';
 
 interface RelationshipNode extends d3.SimulationNodeDatum {
   id: string;
@@ -83,14 +85,8 @@ export default function CharacterRelationshipMap({
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(30));
 
-    // Color scale for relationship types
-    const relationshipColors = {
-      ally: '#10B981', // green
-      enemy: '#EF4444', // red
-      neutral: '#6B7280', // gray
-      romantic: '#F59E0B', // pink
-      family: '#8B5CF6' // purple
-    };
+    // Use imported relationship colors
+    const relationshipColors = RELATIONSHIP_COLORS;
 
     // Create container group
     const container = svg.append("g");
@@ -204,19 +200,19 @@ export default function CharacterRelationshipMap({
       node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
 
-    // Drag functions
-    function dragstarted(event: any, d: RelationshipNode) {
+    // Drag functions with proper typing
+    function dragstarted(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
     }
 
-    function dragged(event: any, d: RelationshipNode) {
+    function dragged(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
       d.fx = event.x;
       d.fy = event.y;
     }
 
-    function dragended(event: any, d: RelationshipNode) {
+    function dragended(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
       if (!event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;

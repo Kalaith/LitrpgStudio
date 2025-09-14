@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { motion } from 'framer-motion';
 import { marked } from 'marked';
+import { APP_CONFIG } from '../constants';
+import type { EditorInstance } from '../types/common';
 
-interface AdvancedTextEditorProps {
+export interface AdvancedTextEditorProps {
   content: string;
   onChange: (content: string) => void;
   mode?: 'markdown' | 'rich' | 'plain';
@@ -11,6 +13,33 @@ interface AdvancedTextEditorProps {
   theme?: 'light' | 'dark';
   spellCheck?: boolean;
   focusMode?: boolean;
+  height?: number;
+  fontSize?: number;
+  readOnly?: boolean;
+  placeholder?: string;
+  onSave?: () => void;
+  className?: string;
+}
+
+interface EditorOptions {
+  minimap: { enabled: boolean };
+  scrollBeyondLastLine: boolean;
+  wordWrap: 'on';
+  lineNumbers: 'on' | 'off';
+  glyphMargin: boolean;
+  folding: boolean;
+  lineDecorationsWidth?: number;
+  lineNumbersMinChars?: number;
+  renderLineHighlight: 'none' | 'all';
+  hideCursorInOverviewRuler: boolean;
+  overviewRulerBorder: boolean;
+  fontSize: number;
+  fontFamily: string;
+  suggestOnTriggerCharacters: boolean;
+  quickSuggestions: boolean;
+  parameterHints: { enabled: boolean };
+  hover: { enabled: boolean };
+  readOnly?: boolean;
 }
 
 export default function AdvancedTextEditor({
@@ -20,13 +49,19 @@ export default function AdvancedTextEditor({
   showPreview = true,
   theme = 'light',
   spellCheck = true,
-  focusMode = false
+  focusMode = false,
+  height = APP_CONFIG.DEFAULT_EDITOR_HEIGHT,
+  fontSize = APP_CONFIG.DEFAULT_FONT_SIZE,
+  readOnly = false,
+  placeholder = 'Start writing...',
+  onSave,
+  className = ''
 }: AdvancedTextEditorProps) {
   const [editorContent, setEditorContent] = useState(content);
   const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('split');
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
-  const editorRef = useRef<object | null>(null);
+  const editorRef = useRef<EditorInstance | null>(null);
 
   useEffect(() => {
     const words = editorContent.trim().split(/\s+/).filter(word => word.length > 0);
@@ -40,39 +75,41 @@ export default function AdvancedTextEditor({
     onChange(newContent);
   };
 
-  const getPreviewHtml = () => {
+  const previewHtml = useMemo(() => {
     if (mode === 'markdown') {
       return marked(editorContent);
     }
     return editorContent.replace(/\n/g, '<br>');
-  };
+  }, [mode, editorContent]);
 
-  const editorOptions = {
+  const editorOptions = useMemo<EditorOptions>(() => ({
     minimap: { enabled: !focusMode },
     scrollBeyondLastLine: false,
-    wordWrap: 'on' as const,
-    lineNumbers: focusMode ? 'off' as const : 'on' as const,
+    wordWrap: 'on',
+    lineNumbers: focusMode ? 'off' : 'on',
     glyphMargin: !focusMode,
     folding: !focusMode,
     lineDecorationsWidth: focusMode ? 0 : undefined,
     lineNumbersMinChars: focusMode ? 0 : undefined,
-    renderLineHighlight: focusMode ? 'none' as const : 'all' as const,
+    renderLineHighlight: focusMode ? 'none' : 'all',
     hideCursorInOverviewRuler: focusMode,
     overviewRulerBorder: !focusMode,
-    fontSize: 16,
+    fontSize,
     fontFamily: "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
     suggestOnTriggerCharacters: spellCheck,
     quickSuggestions: spellCheck,
     parameterHints: { enabled: spellCheck },
-    hover: { enabled: spellCheck }
-  };
+    hover: { enabled: spellCheck },
+    readOnly
+  }), [focusMode, fontSize, spellCheck, readOnly]);
 
-  const containerClasses = `
-    ${focusMode
+  const containerClasses = useMemo(() =>
+    `${focusMode
       ? 'fixed inset-0 bg-black bg-opacity-90 z-50'
       : 'border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden'
-    }
-  `;
+    } ${className}`.trim(),
+    [focusMode, className]
+  );
 
   return (
     <motion.div
@@ -154,7 +191,7 @@ export default function AdvancedTextEditor({
             dark:prose-invert
           `}>
             <div
-              dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
               className="h-full"
             />
           </div>

@@ -6,20 +6,16 @@ import {
   startOfMonth,
   differenceInMinutes,
   parseISO,
-  isToday,
-  isYesterday,
   subDays,
 } from 'date-fns';
 import type {
   AnalyticsStore,
   WritingSession,
   WritingGoal,
-  WritingStreak,
   DailyWritingStats,
   WeeklyWritingStats,
   MonthlyWritingStats,
   ProductivityInsight,
-  WritingPaceData,
   ChapterCompletionRate,
   TimeOfDayStats,
 } from '../types/analytics';

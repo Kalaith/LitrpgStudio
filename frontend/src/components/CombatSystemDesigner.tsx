@@ -57,12 +57,10 @@ export interface CombatSimulation {
 }
 
 interface CombatSystemDesignerProps {
-  onSaveAction?: (action: CombatAction) => void;
   onSimulate?: (simulation: CombatSimulation) => void;
 }
 
 export default function CombatSystemDesigner({
-  onSaveAction,
   onSimulate
 }: CombatSystemDesignerProps) {
   const [activeTab, setActiveTab] = useState<'actions' | 'simulator' | 'balance'>('actions');
