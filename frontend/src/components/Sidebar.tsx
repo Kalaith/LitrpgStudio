@@ -14,6 +14,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
     { id: 'skills', icon: '⚡', label: 'Skills' },
     { id: 'timeline', icon: '📅', label: 'Timeline' },
     { id: 'editor', icon: '✍️', label: 'Editor' },
+    { id: 'analytics', icon: '📈', label: 'Analytics' },
+    { id: 'worldbuilding', icon: '🌍', label: 'World Building' },
+    { id: 'combat', icon: '⚔️', label: 'Combat Designer' },
+    { id: 'items', icon: '📦', label: 'Item Database' },
+    { id: 'focus', icon: '🎯', label: 'Focus Timer' },
     { id: 'templates', icon: '📋', label: 'Templates' },
     { id: 'export', icon: '📤', label: 'Export' }
   ];

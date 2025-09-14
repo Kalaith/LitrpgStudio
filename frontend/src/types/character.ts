@@ -12,8 +12,17 @@ export interface Character {
   appearance: string;
   personality: string[];
   progression: LevelProgression[];
+  relationships: CharacterRelationship[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface CharacterRelationship {
+  characterId: string;
+  type: 'ally' | 'enemy' | 'neutral' | 'romantic' | 'family';
+  strength: number; // 1-10 scale
+  description?: string;
+  history?: string;
 }
 
 export interface CharacterStats {

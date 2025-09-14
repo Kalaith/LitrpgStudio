@@ -1,14 +1,18 @@
 import { useState } from 'react';
+import { useStoryStore } from '../stores/storyStore';
+import AdvancedTextEditor from '../components/AdvancedTextEditor';
 
 const EditorView = () => {
-  const [wordCount, setWordCount] = useState<number>(0);
   const [chapterTitle, setChapterTitle] = useState<string>('');
-  const [, setContent] = useState<string>(''); // Keep setter if needed, remove content if unused
+  const [content, setContent] = useState<string>('');
+  const [focusMode, setFocusMode] = useState(false);
+  const [editorMode, setEditorMode] = useState<'markdown' | 'rich' | 'plain'>('markdown');
+  const [spellCheck, setSpellCheck] = useState(true);
 
-  const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
-    const text = event.currentTarget.textContent || '';
-    setContent(text);
-    setWordCount(text.trim().split(/\s+/).length);
+  const { currentStory, addChapter, updateChapter } = useStoryStore();
+
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
   };
 
   return (
@@ -35,12 +39,43 @@ const EditorView = () => {
         
         <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow">
           <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-700">
-            <button className="btn-secondary text-sm py-1">B</button>
-            <button className="btn-secondary text-sm py-1">I</button>
-            <button className="btn-secondary text-sm py-1">[Tag]</button>
-            <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">{wordCount} words</div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditorMode('markdown')}
+                className={`btn-secondary text-sm py-1 ${editorMode === 'markdown' ? 'bg-blue-500 text-white' : ''}`}
+              >
+                MD
+              </button>
+              <button
+                onClick={() => setEditorMode('rich')}
+                className={`btn-secondary text-sm py-1 ${editorMode === 'rich' ? 'bg-blue-500 text-white' : ''}`}
+              >
+                Rich
+              </button>
+              <button
+                onClick={() => setEditorMode('plain')}
+                className={`btn-secondary text-sm py-1 ${editorMode === 'plain' ? 'bg-blue-500 text-white' : ''}`}
+              >
+                Plain
+              </button>
+            </div>
+
+            <div className="flex gap-2 ml-4">
+              <button
+                onClick={() => setSpellCheck(!spellCheck)}
+                className={`btn-secondary text-sm py-1 ${spellCheck ? 'bg-green-500 text-white' : ''}`}
+              >
+                Spell
+              </button>
+              <button
+                onClick={() => setFocusMode(!focusMode)}
+                className={`btn-secondary text-sm py-1 ${focusMode ? 'bg-purple-500 text-white' : ''}`}
+              >
+                Focus
+              </button>
+            </div>
           </div>
-          
+
           <div className="flex-1 p-4">
             <input
               type="text"
@@ -49,12 +84,16 @@ const EditorView = () => {
               value={chapterTitle}
               onChange={(e) => setChapterTitle(e.target.value)}
             />
-            <div
-              className="min-h-[500px] p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"
-              contentEditable
-              onInput={handleContentChange}
-              data-placeholder="Start writing your story..."
-            ></div>
+
+            <AdvancedTextEditor
+              content={content}
+              onChange={handleContentChange}
+              mode={editorMode}
+              showPreview={true}
+              theme="light"
+              spellCheck={spellCheck}
+              focusMode={focusMode}
+            />
           </div>
         </div>
       </div>

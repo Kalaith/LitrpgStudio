@@ -2,10 +2,15 @@ import { useState } from 'react';
 import ToastContainer from './components/Toast.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import MainContent from './components/MainContent.tsx';
+import { useAnalyticsIntegration, useGoalTracking } from './hooks/useAnalyticsIntegration';
 import './App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
+
+  // Enable analytics integration
+  useAnalyticsIntegration();
+  useGoalTracking();
 
   return (
     <>

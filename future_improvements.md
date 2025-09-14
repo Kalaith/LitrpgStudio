@@ -18,12 +18,25 @@
 11. **Beta Reader System**: Invite beta readers for feedback collection and comment management
 12. **Version Control**: Git-like version control for manuscripts with branching and merging
 13. **Export Integration**: Direct publishing to platforms like Amazon KDP, Kindle Vella, and Royal Road
-14. **Collaborative Editing**: Real-time collaborative writing with multiple authors
-15. **Reader Community**: Built-in community features for reader feedback and engagement
+
+## Writing Focus & Productivity
+14. **Blackout Focus Mode**: Distraction-free writing mode with timer where only text exists on screen - customizable background darkness, optional cursor-only highlighting
+15. **Adaptive Spell Checker**: Toggle spell checker on/off with custom dictionaries for fantasy terms, character names, and LitRPG terminology
+16. **Built-in Focus Timer**: Pomodoro-style writing sessions with customizable intervals, break reminders, and session tracking
+17. **Distraction Blocker**: Optional website/app blocking during writing sessions with whitelist for research sites
+18. **Ambient Writing Sounds**: Built-in soundscapes (forest, tavern, dungeon ambiance) to enhance writing atmosphere
+19. **Word Sprint Challenges**: Timed writing sprints with progress tracking and personal best records
+
+## Content Organization & Research
+21. **Research Repository**: Dedicated space for storing inspiration images, reference materials, and research notes with tagging
+22. **Chapter Dependencies**: Visual mapping of chapter prerequisites and story element dependencies
+23. **Consistency Checker**: Automated detection of character trait inconsistencies, timeline conflicts, and world-building contradictions
+24. **Inspiration Board**: Pinterest-style board for collecting visual inspiration, character art, and scene references
+
+## Advanced Analytics & Insights
+25. **Reading Level Analysis**: Automated analysis of prose complexity and readability scores
+26. **Pacing Visualization**: Heat maps showing story pacing, tension curves, and dialogue-to-action ratios
+27. **Character Arc Tracker**: Visual representation of character development and growth throughout the story
 
 ## Technical Enhancements
-16. **AI Writing Assistant**: Integrate AI for plot suggestions, character development, and consistency checking
-17. **Mobile App**: React Native app for writing on the go with offline sync
-18. **Plugin System**: Extensible plugin architecture for custom tools and integrations
-19. **Cloud Sync**: Multi-device synchronization with conflict resolution
-20. **Performance Optimization**: Lazy loading for large manuscripts and improved editor performance
+28. **Performance Optimization**: Lazy loading for large manuscripts and improved editor performance

@@ -7,6 +7,11 @@ import TimelineView from '../pages/TimelineView';
 import EditorView from '../pages/EditorView';
 import TemplatesView from '../pages/TemplatesView';
 import ExportView from '../pages/ExportView';
+import WorldBuildingView from '../pages/WorldBuildingView';
+import { WritingAnalytics } from './WritingAnalytics';
+import CombatSystemDesigner from './CombatSystemDesigner';
+import ItemDatabase from './ItemDatabase';
+import FocusTimer from './FocusTimer';
 
 interface MainContentProps {
   activeView: string;
@@ -48,6 +53,16 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
         );
       case 'editor':
         return <EditorView />;
+      case 'analytics':
+        return <WritingAnalytics />;
+      case 'worldbuilding':
+        return <WorldBuildingView />;
+      case 'combat':
+        return <CombatSystemDesigner />;
+      case 'items':
+        return <ItemDatabase />;
+      case 'focus':
+        return <FocusTimer />;
       case 'templates':
         return <TemplatesView />;
       case 'export':

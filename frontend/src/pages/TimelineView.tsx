@@ -1,18 +1,9 @@
-import { useState, useEffect } from 'react';
-
-interface Character {
-  id: string;
-  name: string;
-}
-
-interface TimelineEvent {
-  id: string;
-  title: string;
-  description: string;
-  datetime: string; // ISO string for proper sorting
-  characters: { id: string; name: string }[];
-  type: 'plot' | 'character' | 'world';
-}
+import { useState } from 'react';
+import { useStoryStore } from '../stores/storyStore';
+import { useCharacterStore } from '../stores/characterStore';
+import InteractiveTimeline from '../components/InteractiveTimeline';
+import { StoryEvent } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimelineViewProps {
   isCreating?: boolean;
@@ -23,289 +14,329 @@ const TimelineView: React.FC<TimelineViewProps> = ({
   isCreating = false,
   onCreateComplete
 }) => {
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [isCreatingLocal, setIsCreatingLocal] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
+  const { currentStory, addStoryEvent, updateStoryEvent } = useStoryStore();
+  const { characters } = useCharacterStore();
+  const [viewMode, setViewMode] = useState<'interactive' | 'list'>('interactive');
 
-  // Load events and characters from localStorage
-  useEffect(() => {
-    const savedEvents = localStorage.getItem('timeline-events');
-    if (savedEvents) {
-      setEvents(JSON.parse(savedEvents));
-    }
-
-    const savedCharacters = localStorage.getItem('characters');
-    if (savedCharacters) {
-      const chars = JSON.parse(savedCharacters);
-      setCharacters(chars.map((c: any) => ({ id: c.id, name: c.name })));
-    }
-  }, []);
-
-  // Update local creating state when prop changes
-  useEffect(() => {
-    if (isCreating) {
-      setIsCreatingLocal(true);
-    }
-  }, [isCreating]);
-
-  const handleSaveEvent = (event: TimelineEvent) => {
-    let updatedEvents;
-    if (editingEvent) {
-      updatedEvents = events.map(e => e.id === event.id ? event : e);
-    } else {
-      updatedEvents = [...events, { ...event, id: crypto.randomUUID() }];
-    }
-    
-    setEvents(updatedEvents);
-    localStorage.setItem('timeline-events', JSON.stringify(updatedEvents));
-    setEditingEvent(null);
-    setIsCreatingLocal(false);
-    onCreateComplete?.();
-  };
-
-  const handleDeleteEvent = (id: string) => {
-    const updatedEvents = events.filter(e => e.id !== id);
-    setEvents(updatedEvents);
-    localStorage.setItem('timeline-events', JSON.stringify(updatedEvents));
-  };
-
-  // Sort events by date, oldest to newest
-  const sortedEvents = [...events].sort((a, b) => 
-    new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
-  );
-
-  return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Story Timeline</h2>
-        <button className="btn-primary" onClick={() => setIsCreatingLocal(true)}>
-          + Add Event
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="space-y-6">
-          {sortedEvents.map(event => (
-            <div 
-              key={event.id}
-              className="flex gap-4 items-start border-l-4 border-primary-600 pl-4 relative group"
-            >
-              <div className="absolute -left-2 top-0 w-4 h-4 bg-primary-600 rounded-full" />
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold">{event.title}</h3>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
-                      onClick={() => {
-                        setEditingEvent(event);
-                        setIsCreatingLocal(true);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-700 dark:text-red-400"
-                      onClick={() => handleDeleteEvent(event.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  {new Date(event.datetime).toLocaleString()}
-                </div>
-                <p className="text-gray-700 dark:text-gray-300">{event.description}</p>
-                {event.characters.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {event.characters.map(character => (
-                      <span 
-                        key={character.id}
-                        className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
-                      >
-                        {character.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 capitalize">
-                  {event.type}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {(isCreatingLocal || editingEvent) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl w-full">
-            <h3 className="text-xl font-semibold mb-4">
-              {editingEvent ? 'Edit Event' : 'Create New Event'}
-            </h3>
-            <EventForm
-              initialEvent={editingEvent}
-              characters={characters}
-              onSave={handleSaveEvent}
-              onCancel={() => {
-                setIsCreatingLocal(false);
-                setEditingEvent(null);
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface EventFormProps {
-  initialEvent?: TimelineEvent | null;
-  characters: Character[];
-  onSave: (event: TimelineEvent) => void;
-  onCancel: () => void;
-}
-
-const EventForm: React.FC<EventFormProps> = ({
-  initialEvent,
-  characters,
-  onSave,
-  onCancel
-}) => {
-  const [event, setEvent] = useState<TimelineEvent>({
-    id: initialEvent?.id || '',
-    title: initialEvent?.title || '',
-    description: initialEvent?.description || '',
-    datetime: initialEvent?.datetime || new Date().toISOString().slice(0, 16),
-    characters: initialEvent?.characters || [],
-    type: initialEvent?.type || 'plot'
-  });
-
-  const [selectedCharacterId, setSelectedCharacterId] = useState('');
-
-  const handleAddCharacter = () => {
-    if (!selectedCharacterId) return;
-    const character = characters.find(c => c.id === selectedCharacterId);
-    if (!character) return;
-    
-    if (!event.characters.some(c => c.id === character.id)) {
-      setEvent({
-        ...event,
-        characters: [...event.characters, { id: character.id, name: character.name }]
-      });
-    }
-    setSelectedCharacterId('');
-  };
-
-  const handleRemoveCharacter = (characterId: string) => {
-    setEvent({
-      ...event,
-      characters: event.characters.filter(c => c.id !== characterId)
-    });
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2">Title</label>
-        <input
-          type="text"
-          className="input"
-          value={event.title}
-          onChange={e => setEvent({ ...event, title: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Date and Time</label>
-        <input
-          type="datetime-local"
-          className="input"
-          value={event.datetime.slice(0, 16)}
-          onChange={e => setEvent({ ...event, datetime: new Date(e.target.value).toISOString() })}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-        <textarea
-          className="input min-h-[100px]"
-          value={event.description}
-          onChange={e => setEvent({ ...event, description: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Type</label>
-        <select
-          className="input"
-          value={event.type}
-          onChange={e => setEvent({ ...event, type: e.target.value as TimelineEvent['type'] })}
-        >
-          <option value="plot">Plot Event</option>
-          <option value="character">Character Event</option>
-          <option value="world">World Event</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Characters Involved</label>
-        <div className="flex gap-2">
-          <select
-            className="input flex-1"
-            value={selectedCharacterId}
-            onChange={e => setSelectedCharacterId(e.target.value)}
-          >
-            <option value="">Select Character</option>
-            {characters.map(character => (
-              <option key={character.id} value={character.id}>
-                {character.name}
-              </option>
-            ))}
-          </select>
-          <button 
-            className="btn-secondary px-4" 
-            onClick={handleAddCharacter}
-            disabled={!selectedCharacterId}
-          >
-            Add
+  if (!currentStory) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No story selected
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Please select or create a story to view its timeline
+          </p>
+          <button className="btn-primary">
+            Create New Story
           </button>
         </div>
-        {event.characters.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {event.characters.map(character => (
-              <span 
-                key={character.id}
-                className="inline-flex items-center gap-1 text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
-              >
-                {character.name}
-                <button
-                  className="text-red-500 hover:text-red-700"
-                  onClick={() => handleRemoveCharacter(character.id)}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+      </div>
+    );
+  }
+
+  const getAllCharacters = () => {
+    const storyCharacters = [currentStory.mainCharacter, ...currentStory.supportingCharacters];
+    const uniqueCharacters = new Map();
+
+    [...storyCharacters, ...characters].forEach(char => {
+      if (char && !uniqueCharacters.has(char.id)) {
+        uniqueCharacters.set(char.id, char);
+      }
+    });
+
+    return Array.from(uniqueCharacters.values());
+  };
+
+  const handleEventClick = (event: StoryEvent) => {
+    // Handle event click - could open a detail modal
+    console.log('Event clicked:', event);
+  };
+
+  const handleEventUpdate = (eventId: string, updates: Partial<StoryEvent>) => {
+    updateStoryEvent(eventId, updates);
+  };
+
+  const handleAddEvent = (event: Omit<StoryEvent, 'id'>) => {
+    if (currentStory) {
+      addStoryEvent(currentStory.id, event);
+    }
+  };
+
+  const allCharacters = getAllCharacters();
+  const events = currentStory.timeline || [];
+
+  return (
+    <div className="flex-1 p-6">
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Story Timeline</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Track events and character arcs in "{currentStory.title}"
+            </p>
           </div>
-        )}
+
+          <div className="flex items-center space-x-4">
+            {/* View Mode Toggle */}
+            <div className="flex rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+              <button
+                onClick={() => setViewMode('interactive')}
+                className={`
+                  px-3 py-2 text-sm
+                  ${viewMode === 'interactive'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  }
+                `}
+              >
+                Interactive
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`
+                  px-3 py-2 text-sm
+                  ${viewMode === 'list'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  }
+                `}
+              >
+                List
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-6">
-        <button className="btn-secondary" onClick={onCancel}>
-          Cancel
-        </button>
-        <button 
-          className="btn-primary"
-          onClick={() => onSave(event)}
-          disabled={!event.title || !event.datetime}
-        >
-          {initialEvent ? 'Update' : 'Create'} Event
-        </button>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <AnimatePresence mode="wait">
+          {viewMode === 'interactive' ? (
+            <motion.div
+              key="interactive"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="p-6"
+            >
+              {events.length === 0 ? (
+                <div className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No timeline events yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Add events to track your story's progression
+                  </p>
+                  <button
+                    onClick={() => handleAddEvent({
+                      title: 'New Event',
+                      description: 'Event description',
+                      date: new Date().toISOString(),
+                      charactersInvolved: [],
+                      importance: 'moderate'
+                    })}
+                    className="btn-primary"
+                  >
+                    Add First Event
+                  </button>
+                </div>
+              ) : (
+                <InteractiveTimeline
+                  events={events}
+                  characters={allCharacters}
+                  onEventClick={handleEventClick}
+                  onEventUpdate={handleEventUpdate}
+                  onAddEvent={handleAddEvent}
+                />
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="p-6"
+            >
+              <ListView
+                events={events}
+                characters={allCharacters}
+                onEventUpdate={handleEventUpdate}
+                onAddEvent={handleAddEvent}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 };
+
+// List View Component
+interface ListViewProps {
+  events: StoryEvent[];
+  characters: any[];
+  onEventUpdate: (eventId: string, updates: Partial<StoryEvent>) => void;
+  onAddEvent: (event: Omit<StoryEvent, 'id'>) => void;
+}
+
+function ListView({ events, characters, onEventUpdate, onAddEvent }: ListViewProps) {
+  const [selectedEvent, setSelectedEvent] = useState<StoryEvent | null>(null);
+
+  // Sort events by date
+  const sortedEvents = [...events].sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  const getCharacterName = (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    return character?.name || 'Unknown Character';
+  };
+
+  if (events.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          No timeline events yet
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          Add events to track your story's progression
+        </p>
+        <button
+          onClick={() => onAddEvent({
+            title: 'New Event',
+            description: 'Event description',
+            date: new Date().toISOString(),
+            charactersInvolved: [],
+            importance: 'moderate'
+          })}
+          className="btn-primary"
+        >
+          Add First Event
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Timeline Events ({events.length})</h3>
+        <button
+          onClick={() => onAddEvent({
+            title: 'New Event',
+            description: 'Event description',
+            date: new Date().toISOString(),
+            charactersInvolved: [],
+            importance: 'moderate'
+          })}
+          className="btn-primary text-sm"
+        >
+          Add Event
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {sortedEvents.map((event, index) => (
+          <motion.div
+            key={event.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={`
+              border border-gray-200 dark:border-gray-600 rounded-lg p-4 cursor-pointer
+              transition-all hover:shadow-md
+              ${selectedEvent?.id === event.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+            `}
+            onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h4 className="font-semibold">{event.title}</h4>
+                  <span className={`
+                    px-2 py-1 text-xs rounded-full font-medium
+                    ${event.importance === 'critical' ? 'bg-red-100 text-red-800' :
+                      event.importance === 'major' ? 'bg-orange-100 text-orange-800' :
+                      event.importance === 'moderate' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'}
+                  `}>
+                    {event.importance}
+                  </span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  {event.description}
+                </p>
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>{new Date(event.date).toLocaleDateString()}</span>
+                  {event.charactersInvolved.length > 0 && (
+                    <span>
+                      Characters: {event.charactersInvolved.map(getCharacterName).join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Edit event
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            {selectedEvent?.id === event.id && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={event.date.split('T')[0]}
+                      onChange={(e) => onEventUpdate(event.id, { date: e.target.value })}
+                      className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Importance</label>
+                    <select
+                      value={event.importance}
+                      onChange={(e) => onEventUpdate(event.id, { importance: e.target.value as any })}
+                      className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded"
+                    >
+                      <option value="minor">Minor</option>
+                      <option value="moderate">Moderate</option>
+                      <option value="major">Major</option>
+                      <option value="critical">Critical</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <textarea
+                    value={event.description}
+                    onChange={(e) => onEventUpdate(event.id, { description: e.target.value })}
+                    rows={3}
+                    className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default TimelineView;
