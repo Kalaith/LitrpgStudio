@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import { useCharacterStore } from '../stores/characterStore';
 import CharacterRelationshipMap from '../components/CharacterRelationshipMap';
-import { Character, CharacterRelationship } from '../types';
+import type { Character, CharacterRelationship } from '../types/character';
 import { motion } from 'framer-motion';
 
 export default function CharacterRelationshipsView() {

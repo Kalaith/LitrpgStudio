@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as d3 from 'd3';
-import { StoryEvent, Character } from '../types';
+import type { StoryEvent } from '../types/story';
+import type { Character } from '../types/character';
 
 interface TimelineEvent extends StoryEvent {
   date: Date;

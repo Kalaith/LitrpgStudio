@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import { useCharacterStore } from '../stores/characterStore';
 import InteractiveTimeline from '../components/InteractiveTimeline';
-import { StoryEvent } from '../types';
+import type { StoryEvent } from '../types/story';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimelineViewProps {

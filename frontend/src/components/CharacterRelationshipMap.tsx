@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { motion } from 'framer-motion';
-import type { Character } from '../types';
+import type { Character } from '../types/character';
 import { RELATIONSHIP_COLORS } from '../constants';
 import type { D3NodeDragEvent } from '../types/common';
 

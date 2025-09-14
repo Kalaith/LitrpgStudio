@@ -1,4 +1,5 @@
-import { Story, Character, StoryEvent, Location, Faction } from '../types';
+import type { Story, StoryEvent, Location, Faction } from '../types/story';
+import type { Character } from '../types/character';
 
 export interface ConsistencyIssue {
   type: 'error' | 'warning' | 'info';

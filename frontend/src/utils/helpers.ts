@@ -174,7 +174,7 @@ export const ObjectUtils = {
     return Object.keys(obj).length === 0;
   },
 
-  deepClone: <T>(obj: T): T => {
+  deepClone: <T extends object>(obj: T): T => {
     return JSON.parse(JSON.stringify(obj));
   }
 };
@@ -254,7 +254,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
 
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import SkillTreeVisualizer, { SkillTree } from '../components/SkillTreeVisualizer';
+import SkillTreeVisualizer from '../components/SkillTreeVisualizer';
+import type { SkillTree } from '../components/SkillTreeVisualizer';
 
 interface Character {
   id: string;

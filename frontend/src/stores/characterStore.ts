@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Character, CharacterTemplate, Skill, Item } from '../types';
+import type { Character, CharacterTemplate, Skill, Item } from '../types/character';
 
 interface CharacterState {
   characters: Character[];

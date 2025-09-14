@@ -77,7 +77,7 @@ export default function AdvancedTextEditor({
 
   const previewHtml = useMemo(() => {
     if (mode === 'markdown') {
-      return marked(editorContent);
+      return marked.parse(editorContent);
     }
     return editorContent.replace(/\n/g, '<br>');
   }, [mode, editorContent]);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Location, Faction, WorldMap, WorldTimelineEvent } from '../types';
+import type { Location, Faction, WorldMap, WorldTimelineEvent } from '../types/story';
 
 interface WorldBuildingToolsProps {
   worldDetails: any;

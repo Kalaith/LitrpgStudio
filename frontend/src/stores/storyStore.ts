@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Story, Chapter, StoryEvent, StoryTemplate, CharacterProgressionEvent } from '../types';
+import type { Story, Chapter, StoryEvent, StoryTemplate, CharacterProgressionEvent } from '../types/story';
 
 interface StoryState {
   stories: Story[];
