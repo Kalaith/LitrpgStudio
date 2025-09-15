@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Character, CharacterTemplate, Skill, Item } from '../types/character';
+import type { Character, CharacterTemplate, Skill, Item, StoryReference, CrossReference } from '../types/character';
 
 interface CharacterState {
   characters: Character[];
   currentCharacter: Character | null;
   templates: CharacterTemplate[];
+  crossReferences: CrossReference[];
 }
 
 interface CharacterActions {
@@ -26,7 +27,15 @@ interface CharacterActions {
   // Templates
   saveAsTemplate: (character: Character, templateName: string) => void;
   createFromTemplate: (templateId: string, characterName: string) => void;
-  
+
+  // Story References & Cross-References
+  addStoryReference: (characterId: string, storyReference: StoryReference) => void;
+  removeStoryReference: (characterId: string, storyId: string, chapterId?: string) => void;
+  updateStoryReference: (characterId: string, storyId: string, updates: Partial<StoryReference>) => void;
+  addCrossReference: (crossReference: Omit<CrossReference, 'id'>) => void;
+  removeCrossReference: (crossReferenceId: string) => void;
+  getCrossReferences: (sourceId: string, sourceType?: string) => CrossReference[];
+
   // Utility
   clearAll: () => void;
 }
@@ -51,6 +60,7 @@ export const useCharacterStore = create<CharacterStore>()(
       characters: [],
       currentCharacter: null,
       templates: [],
+      crossReferences: [],
 
       // Actions
       createCharacter: (characterData) =>
@@ -59,6 +69,7 @@ export const useCharacterStore = create<CharacterStore>()(
             ...characterData,
             id: generateId(),
             stats: calculateDerivedStats(characterData.stats),
+            storyReferences: characterData.storyReferences || [],
             createdAt: new Date(),
             updatedAt: new Date(),
           };
@@ -103,7 +114,6 @@ export const useCharacterStore = create<CharacterStore>()(
           if (!character) return state;
 
           const newLevel = character.level + 1;
-          const statIncrease = Math.floor(newLevel / 4); // Stat increase every 4 levels
 
           const updatedCharacter: Character = {
             ...character,
@@ -282,6 +292,7 @@ export const useCharacterStore = create<CharacterStore>()(
             appearance: '',
             personality: [],
             progression: [],
+            storyReferences: [],
             createdAt: new Date(),
             updatedAt: new Date(),
           };
@@ -292,11 +303,96 @@ export const useCharacterStore = create<CharacterStore>()(
           };
         }),
 
+      addStoryReference: (characterId, storyReference) =>
+        set((state) => {
+          const character = state.characters.find(c => c.id === characterId);
+          if (!character) return state;
+
+          const updatedCharacter: Character = {
+            ...character,
+            storyReferences: [...character.storyReferences, storyReference],
+            updatedAt: new Date(),
+          };
+
+          return {
+            characters: state.characters.map(c =>
+              c.id === characterId ? updatedCharacter : c
+            ),
+            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+          };
+        }),
+
+      removeStoryReference: (characterId, storyId, chapterId) =>
+        set((state) => {
+          const character = state.characters.find(c => c.id === characterId);
+          if (!character) return state;
+
+          const updatedCharacter: Character = {
+            ...character,
+            storyReferences: character.storyReferences.filter(ref =>
+              ref.storyId !== storyId || (chapterId && ref.chapterId !== chapterId)
+            ),
+            updatedAt: new Date(),
+          };
+
+          return {
+            characters: state.characters.map(c =>
+              c.id === characterId ? updatedCharacter : c
+            ),
+            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+          };
+        }),
+
+      updateStoryReference: (characterId, storyId, updates) =>
+        set((state) => {
+          const character = state.characters.find(c => c.id === characterId);
+          if (!character) return state;
+
+          const updatedCharacter: Character = {
+            ...character,
+            storyReferences: character.storyReferences.map(ref =>
+              ref.storyId === storyId ? { ...ref, ...updates } : ref
+            ),
+            updatedAt: new Date(),
+          };
+
+          return {
+            characters: state.characters.map(c =>
+              c.id === characterId ? updatedCharacter : c
+            ),
+            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+          };
+        }),
+
+      addCrossReference: (crossReferenceData) =>
+        set((state) => {
+          const newCrossReference: CrossReference = {
+            ...crossReferenceData,
+            id: generateId(),
+          };
+          return {
+            crossReferences: [...state.crossReferences, newCrossReference],
+          };
+        }),
+
+      removeCrossReference: (crossReferenceId) =>
+        set((state) => ({
+          crossReferences: state.crossReferences.filter(ref => ref.id !== crossReferenceId),
+        })),
+
+      getCrossReferences: (sourceId, sourceType) => {
+        const state = get();
+        return state.crossReferences.filter(ref =>
+          ref.sourceId === sourceId && (!sourceType || ref.sourceType === sourceType)
+        );
+      },
+
       clearAll: () =>
         set({
           characters: [],
           currentCharacter: null,
           templates: [],
+          crossReferences: [],
         }),
     }),
     {
@@ -304,6 +400,7 @@ export const useCharacterStore = create<CharacterStore>()(
       partialize: (state) => ({
         characters: state.characters,
         templates: state.templates,
+        crossReferences: state.crossReferences,
       }),
     }
   )

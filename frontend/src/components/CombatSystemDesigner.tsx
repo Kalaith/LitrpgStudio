@@ -177,13 +177,13 @@ export default function CombatSystemDesigner({
     }
 
     // Calculate defense reduction
-    let defense = action.damageType === 'physical' ? defender.defense : defender.magicDefense;
-    let damageReduction = defense / (defense + 100);
+    const defense = action.damageType === 'physical' ? defender.defense : defender.magicDefense;
+    const damageReduction = defense / (defense + 100);
     let finalDamage = baseDmg * (1 - damageReduction);
 
     // Check for hit
-    let hitChance = action.accuracy + attacker.accuracy - defender.evasion;
-    let isHit = Math.random() * 100 < hitChance;
+    const hitChance = action.accuracy + attacker.accuracy - defender.evasion;
+    const isHit = Math.random() * 100 < hitChance;
 
     if (!isHit) {
       return {
@@ -195,8 +195,8 @@ export default function CombatSystemDesigner({
     }
 
     // Check for critical hit
-    let critChance = action.critChance + attacker.criticalRate;
-    let isCritical = Math.random() * 100 < critChance;
+    const critChance = action.critChance + attacker.criticalRate;
+    const isCritical = Math.random() * 100 < critChance;
 
     if (isCritical) {
       finalDamage *= (action.critMultiplier * (attacker.criticalDamage / 100));

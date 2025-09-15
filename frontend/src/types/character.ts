@@ -13,8 +13,30 @@ export interface Character {
   personality: string[];
   progression: LevelProgression[];
   relationships: CharacterRelationship[];
+  storyReferences: StoryReference[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface StoryReference {
+  storyId: string;
+  chapterId?: string;
+  mentionType: 'main_character' | 'supporting' | 'mentioned' | 'appears';
+  context: string;
+  chapterNumber?: number;
+  sceneDescription?: string;
+  importanceLevel: 'background' | 'minor' | 'moderate' | 'major' | 'critical';
+}
+
+export interface CrossReference {
+  id: string;
+  sourceType: 'character' | 'location' | 'item' | 'event';
+  sourceId: string;
+  targetType: 'character' | 'location' | 'item' | 'event' | 'chapter';
+  targetId: string;
+  relationshipType: string;
+  description?: string;
+  strength: number; // 1-10 scale
 }
 
 export interface CharacterRelationship {

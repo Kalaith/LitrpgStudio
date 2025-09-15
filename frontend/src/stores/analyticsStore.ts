@@ -230,7 +230,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         );
 
         const weeklyStats: WeeklyWritingStats[] = [];
-        let currentWeek = startOfWeek(parseISO(monthStart), { weekStartsOn: 1 });
+        const currentWeek = startOfWeek(parseISO(monthStart), { weekStartsOn: 1 });
         const monthEnd = parseISO(month + '-01');
         monthEnd.setMonth(monthEnd.getMonth() + 1);
         monthEnd.setDate(0);
@@ -263,7 +263,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         const today = getDateString();
         const yesterday = getDateString(subDays(new Date(), 1));
 
-        let newStreak = { ...streak };
+        const newStreak = { ...streak };
 
         if (writingDate === today) {
           if (streak.lastWritingDate === yesterday || streak.lastWritingDate === today) {
