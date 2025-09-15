@@ -1,10 +1,10 @@
 // Entity Adapters - Bridge existing data types to unified entity registry
-import { BaseEntity, EntityAdapter, EntityValidationResult, EntityType } from '../types/entityRegistry';
-import { Character } from '../types/character';
-import { Story, Chapter } from '../types/story';
-import { Series, Book } from '../types/series';
-import { ResearchSource } from '../types/research';
-import { LootTable } from '../types/lootTable';
+import type { BaseEntity, EntityAdapter, EntityValidationResult, EntityType } from '../types/entityRegistry';
+import type { Character } from '../types/character';
+import type { Story, Chapter } from '../types/story';
+import type { Series, Book } from '../types/series';
+import type { ResearchSource } from '../types/research';
+import type { LootTable } from '../types/lootTable';
 
 // Character Adapter
 export class CharacterAdapter implements EntityAdapter<Character> {

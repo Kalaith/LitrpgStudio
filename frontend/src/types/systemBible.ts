@@ -560,7 +560,7 @@ export interface CharacterBackground {
 
 export interface ProgressionSystem {
   experience: ExperienceSystem;
-  levels: LevelProgression[];
+  levels: SystemLevelProgression[];
   milestones: ProgressionMilestone[];
   alternatives: AlternativeProgression[];
 }
@@ -579,7 +579,7 @@ export interface ExperienceSource {
   frequency: string;
 }
 
-export interface LevelProgression {
+export interface SystemLevelProgression {
   level: number;
   experienceRequired: number;
   benefits: LevelBenefit[];

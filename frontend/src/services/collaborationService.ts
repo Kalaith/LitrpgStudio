@@ -1,6 +1,6 @@
-import { BaseEntity, EntityRelationship } from '../types/entityRegistry';
-import { TimelineEvent } from '../types/unifiedTimeline';
-import { Story } from '../types/story';
+import type { BaseEntity, EntityRelationship } from '../types/entityRegistry';
+import type { TimelineEvent } from '../types/unifiedTimeline';
+import type { Story } from '../types/story';
 
 export interface CollaborationUser {
   id: string;

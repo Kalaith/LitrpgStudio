@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCharacterStore } from '../stores/characterStore';
-import type { Character, StoryReference, CrossReference } from '../types/character';
+import type { Character, StoryReference, CharacterCrossReference } from '../types/character';
 
 interface CharacterDashboardProps {
   character: Character;
@@ -320,9 +320,9 @@ const ProgressionTab: React.FC<{ character: Character }> = ({ character }) => (
 
 // Cross References Tab Component
 const CrossReferencesTab: React.FC<{
-  crossReferences: CrossReference[];
+  crossReferences: CharacterCrossReference[];
   characterId: string;
-  onAddReference: (ref: Omit<CrossReference, 'id'>) => void;
+  onAddReference: (ref: Omit<CharacterCrossReference, 'id'>) => void;
   onRemoveReference: (id: string) => void;
 }> = ({ crossReferences, onRemoveReference }) => (
   <div className="space-y-6">

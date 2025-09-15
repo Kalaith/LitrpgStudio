@@ -28,7 +28,7 @@ export interface StoryReference {
   importanceLevel: 'background' | 'minor' | 'moderate' | 'major' | 'critical';
 }
 
-export interface CrossReference {
+export interface CharacterCrossReference {
   id: string;
   sourceType: 'character' | 'location' | 'item' | 'event';
   sourceId: string;

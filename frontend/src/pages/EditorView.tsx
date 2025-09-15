@@ -6,8 +6,8 @@ import AdvancedTextEditor from '../components/AdvancedTextEditor';
 import { ContextSidebar } from '../components/ContextSidebar';
 import { ContinuityChecker } from '../components/ContinuityChecker';
 import { AIConsistencyPanel } from '../components/AIConsistencyPanel';
-import { BaseEntity } from '../types/entityRegistry';
-import { TimelineEvent } from '../types/unifiedTimeline';
+import type { BaseEntity } from '../types/entityRegistry';
+import type { TimelineEvent } from '../types/unifiedTimeline';
 
 const EditorView = () => {
   const [chapterTitle, setChapterTitle] = useState<string>('');

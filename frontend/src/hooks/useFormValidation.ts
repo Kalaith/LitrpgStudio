@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { ValidationResult, FormField } from '../types/common';
+import type { FormValidationResult, FormField } from '../types/common';
 import { ERROR_MESSAGES, APP_CONFIG } from '../constants';
 
 export type ValidationRule<T = string> = {
@@ -62,7 +62,7 @@ export function useFormValidation<T extends Record<string, unknown>>(
     return undefined;
   }, [rules]);
 
-  const validateForm = useCallback((): ValidationResult => {
+  const validateForm = useCallback((): FormValidationResult => {
     const errors: Record<string, string> = {};
     let isValid = true;
 

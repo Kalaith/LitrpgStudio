@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Character, CharacterTemplate, Skill, Item, StoryReference, CrossReference } from '../types/character';
+import type { Character, CharacterTemplate, Skill, Item, StoryReference, CharacterCrossReference } from '../types/character';
 
 interface CharacterState {
   characters: Character[];
   currentCharacter: Character | null;
   templates: CharacterTemplate[];
-  crossReferences: CrossReference[];
+  crossReferences: CharacterCrossReference[];
 }
 
 interface CharacterActions {
@@ -32,9 +32,9 @@ interface CharacterActions {
   addStoryReference: (characterId: string, storyReference: StoryReference) => void;
   removeStoryReference: (characterId: string, storyId: string, chapterId?: string) => void;
   updateStoryReference: (characterId: string, storyId: string, updates: Partial<StoryReference>) => void;
-  addCrossReference: (crossReference: Omit<CrossReference, 'id'>) => void;
+  addCrossReference: (crossReference: Omit<CharacterCrossReference, 'id'>) => void;
   removeCrossReference: (crossReferenceId: string) => void;
-  getCrossReferences: (sourceId: string, sourceType?: string) => CrossReference[];
+  getCrossReferences: (sourceId: string, sourceType?: string) => CharacterCrossReference[];
 
   // Utility
   clearAll: () => void;
@@ -366,7 +366,7 @@ export const useCharacterStore = create<CharacterStore>()(
 
       addCrossReference: (crossReferenceData) =>
         set((state) => {
-          const newCrossReference: CrossReference = {
+          const newCrossReference: CharacterCrossReference = {
             ...crossReferenceData,
             id: generateId(),
           };

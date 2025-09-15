@@ -24,7 +24,7 @@ export interface LootEntry {
   quantity: QuantityRange;
   probability: ProbabilityData;
   conditions: LootCondition[];
-  rarity: ItemRarity;
+  rarity: LootItemRarity;
   category: string;
   tags: string[];
   description: string;
@@ -157,7 +157,7 @@ export interface LevelRange {
 export interface ExpectedValue {
   averageGoldValue: number;
   averageItemCount: number;
-  rarityDistribution: Record<ItemRarity, number>;
+  rarityDistribution: Record<LootItemRarity, number>;
   typeDistribution: Record<string, number>;
 }
 
@@ -181,7 +181,7 @@ export interface LootRollResult {
 export interface GeneratedItem {
   name: string;
   quantity: number;
-  rarity: ItemRarity;
+  rarity: LootItemRarity;
   value: number;
   source: string;
   modifiers: string[];
@@ -193,7 +193,7 @@ export interface RollStatistics {
   standardDeviation: number;
   minValue: number;
   maxValue: number;
-  rarityDistribution: Record<ItemRarity, number>;
+  rarityDistribution: Record<LootItemRarity, number>;
   nothingPercentage: number;
   averageRollTime: number;
 }
@@ -219,7 +219,7 @@ export interface ComparisonData {
   playerExpectations: Record<string, number>;
 }
 
-export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'artifact' | 'unique';
+export type LootItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'artifact' | 'unique';
 
 export interface LootTableTemplate {
   id: string;
@@ -310,7 +310,7 @@ export interface SimulationScenario {
 export interface ExpectedOutcome {
   minValue: number;
   maxValue: number;
-  targetRarity: ItemRarity[];
+  targetRarity: LootItemRarity[];
   targetTypes: string[];
 }
 
@@ -332,7 +332,7 @@ export interface SimulationResult {
 
 export interface DistributionData {
   valueHistogram: HistogramBin[];
-  rarityChart: Record<ItemRarity, number>;
+  rarityChart: Record<LootItemRarity, number>;
   typeChart: Record<string, number>;
   outliers: OutlierData[];
 }

@@ -1,4 +1,4 @@
-import type { Character, StoryReference, CrossReference } from '../types/character';
+import type { Character, StoryReference, CharacterCrossReference } from '../types/character';
 import type { Story, Chapter } from '../types/story';
 import { useCharacterStore } from '../stores/characterStore';
 
@@ -106,14 +106,14 @@ export class CrossReferenceService {
 
   // Create cross-references between story elements
   public createCrossReference(
-    sourceType: CrossReference['sourceType'],
+    sourceType: CharacterCrossReference['sourceType'],
     sourceId: string,
-    targetType: CrossReference['targetType'],
+    targetType: CharacterCrossReference['targetType'],
     targetId: string,
     relationshipType: string,
     strength: number = 5,
     description?: string
-  ): Omit<CrossReference, 'id'> {
+  ): Omit<CharacterCrossReference, 'id'> {
     return {
       sourceType,
       sourceId,

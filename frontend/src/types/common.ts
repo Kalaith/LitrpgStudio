@@ -1,6 +1,6 @@
 // Common utility types
 
-export interface BaseEntity {
+export interface CommonBaseEntity {
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -39,7 +39,7 @@ export interface FormField<T = string> {
   isDirty: boolean;
 }
 
-export interface ValidationResult {
+export interface FormValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
 }
