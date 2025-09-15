@@ -12,6 +12,10 @@ import { WritingAnalytics } from './WritingAnalytics';
 import CombatSystemDesigner from './CombatSystemDesigner';
 import ItemDatabase from './ItemDatabase';
 import FocusTimer from './FocusTimer';
+import { SeriesManager } from './SeriesManager';
+import { SystemBibleGenerator } from './SystemBibleGenerator';
+import { LootTableDesigner } from './LootTableDesigner';
+import { ResearchDatabase } from './ResearchDatabase';
 
 interface MainContentProps {
   activeView: string;
@@ -63,6 +67,14 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
         return <ItemDatabase />;
       case 'focus':
         return <FocusTimer />;
+      case 'series':
+        return <SeriesManager />;
+      case 'research':
+        return <ResearchDatabase />;
+      case 'loot':
+        return <LootTableDesigner />;
+      case 'system_bible':
+        return <SystemBibleGenerator />;
       case 'templates':
         return <TemplatesView />;
       case 'export':

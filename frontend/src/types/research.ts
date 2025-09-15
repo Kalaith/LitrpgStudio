@@ -1,0 +1,773 @@
+export interface ResearchDatabase {
+  id: string;
+  name: string;
+  description: string;
+  collections: ResearchCollection[];
+  sources: ResearchSource[];
+  links: ResearchLink[];
+  tags: ResearchTag[];
+  metadata: DatabaseMetadata;
+  settings: DatabaseSettings;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ResearchCollection {
+  id: string;
+  name: string;
+  description: string;
+  category: CollectionCategory;
+  sources: string[];
+  tags: string[];
+  color: string;
+  icon: string;
+  visibility: 'private' | 'public' | 'shared';
+  collaborators: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type CollectionCategory =
+  | 'worldbuilding'
+  | 'characters'
+  | 'magic_systems'
+  | 'combat'
+  | 'economics'
+  | 'cultures'
+  | 'technology'
+  | 'history'
+  | 'language'
+  | 'mythology'
+  | 'science'
+  | 'reference'
+  | 'inspiration'
+  | 'general';
+
+export interface ResearchSource {
+  id: string;
+  title: string;
+  type: SourceType;
+  content: SourceContent;
+  metadata: SourceMetadata;
+  annotations: Annotation[];
+  links: string[];
+  citations: Citation[];
+  attachments: Attachment[];
+  tags: string[];
+  collections: string[];
+  favorited: boolean;
+  archived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  lastAccessed: Date;
+}
+
+export type SourceType =
+  | 'article'
+  | 'book'
+  | 'research_paper'
+  | 'website'
+  | 'video'
+  | 'podcast'
+  | 'image'
+  | 'document'
+  | 'note'
+  | 'quote'
+  | 'interview'
+  | 'forum_post'
+  | 'social_media'
+  | 'dataset'
+  | 'other';
+
+export interface SourceContent {
+  text?: string;
+  summary: string;
+  keyPoints: string[];
+  excerpts: Excerpt[];
+  media: MediaContent[];
+  structure: ContentStructure;
+  readingTime: number;
+  wordCount: number;
+  language: string;
+  quality: ContentQuality;
+}
+
+export interface Excerpt {
+  id: string;
+  text: string;
+  page?: number;
+  timestamp?: number;
+  context: string;
+  importance: 'low' | 'medium' | 'high' | 'critical';
+  tags: string[];
+  linkedElements: string[];
+}
+
+export interface MediaContent {
+  id: string;
+  type: 'image' | 'video' | 'audio' | 'diagram' | 'chart';
+  url: string;
+  thumbnail?: string;
+  caption: string;
+  description: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface ContentStructure {
+  headings: Heading[];
+  sections: Section[];
+  references: Reference[];
+  figures: Figure[];
+  tables: Table[];
+}
+
+export interface Heading {
+  level: number;
+  text: string;
+  id: string;
+  page?: number;
+}
+
+export interface Section {
+  id: string;
+  title: string;
+  content: string;
+  subsections: Section[];
+  startPage?: number;
+  endPage?: number;
+}
+
+export interface Reference {
+  id: string;
+  text: string;
+  type: 'citation' | 'footnote' | 'endnote' | 'bibliography';
+  linkedSources: string[];
+}
+
+export interface Figure {
+  id: string;
+  caption: string;
+  url: string;
+  type: string;
+  page?: number;
+}
+
+export interface Table {
+  id: string;
+  caption: string;
+  headers: string[];
+  rows: string[][];
+  page?: number;
+}
+
+export interface ContentQuality {
+  credibility: number;
+  accuracy: number;
+  relevance: number;
+  completeness: number;
+  freshness: number;
+  overallScore: number;
+  issues: QualityIssue[];
+}
+
+export interface QualityIssue {
+  type: 'outdated' | 'bias' | 'incomplete' | 'unverified' | 'low_quality';
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  suggestion?: string;
+}
+
+export interface SourceMetadata {
+  author: string[];
+  publisher?: string;
+  publishDate?: Date;
+  url?: string;
+  doi?: string;
+  isbn?: string;
+  pages?: PageRange;
+  edition?: string;
+  volume?: string;
+  issue?: string;
+  journal?: string;
+  conference?: string;
+  accessDate: Date;
+  license?: string;
+  format: string;
+  fileSize?: number;
+  checksum?: string;
+}
+
+export interface PageRange {
+  start: number;
+  end: number;
+  total: number;
+}
+
+export interface Annotation {
+  id: string;
+  type: AnnotationType;
+  content: string;
+  location: AnnotationLocation;
+  importance: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  tags: string[];
+  linkedElements: LinkedElement[];
+  author: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type AnnotationType =
+  | 'highlight'
+  | 'note'
+  | 'question'
+  | 'idea'
+  | 'correction'
+  | 'reference'
+  | 'summary'
+  | 'critique'
+  | 'connection';
+
+export interface AnnotationLocation {
+  type: 'text' | 'page' | 'time' | 'coordinate';
+  startIndex?: number;
+  endIndex?: number;
+  page?: number;
+  timestamp?: number;
+  coordinates?: { x: number; y: number; width: number; height: number };
+  context: string;
+}
+
+export interface LinkedElement {
+  type: 'character' | 'location' | 'item' | 'concept' | 'story' | 'chapter';
+  id: string;
+  name: string;
+  relationship: string;
+  description: string;
+}
+
+export interface Citation {
+  id: string;
+  style: CitationStyle;
+  formatted: string;
+  fields: CitationFields;
+  autoGenerated: boolean;
+  customized: boolean;
+  notes: string;
+}
+
+export type CitationStyle = 'APA' | 'MLA' | 'Chicago' | 'Harvard' | 'IEEE' | 'Vancouver' | 'custom';
+
+export interface CitationFields {
+  title: string;
+  authors: Author[];
+  publisher: string;
+  publishDate: Date;
+  url?: string;
+  doi?: string;
+  pages?: string;
+  volume?: string;
+  issue?: string;
+  accessDate: Date;
+  [key: string]: unknown;
+}
+
+export interface Author {
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  suffix?: string;
+  role?: string;
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  type: AttachmentType;
+  url: string;
+  size: number;
+  mimeType: string;
+  thumbnail?: string;
+  description: string;
+  uploadDate: Date;
+  downloadCount: number;
+}
+
+export type AttachmentType =
+  | 'document'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'spreadsheet'
+  | 'presentation'
+  | 'archive'
+  | 'other';
+
+export interface ResearchLink {
+  id: string;
+  sourceId: string;
+  targetType: LinkTargetType;
+  targetId: string;
+  linkType: LinkType;
+  relationship: string;
+  strength: number;
+  bidirectional: boolean;
+  notes: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+export type LinkTargetType =
+  | 'character'
+  | 'location'
+  | 'item'
+  | 'story'
+  | 'chapter'
+  | 'world_rule'
+  | 'magic_system'
+  | 'faction'
+  | 'concept'
+  | 'source';
+
+export type LinkType =
+  | 'inspiration'
+  | 'reference'
+  | 'basis'
+  | 'contradiction'
+  | 'support'
+  | 'expansion'
+  | 'adaptation'
+  | 'comparison'
+  | 'context'
+  | 'background';
+
+export interface ResearchTag {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  category: string;
+  parent?: string;
+  children: string[];
+  usageCount: number;
+  createdAt: Date;
+}
+
+export interface DatabaseMetadata {
+  version: string;
+  owner: string;
+  contributors: Contributor[];
+  totalSources: number;
+  totalSize: number;
+  lastBackup: Date;
+  syncSettings: SyncSettings;
+  integrations: Integration[];
+}
+
+export interface Contributor {
+  id: string;
+  name: string;
+  email: string;
+  role: 'owner' | 'editor' | 'viewer' | 'contributor';
+  permissions: Permission[];
+  lastActivity: Date;
+  contributionCount: number;
+}
+
+export interface Permission {
+  action: string;
+  resource: string;
+  granted: boolean;
+}
+
+export interface SyncSettings {
+  enabled: boolean;
+  services: SyncService[];
+  frequency: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'manual';
+  conflicts: ConflictResolution;
+  lastSync: Date;
+}
+
+export interface SyncService {
+  name: string;
+  type: 'cloud_storage' | 'note_app' | 'reference_manager' | 'web_clipper';
+  enabled: boolean;
+  settings: Record<string, unknown>;
+  status: 'connected' | 'disconnected' | 'error';
+}
+
+export type ConflictResolution = 'manual' | 'local_wins' | 'remote_wins' | 'merge' | 'duplicate';
+
+export interface Integration {
+  id: string;
+  name: string;
+  type: IntegrationType;
+  status: 'active' | 'inactive' | 'error';
+  settings: IntegrationSettings;
+  lastSync: Date;
+  errorMessage?: string;
+}
+
+export type IntegrationType =
+  | 'zotero'
+  | 'mendeley'
+  | 'notion'
+  | 'obsidian'
+  | 'roam'
+  | 'evernote'
+  | 'onenote'
+  | 'google_drive'
+  | 'dropbox'
+  | 'web_clipper'
+  | 'rss_feed'
+  | 'api'
+  | 'webhook';
+
+export interface IntegrationSettings {
+  apiKey?: string;
+  endpoint?: string;
+  webhook?: string;
+  filters: IntegrationFilter[];
+  mapping: FieldMapping[];
+  autoSync: boolean;
+  syncDirection: 'import' | 'export' | 'bidirectional';
+}
+
+export interface IntegrationFilter {
+  field: string;
+  operator: 'equals' | 'contains' | 'starts_with' | 'regex';
+  value: string;
+  active: boolean;
+}
+
+export interface FieldMapping {
+  sourceField: string;
+  targetField: string;
+  transformation?: string;
+  required: boolean;
+}
+
+export interface DatabaseSettings {
+  searchSettings: SearchSettings;
+  displaySettings: DisplaySettings;
+  privacySettings: PrivacySettings;
+  backupSettings: BackupSettings;
+  notificationSettings: NotificationSettings;
+}
+
+export interface SearchSettings {
+  indexingEnabled: boolean;
+  fullTextSearch: boolean;
+  fuzzySearch: boolean;
+  synonyms: Synonym[];
+  stopWords: string[];
+  stemming: boolean;
+  searchHistory: SearchHistory[];
+}
+
+export interface Synonym {
+  term: string;
+  synonyms: string[];
+}
+
+export interface SearchHistory {
+  query: string;
+  timestamp: Date;
+  resultCount: number;
+}
+
+export interface DisplaySettings {
+  defaultView: 'grid' | 'list' | 'timeline' | 'graph';
+  itemsPerPage: number;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+  groupBy?: string;
+  showPreviews: boolean;
+  theme: 'light' | 'dark' | 'auto';
+  compactMode: boolean;
+}
+
+export interface PrivacySettings {
+  defaultVisibility: 'private' | 'public' | 'shared';
+  allowIndexing: boolean;
+  anonymizeExports: boolean;
+  dataRetention: number; // days
+  auditLog: boolean;
+}
+
+export interface BackupSettings {
+  enabled: boolean;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  retention: number; // number of backups to keep
+  destination: 'local' | 'cloud';
+  encryption: boolean;
+  compression: boolean;
+}
+
+export interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  newSources: boolean;
+  updates: boolean;
+  collaboratorActivity: boolean;
+  systemAlerts: boolean;
+}
+
+export interface ResearchQuery {
+  id: string;
+  name: string;
+  query: string;
+  filters: QueryFilter[];
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+  limit: number;
+  saved: boolean;
+  createdAt: Date;
+  lastExecuted: Date;
+  executionCount: number;
+}
+
+export interface QueryFilter {
+  field: string;
+  operator: 'equals' | 'contains' | 'greater' | 'less' | 'range' | 'exists';
+  value: unknown;
+  active: boolean;
+}
+
+export interface SearchResult {
+  source: ResearchSource;
+  relevanceScore: number;
+  highlights: SearchHighlight[];
+  snippet: string;
+  matchedFields: string[];
+}
+
+export interface SearchHighlight {
+  field: string;
+  text: string;
+  startIndex: number;
+  endIndex: number;
+}
+
+export interface ResearchExport {
+  id: string;
+  name: string;
+  format: ExportFormat;
+  sources: string[];
+  includeAnnotations: boolean;
+  includeCitations: boolean;
+  includeAttachments: boolean;
+  template?: string;
+  createdAt: Date;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  downloadUrl?: string;
+  errorMessage?: string;
+}
+
+export type ExportFormat =
+  | 'pdf'
+  | 'docx'
+  | 'html'
+  | 'markdown'
+  | 'json'
+  | 'csv'
+  | 'bibtex'
+  | 'ris'
+  | 'endnote'
+  | 'zotero';
+
+export interface ImportJob {
+  id: string;
+  name: string;
+  source: ImportSource;
+  status: 'pending' | 'processing' | 'completed' | 'error' | 'cancelled';
+  progress: number;
+  totalItems: number;
+  processedItems: number;
+  successCount: number;
+  errorCount: number;
+  errors: ImportError[];
+  settings: ImportSettings;
+  createdAt: Date;
+  completedAt?: Date;
+}
+
+export interface ImportSource {
+  type: 'file' | 'url' | 'api' | 'integration';
+  location: string;
+  format: string;
+  size?: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface ImportError {
+  itemIndex: number;
+  error: string;
+  details?: string;
+  recoverable: boolean;
+}
+
+export interface ImportSettings {
+  duplicateHandling: 'skip' | 'update' | 'duplicate';
+  validateData: boolean;
+  autoTag: boolean;
+  defaultCollection?: string;
+  fieldMapping: Record<string, string>;
+  customRules: ImportRule[];
+}
+
+export interface ImportRule {
+  condition: string;
+  action: 'skip' | 'modify' | 'tag' | 'collect';
+  parameters: Record<string, unknown>;
+}
+
+export interface ResearchWorkspace {
+  id: string;
+  name: string;
+  description: string;
+  layout: WorkspaceLayout;
+  panels: WorkspacePanel[];
+  filters: WorkspaceFilter[];
+  savedState: WorkspaceState;
+  shared: boolean;
+  collaborators: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkspaceLayout {
+  type: 'grid' | 'columns' | 'tabs' | 'custom';
+  configuration: Record<string, unknown>;
+  responsive: boolean;
+}
+
+export interface WorkspacePanel {
+  id: string;
+  type: PanelType;
+  title: string;
+  position: PanelPosition;
+  size: PanelSize;
+  settings: PanelSettings;
+  visible: boolean;
+  collapsible: boolean;
+}
+
+export type PanelType =
+  | 'source_list'
+  | 'source_detail'
+  | 'annotation_list'
+  | 'tag_cloud'
+  | 'link_graph'
+  | 'timeline'
+  | 'search'
+  | 'filters'
+  | 'collections'
+  | 'notes'
+  | 'citations'
+  | 'attachments';
+
+export interface PanelPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface PanelSize {
+  minWidth: number;
+  minHeight: number;
+  maxWidth?: number;
+  maxHeight?: number;
+  resizable: boolean;
+}
+
+export interface PanelSettings {
+  viewMode: string;
+  sortBy: string;
+  filters: string[];
+  customization: Record<string, unknown>;
+}
+
+export interface WorkspaceFilter {
+  id: string;
+  name: string;
+  field: string;
+  operator: string;
+  value: unknown;
+  active: boolean;
+}
+
+export interface WorkspaceState {
+  selectedSources: string[];
+  expandedCollections: string[];
+  viewMode: string;
+  zoomLevel: number;
+  scrollPosition: Record<string, number>;
+  customData: Record<string, unknown>;
+}
+
+export interface ResearchAnalytics {
+  databaseId: string;
+  period: AnalyticsPeriod;
+  metrics: AnalyticsMetrics;
+  trends: AnalyticsTrend[];
+  insights: AnalyticsInsight[];
+  recommendations: AnalyticsRecommendation[];
+  generatedAt: Date;
+}
+
+export interface AnalyticsPeriod {
+  start: Date;
+  end: Date;
+  granularity: 'day' | 'week' | 'month' | 'year';
+}
+
+export interface AnalyticsMetrics {
+  totalSources: number;
+  sourcesAdded: number;
+  sourcesRead: number;
+  annotationsCreated: number;
+  linksCreated: number;
+  searches: number;
+  activeUsers: number;
+  storageUsed: number;
+  citationsGenerated: number;
+}
+
+export interface AnalyticsTrend {
+  metric: string;
+  values: TrendValue[];
+  direction: 'up' | 'down' | 'stable';
+  changePercent: number;
+}
+
+export interface TrendValue {
+  date: Date;
+  value: number;
+}
+
+export interface AnalyticsInsight {
+  type: 'pattern' | 'anomaly' | 'recommendation' | 'achievement';
+  title: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high';
+  actionable: boolean;
+  relatedMetrics: string[];
+}
+
+export interface AnalyticsRecommendation {
+  type: 'organization' | 'productivity' | 'collaboration' | 'quality';
+  title: string;
+  description: string;
+  expectedBenefit: string;
+  effort: 'low' | 'medium' | 'high';
+  priority: number;
+  actions: RecommendationAction[];
+}
+
+export interface RecommendationAction {
+  description: string;
+  automated: boolean;
+  parameters?: Record<string, unknown>;
+}

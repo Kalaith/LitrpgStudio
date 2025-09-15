@@ -24,6 +24,9 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
 
   const [selectedStoryId, setSelectedStoryId] = useState(currentStory?.id || '');
   const [selectedChapterId, setSelectedChapterId] = useState('');
+  const [sessionType, setSessionType] = useState<'new_chapter' | 'section' | 'continue'>('continue');
+  const [newChapterTitle, setNewChapterTitle] = useState('');
+  const [sectionName, setSectionName] = useState('');
   const [wordTarget, setWordTarget] = useState(500);
   const [sessionTime, setSessionTime] = useState(0);
   const [currentWordCount, setCurrentWordCount] = useState(0);
@@ -54,15 +57,38 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
   const handleStartSession = () => {
     if (!selectedStoryId) return;
 
+    // Validate session type requirements
+    if (sessionType === 'new_chapter' && !newChapterTitle.trim()) return;
+    if (sessionType === 'section' && (!sectionName.trim() || !selectedChapterId)) return;
+    if (sessionType === 'continue' && !selectedChapterId) return;
+
     startSession(
       selectedStoryId,
       selectedChapterId || undefined,
-      wordTarget
+      wordTarget,
+      sessionType,
+      sessionType === 'new_chapter' ? newChapterTitle :
+      sessionType === 'section' ? sectionName : undefined
     );
 
     const story = stories.find(s => s.id === selectedStoryId);
     if (story) {
       setCurrentWordCount(story.wordCount);
+    }
+  };
+
+  const isSessionReady = () => {
+    if (!selectedStoryId) return false;
+
+    switch (sessionType) {
+      case 'new_chapter':
+        return newChapterTitle.trim() !== '';
+      case 'section':
+        return selectedChapterId && sectionName.trim() !== '';
+      case 'continue':
+        return selectedChapterId !== '';
+      default:
+        return false;
     }
   };
 
@@ -141,24 +167,130 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
               </select>
             </div>
 
-            {/* Chapter Selection (Optional) */}
-            {selectedStoryId && availableChapters.length > 0 && (
+            {/* Session Type Selection */}
+            {selectedStoryId && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Chapter (Optional)
+                  Writing Focus
                 </label>
-                <select
-                  value={selectedChapterId}
-                  onChange={(e) => setSelectedChapterId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Any chapter...</option>
-                  {availableChapters.map(chapter => (
-                    <option key={chapter.id} value={chapter.id}>
-                      {chapter.title}
-                    </option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <button
+                    onClick={() => {
+                      setSessionType('new_chapter');
+                      setSelectedChapterId('');
+                    }}
+                    className={`px-3 py-2 rounded-md text-sm font-medium border ${
+                      sessionType === 'new_chapter'
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    📝 New Chapter
+                  </button>
+                  <button
+                    onClick={() => setSessionType('section')}
+                    className={`px-3 py-2 rounded-md text-sm font-medium border ${
+                      sessionType === 'section'
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    📄 Section
+                  </button>
+                  <button
+                    onClick={() => setSessionType('continue')}
+                    className={`px-3 py-2 rounded-md text-sm font-medium border ${
+                      sessionType === 'continue'
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    ⏯️ Continue
+                  </button>
+                </div>
+
+                {/* New Chapter Input */}
+                {sessionType === 'new_chapter' && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New Chapter Title
+                    </label>
+                    <input
+                      type="text"
+                      value={newChapterTitle}
+                      onChange={(e) => setNewChapterTitle(e.target.value)}
+                      placeholder="Enter chapter title..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      This will create a new chapter in your story
+                    </p>
+                  </div>
+                )}
+
+                {/* Section Input */}
+                {sessionType === 'section' && (
+                  <div className="space-y-3">
+                    {availableChapters.length > 0 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Chapter
+                        </label>
+                        <select
+                          value={selectedChapterId}
+                          onChange={(e) => setSelectedChapterId(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="">Select chapter for section...</option>
+                          {availableChapters.map(chapter => (
+                            <option key={chapter.id} value={chapter.id}>
+                              {chapter.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Section Name
+                      </label>
+                      <input
+                        type="text"
+                        value={sectionName}
+                        onChange={(e) => setSectionName(e.target.value)}
+                        placeholder="e.g., Character introduction, Battle scene..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Focus on a specific section or scene
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Continue Existing Chapter */}
+                {sessionType === 'continue' && availableChapters.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Continue Chapter
+                    </label>
+                    <select
+                      value={selectedChapterId}
+                      onChange={(e) => setSelectedChapterId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select chapter to continue...</option>
+                      {availableChapters.map(chapter => (
+                        <option key={chapter.id} value={chapter.id}>
+                          {chapter.title} ({chapter.wordCount || 0} words)
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Resume work on an existing chapter
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -195,11 +327,25 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
             {/* Start Button */}
             <button
               onClick={handleStartSession}
-              disabled={!selectedStoryId}
+              disabled={!isSessionReady()}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Start Writing Session
+              {sessionType === 'new_chapter' && 'Start New Chapter'}
+              {sessionType === 'section' && 'Start Section Writing'}
+              {sessionType === 'continue' && 'Continue Chapter'}
             </button>
+
+            {/* Validation Messages */}
+            {!isSessionReady() && selectedStoryId && (
+              <div className="text-sm text-gray-500 text-center">
+                {sessionType === 'new_chapter' && !newChapterTitle.trim() &&
+                  'Enter a title for your new chapter'}
+                {sessionType === 'section' && (!selectedChapterId || !sectionName.trim()) &&
+                  'Select a chapter and enter a section name'}
+                {sessionType === 'continue' && !selectedChapterId &&
+                  'Select a chapter to continue'}
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -212,14 +358,26 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
             {/* Session Info */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-gray-800">
-                  {selectedStory?.title}
-                  {selectedChapterId && (
-                    <span className="text-gray-500 ml-2">
-                      - {availableChapters.find(c => c.id === selectedChapterId)?.title}
-                    </span>
-                  )}
-                </h3>
+                <div>
+                  <h3 className="font-medium text-gray-800">
+                    {selectedStory?.title}
+                  </h3>
+                  <div className="text-sm text-gray-600">
+                    {sessionType === 'new_chapter' && (
+                      <span>📝 New Chapter: {newChapterTitle}</span>
+                    )}
+                    {sessionType === 'section' && (
+                      <span>📄 Section: {sectionName}
+                        {selectedChapterId && (
+                          <span className="text-gray-500"> in {availableChapters.find(c => c.id === selectedChapterId)?.title}</span>
+                        )}
+                      </span>
+                    )}
+                    {sessionType === 'continue' && selectedChapterId && (
+                      <span>⏯️ Continuing: {availableChapters.find(c => c.id === selectedChapterId)?.title}</span>
+                    )}
+                  </div>
+                </div>
                 <span className="text-sm text-gray-500">
                   {format(currentSession.startTime, 'HH:mm')}
                 </span>
