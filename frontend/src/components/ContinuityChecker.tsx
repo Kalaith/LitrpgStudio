@@ -1,21 +1,16 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertTriangle,
   Info,
   CheckCircle,
   X,
-  Eye,
-  EyeOff,
   Settings,
-  Zap,
-  Clock,
-  MapPin,
-  User
+  Zap
 } from 'lucide-react';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import { BaseEntity } from '../types/entityRegistry';
+import type { BaseEntity } from '../types/entityRegistry';
 
 interface ContinuityIssue {
   id: string;
@@ -43,7 +38,6 @@ interface ContinuityCheckerProps {
 
 export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
   content,
-  currentPosition,
   chapterId,
   storyId,
   isEnabled = true,

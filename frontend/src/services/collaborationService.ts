@@ -102,7 +102,7 @@ export class CollaborationService {
   private commentListeners: Map<string, (comment: CollaborationComment) => void> = new Map();
   private conflictListeners: Map<string, (conflict: CollaborationConflict) => void> = new Map();
   private options: ChangeTrackingOptions;
-  private isConnected = false;
+  private connected = false;
   private pendingChanges: CollaborationChange[] = [];
   private version = 0;
 
@@ -153,7 +153,7 @@ export class CollaborationService {
       lastActivity: new Date()
     };
 
-    this.isConnected = true;
+    this.connected = true;
   }
 
   // User Management
@@ -500,7 +500,7 @@ export class CollaborationService {
   }
 
   isConnected(): boolean {
-    return this.isConnected;
+    return this.connected;
   }
 
   getVersion(): number {

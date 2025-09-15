@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
+import type {
   TimelineEvent,
   TimelineView,
   TimelineScope,
@@ -12,7 +12,7 @@ import {
   TimelineTimestamp,
   EventDependency
 } from '../types/unifiedTimeline';
-import { EntityReference } from '../types/entityRegistry';
+import type { EntityReference } from '../types/entityRegistry';
 
 interface UnifiedTimelineState {
   // Data Storage
@@ -106,6 +106,9 @@ interface UnifiedTimelineState {
   selectMultipleEvents: (ids: string[]) => void;
   clearSelection: () => void;
   setEditingEvent: (id: string | null) => void;
+
+  // Additional methods needed by other components
+  getAllEvents: () => TimelineEvent[];
 
   // Statistics and Insights
   getEventStatistics: () => {
@@ -702,6 +705,11 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
       setEditingEvent: (id) => {
         set({ editingEventId: id });
+      },
+
+      // Additional methods needed by other components
+      getAllEvents: () => {
+        return Array.from(get().events.values());
       },
 
       // Utility

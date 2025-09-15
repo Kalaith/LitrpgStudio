@@ -1,5 +1,5 @@
 // Unified Timeline System - Consolidates all timeline implementations
-import { EntityReference } from './entityRegistry';
+import type { EntityReference } from './entityRegistry';
 
 export type TimelineEventType =
   | 'story_event'      // Main story events

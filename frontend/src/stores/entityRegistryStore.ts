@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
+import type {
   BaseEntity,
   EntityType,
   EntityRelationship,
@@ -56,6 +56,10 @@ interface EntityRegistryState {
   addToRecentEntities: (entityId: string) => void;
   clearSearchHistory: () => void;
   getEntityStats: () => Record<EntityType, number>;
+
+  // Additional methods needed by other components
+  getAllEntities: () => BaseEntity[];
+  getAllRelationships: () => EntityRelationship[];
 }
 
 const createEmptyRegistry = (): EntityRegistry => ({
@@ -637,6 +641,15 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         });
 
         return stats;
+      },
+
+      // Additional methods needed by other components
+      getAllEntities: () => {
+        return Array.from(get().registry.entities.values());
+      },
+
+      getAllRelationships: () => {
+        return Array.from(get().registry.relationships.values());
       }
     }),
     {

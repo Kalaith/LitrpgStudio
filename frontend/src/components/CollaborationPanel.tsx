@@ -5,7 +5,6 @@ import {
   UserPlus,
   MessageSquare,
   AlertTriangle,
-  Settings,
   Crown,
   Eye,
   Edit,
@@ -17,11 +16,9 @@ import {
   Wifi,
   WifiOff,
   CircleDot,
-  ChevronDown,
-  ChevronRight
 } from 'lucide-react';
-import {
-  collaborationService,
+import { collaborationService } from '../services/collaborationService';
+import type {
   CollaborationUser,
   CollaborationComment,
   CollaborationConflict,
@@ -47,7 +44,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'users' | 'comments' | 'conflicts' | 'history'>('users');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const [selectedEntity] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize collaboration data

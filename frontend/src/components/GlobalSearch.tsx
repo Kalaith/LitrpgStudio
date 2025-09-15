@@ -14,12 +14,11 @@ import {
   Star,
   TrendingUp,
   ArrowRight,
-  ExternalLink
 } from 'lucide-react';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import { BaseEntity, EntityType } from '../types/entityRegistry';
-import { TimelineEvent } from '../types/unifiedTimeline';
+import type { BaseEntity, EntityType } from '../types/entityRegistry';
+import type { TimelineEvent } from '../types/unifiedTimeline';
 
 interface GlobalSearchProps {
   isOpen: boolean;

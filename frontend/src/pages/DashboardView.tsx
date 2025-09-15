@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Grid, Settings, RotateCcw } from 'lucide-react';
-import { DashboardWidget, WidgetConfig, WidgetType } from '../components/DashboardWidget';
+import { DashboardWidget } from '../components/DashboardWidget';
+import type { WidgetConfig, WidgetType } from '../components/DashboardWidget';
 import { useStoryStore } from '../stores/storyStore';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';

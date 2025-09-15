@@ -11,7 +11,6 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Filter,
   TrendingUp,
   Users,
   Clock,
@@ -24,8 +23,8 @@ import {
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import { useStoryStore } from '../stores/storyStore';
-import {
-  aiConsistencyService,
+import { aiConsistencyService } from '../services/aiConsistencyService';
+import type {
   AIConsistencyIssue,
   WorldRule,
   AIAnalysisContext
@@ -42,9 +41,7 @@ interface AIConsistencyPanelProps {
 
 export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   content,
-  currentPosition,
   chapterId,
-  storyId,
   isEnabled = true,
   className = ''
 }) => {

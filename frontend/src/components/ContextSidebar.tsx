@@ -20,8 +20,8 @@ import {
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import { useStoryStore } from '../stores/storyStore';
-import { BaseEntity, EntityReference } from '../types/entityRegistry';
-import { TimelineEvent } from '../types/unifiedTimeline';
+import type { BaseEntity, EntityReference } from '../types/entityRegistry';
+import type { TimelineEvent } from '../types/unifiedTimeline';
 
 interface ContextSidebarProps {
   currentStoryId?: string;
