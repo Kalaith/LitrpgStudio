@@ -663,11 +663,11 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             relationships: Array.from(state.registry.relationships.entries()),
             typeIndex: Array.from(state.registry.typeIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
             tagIndex: Array.from(state.registry.tagIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
-            nameIndex: Array.from(state.registry.nameIndex.entries()).map(([k, v]) => [k, Array.from(v)])
+            nameIndex: Array.from(state.registry.nameIndex.entries()).map(([k, v]: [string, Set<string>]) => [k, Array.from(v)])
           }
         });
       },
-      deserialize: (str) => {
+      deserialize: (str: string) => {
         const parsed = JSON.parse(str);
         return {
           ...parsed,

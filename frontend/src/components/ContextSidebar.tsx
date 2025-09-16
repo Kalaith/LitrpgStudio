@@ -20,7 +20,7 @@ import {
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import { useStoryStore } from '../stores/storyStore';
-import type { BaseEntity, EntityReference } from '../types/entityRegistry';
+import type { BaseEntity } from '../types/entityRegistry';
 import type { TimelineEvent } from '../types/unifiedTimeline';
 
 interface ContextSidebarProps {
@@ -40,6 +40,12 @@ interface ContextSection {
   expanded: boolean;
 }
 
+interface ConsistencyIssue {
+  type: 'warning' | 'info';
+  message: string;
+  entityId: string;
+}
+
 export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   currentStoryId,
   currentChapterId,
@@ -54,8 +60,8 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showConsistencyAlerts, setShowConsistencyAlerts] = useState(true);
 
-  const { searchEntities, getEntity, getRelationshipsForEntity } = useEntityRegistryStore();
-  const { getEventsByEntity, getEventsInView, searchEvents } = useUnifiedTimelineStore();
+  const { searchEntities, getRelationshipsForEntity } = useEntityRegistryStore();
+  const { searchEvents } = useUnifiedTimelineStore();
   const { stories, currentStory } = useStoryStore();
 
   // Get current story context
@@ -189,7 +195,7 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   const consistencyIssues = useMemo(() => {
     if (!showConsistencyAlerts || !activeStory) return [];
 
-    const issues = [];
+    const issues: ConsistencyIssue[] = [];
 
     // Check for character location consistency
     const characters = contextualEntities.filter(e => e.type === 'character');

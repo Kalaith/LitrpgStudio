@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 import { motion } from 'framer-motion';
 import type { Character } from '../types/character';
 import { RELATIONSHIP_COLORS } from '../constants';
-import type { D3NodeDragEvent } from '../types/common';
 
 interface RelationshipNode extends d3.SimulationNodeDatum {
   id: string;
@@ -152,7 +151,7 @@ export default function CharacterRelationshipMap({
       .attr("fill", "#6B7280");
 
     // Node click handler
-    node.on("click", (event, d) => {
+    node.on("click", (_event, d) => {
       setSelectedNode(d.character);
       if (onNodeClick) {
         onNodeClick(d.character);
@@ -172,7 +171,7 @@ export default function CharacterRelationshipMap({
       .style("pointer-events", "none")
       .style("z-index", "1000");
 
-    node.on("mouseover", (event, d) => {
+    node.on("mouseover", (_event, d) => {
       tooltip.style("visibility", "visible")
         .html(`
           <strong>${d.name}</strong><br/>

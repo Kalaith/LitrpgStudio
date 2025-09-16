@@ -288,10 +288,6 @@ export default function ItemDatabase({
     if (onItemSave) onItemSave(item);
   };
 
-  // Use the handler to avoid unused variable warning
-  if (editingItem && handleSaveItem) {
-    // This conditional prevents unused variable warnings
-  }
 
   const getRarityStyle = (rarity: string) => {
     return rarityColors[rarity as keyof typeof rarityColors] || rarityColors.common;

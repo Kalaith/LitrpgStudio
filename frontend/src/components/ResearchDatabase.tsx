@@ -29,7 +29,7 @@ import {
   Clock,
   User
 } from 'lucide-react';
-import {
+import type {
   ResearchDatabase as ResearchDatabaseType,
   ResearchSource,
   ResearchCollection,

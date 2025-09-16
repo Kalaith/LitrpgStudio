@@ -464,7 +464,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         );
       },
 
-      getEventsByTimeRange: (start, end) => {
+      getEventsByTimeRange: (_start, _end) => {
         // TODO: Implement proper time range filtering
         return Array.from(get().events.values());
       },
@@ -505,7 +505,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         );
       },
 
-      getDependencyChain: (eventId) => {
+      getDependencyChain: (_eventId) => {
         // TODO: Implement dependency chain traversal
         return [];
       },
@@ -558,7 +558,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         return allIssues;
       },
 
-      findConflicts: (eventId) => {
+      findConflicts: (_eventId) => {
         // TODO: Implement conflict detection logic
         return [];
       },
@@ -798,21 +798,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
       },
 
       // Placeholder implementations for remaining methods
-      reorderEvents: (eventIds, newOrder) => {
+      reorderEvents: (_eventIds, _newOrder) => {
         // TODO: Implement event reordering
       },
 
-      insertEventBetween: (eventData, beforeEventId, afterEventId) => {
+      insertEventBetween: (eventData, _beforeEventId, _afterEventId) => {
         // TODO: Implement smart insertion between events
         return get().addEvent(eventData);
       },
 
-      splitEvent: (eventId, splitPoint) => {
+      splitEvent: (_eventId, _splitPoint) => {
         // TODO: Implement event splitting
         return { firstPart: '', secondPart: '' };
       },
 
-      combineEvents: (eventIds) => {
+      combineEvents: (_eventIds) => {
         // TODO: Implement event combination
         return '';
       },
@@ -838,21 +838,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         });
       },
 
-      addComment: (eventId, comment, type = 'comment') => {
+      addComment: (_eventId, _comment, _type = 'comment') => {
         // TODO: Implement comment system
       },
 
-      resolveComment: (commentId) => {
+      resolveComment: (_commentId) => {
         // TODO: Implement comment resolution
       },
 
-      createChangeRequest: (eventId, changes, reason) => {
+      createChangeRequest: (_eventId, _changes, _reason) => {
         // TODO: Implement change request system
       }
     }),
     {
       name: 'unified-timeline-store',
-      serialize: (state) => {
+      serialize: (state: any) => {
         return JSON.stringify({
           ...state,
           events: Array.from(state.events.entries()),
@@ -861,7 +861,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           selectedEventIds: Array.from(state.selectedEventIds)
         });
       },
-      deserialize: (str) => {
+      deserialize: (str: string) => {
         const parsed = JSON.parse(str);
         return {
           ...parsed,

@@ -1,4 +1,4 @@
-import type { Story, StoryEvent, Location, Faction } from '../types/story';
+import type { Story, Location } from '../types/story';
 import type { Character } from '../types/character';
 
 export interface ConsistencyIssue {
@@ -58,7 +58,7 @@ export class ConsistencyChecker {
       nameMap.set(char.name.toLowerCase(), existing);
     });
 
-    nameMap.forEach((chars, name) => {
+    nameMap.forEach((chars, _name) => {
       if (chars.length > 1) {
         issues.push({
           type: 'warning',
@@ -215,7 +215,7 @@ export class ConsistencyChecker {
         locationNames.set(loc.name.toLowerCase(), existing);
       });
 
-      locationNames.forEach((locs, name) => {
+      locationNames.forEach((locs, _name) => {
         if (locs.length > 1) {
           issues.push({
             type: 'error',

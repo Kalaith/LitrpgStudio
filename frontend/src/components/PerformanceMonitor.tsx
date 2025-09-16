@@ -9,7 +9,6 @@ import {
   Database,
   Search,
   Clock,
-  Memory,
   Cpu,
   HardDrive,
   BarChart3,
@@ -20,8 +19,8 @@ import {
   Play,
   Pause
 } from 'lucide-react';
-import {
-  performanceOptimizer,
+import { performanceOptimizer } from '../services/performanceOptimizer';
+import type {
   PerformanceMetrics,
   OptimizationStrategy,
   LazyLoadConfig,
@@ -229,7 +228,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                   label: 'Memory Usage',
                   value: `${metrics.memoryUsage.toFixed(1)} MB`,
                   status: getMetricStatus(metrics.memoryUsage, { good: 50, warning: 100 }),
-                  icon: Memory
+                  icon: Cpu
                 },
                 {
                   label: 'Render Time',

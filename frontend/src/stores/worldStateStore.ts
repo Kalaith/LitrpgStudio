@@ -786,7 +786,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.worldStates = new Map(state.worldStates as [string, WorldState[]][]);
+          state.worldStates = new Map(Array.from(state.worldStates as any));
         }
       }
     }

@@ -18,19 +18,30 @@ import type {
   CrossBookRelationship
 } from '../types/series';
 import type { Character } from '../types/character';
+import { api } from '../api';
 
 interface SeriesState {
   series: Series[];
   currentSeries: Series | null;
   currentBook: Book | null;
   analytics: Map<string, SeriesAnalytics>;
+  loading: boolean;
+  error: string | null;
 }
 
 interface SeriesActions {
-  // Series Management
-  createSeries: (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => Series;
-  updateSeries: (seriesId: string, updates: Partial<Series>) => void;
-  deleteSeries: (seriesId: string) => void;
+  // Loading state management
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+
+  // Async API actions
+  fetchSeries: () => Promise<void>;
+  fetchSeriesById: (id: string) => Promise<void>;
+
+  // Series Management (async)
+  createSeries: (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Series>;
+  updateSeries: (seriesId: string, updates: Partial<Series>) => Promise<void>;
+  deleteSeries: (seriesId: string) => Promise<void>;
   setCurrentSeries: (series: Series | null) => void;
 
   // Book Management
@@ -127,56 +138,109 @@ export const useSeriesStore = create<SeriesStore>()(
       currentSeries: null,
       currentBook: null,
       analytics: new Map(),
+      loading: false,
+      error: null,
 
-      // Series Management
-      createSeries: (seriesData) => {
-        const newSeries: Series = {
-          ...seriesData,
-          id: generateId(),
-          books: [],
-          sharedElements: {
-            characters: [],
-            worldBuilding: {
-              timeline: [],
-              worldRules: [],
-              cultures: [],
-              languages: [],
-              religions: [],
-              economics: []
-            },
-            magicSystems: [],
-            locations: [],
-            factions: [],
-            terminology: []
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
+      // Loading state management
+      setLoading: (loading: boolean) => set({ loading }),
+      setError: (error: string | null) => set({ error }),
 
-        set((state) => ({
-          series: [...state.series, newSeries],
-          currentSeries: newSeries
-        }));
-
-        return newSeries;
+      // Async API actions
+      fetchSeries: async () => {
+        set({ loading: true, error: null });
+        try {
+          const response = await api.series.getAll();
+          if (response.success && response.data) {
+            set({ series: response.data });
+          } else {
+            set({ error: response.error || 'Failed to fetch series' });
+          }
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'Failed to fetch series' });
+        } finally {
+          set({ loading: false });
+        }
       },
 
-      updateSeries: (seriesId, updates) =>
-        set((state) => ({
-          series: state.series.map(s =>
-            s.id === seriesId ? { ...s, ...updates, updatedAt: new Date() } : s
-          ),
-          currentSeries: state.currentSeries?.id === seriesId
-            ? { ...state.currentSeries, ...updates, updatedAt: new Date() }
-            : state.currentSeries
-        })),
+      fetchSeriesById: async (id: string) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await api.series.getById(id);
+          if (response.success && response.data) {
+            set({ currentSeries: response.data });
+          } else {
+            set({ error: response.error || 'Failed to fetch series' });
+          }
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'Failed to fetch series' });
+        } finally {
+          set({ loading: false });
+        }
+      },
 
-      deleteSeries: (seriesId) =>
-        set((state) => ({
-          series: state.series.filter(s => s.id !== seriesId),
-          currentSeries: state.currentSeries?.id === seriesId ? null : state.currentSeries,
-          analytics: new Map([...state.analytics].filter(([id]) => id !== seriesId))
-        })),
+      // Series Management (async)
+      createSeries: async (seriesData) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await api.series.create(seriesData);
+          if (response.success && response.data) {
+            const newSeries = response.data;
+            set((state) => ({
+              series: [...state.series, newSeries],
+              currentSeries: newSeries,
+              loading: false
+            }));
+            return newSeries;
+          } else {
+            set({ error: response.error || 'Failed to create series', loading: false });
+            throw new Error(response.error || 'Failed to create series');
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to create series';
+          set({ error: errorMessage, loading: false });
+          throw error;
+        }
+      },
+
+      updateSeries: async (seriesId, updates) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await api.series.update(seriesId, updates);
+          if (response.success && response.data) {
+            const updatedSeries = response.data;
+            set((state) => ({
+              series: state.series.map(s => s.id === seriesId ? updatedSeries : s),
+              currentSeries: state.currentSeries?.id === seriesId ? updatedSeries : state.currentSeries,
+              loading: false
+            }));
+          } else {
+            set({ error: response.error || 'Failed to update series', loading: false });
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update series';
+          set({ error: errorMessage, loading: false });
+        }
+      },
+
+      deleteSeries: async (seriesId) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await api.series.delete(seriesId);
+          if (response.success) {
+            set((state) => ({
+              series: state.series.filter(s => s.id !== seriesId),
+              currentSeries: state.currentSeries?.id === seriesId ? null : state.currentSeries,
+              analytics: new Map([...state.analytics].filter(([id]) => id !== seriesId)),
+              loading: false
+            }));
+          } else {
+            set({ error: response.error || 'Failed to delete series', loading: false });
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete series';
+          set({ error: errorMessage, loading: false });
+        }
+      },
 
       setCurrentSeries: (series) => set({ currentSeries: series }),
 
@@ -972,7 +1036,7 @@ export const useSeriesStore = create<SeriesStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.analytics = new Map(state.analytics as [string, SeriesAnalytics][]);
+          state.analytics = new Map(Array.from(state.analytics as any));
         }
       }
     }

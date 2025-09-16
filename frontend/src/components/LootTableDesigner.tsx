@@ -5,7 +5,7 @@ import type {
   LootEntry,
   LootTableType,
   LootCategory,
-  ItemRarity,
+  LootItemRarity,
   TestResult,
   LootRollResult,
   GeneratedItem
@@ -36,7 +36,15 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
       expectedValue: {
         averageGoldValue: 0,
         averageItemCount: 0,
-        rarityDistribution: {},
+        rarityDistribution: {
+          common: 0,
+          uncommon: 0,
+          rare: 0,
+          epic: 0,
+          legendary: 0,
+          artifact: 0,
+          unique: 0
+        },
         typeDistribution: {}
       },
       testResults: []
@@ -637,7 +645,7 @@ const LootEntryModal: React.FC<{
   const [formData, setFormData] = useState({
     name: entry?.name || '',
     type: entry?.type || 'item' as const,
-    rarity: entry?.rarity || 'common' as ItemRarity,
+    rarity: entry?.rarity || 'common' as LootItemRarity,
     weight: entry?.probability.weight || 10,
     minQuantity: entry?.quantity.min || 1,
     maxQuantity: entry?.quantity.max || 1,
@@ -701,7 +709,7 @@ const LootEntryModal: React.FC<{
               </label>
               <select
                 value={formData.rarity}
-                onChange={(e) => setFormData({ ...formData, rarity: e.target.value as ItemRarity })}
+                onChange={(e) => setFormData({ ...formData, rarity: e.target.value as LootItemRarity })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="common">Common</option>
@@ -865,7 +873,15 @@ const calculateStatistics = (results: LootRollResult[]) => {
     standardDeviation: Math.sqrt(values.map(v => Math.pow(v - average, 2)).reduce((a, b) => a + b, 0) / values.length),
     minValue: Math.min(...values),
     maxValue: Math.max(...values),
-    rarityDistribution: {},
+    rarityDistribution: {
+      common: 0,
+      uncommon: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+      artifact: 0,
+      unique: 0
+    },
     nothingPercentage: (nothingCount / results.length) * 100,
     averageRollTime: results.reduce((sum, r) => sum + r.rollTime, 0) / results.length
   };

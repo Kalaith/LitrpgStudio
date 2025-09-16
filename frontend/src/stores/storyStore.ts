@@ -392,6 +392,10 @@ export const useStoryStore = create<StoryStore>()(
             worldBuilding: {
               name: '',
               description: '',
+              locations: [],
+              maps: [],
+              timeline: [],
+              factions: [],
             },
             timeline: [],
             status: 'draft',

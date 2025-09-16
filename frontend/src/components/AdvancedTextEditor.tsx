@@ -50,11 +50,11 @@ export default function AdvancedTextEditor({
   theme = 'light',
   spellCheck = true,
   focusMode = false,
-  height = APP_CONFIG.DEFAULT_EDITOR_HEIGHT,
+  height: _height = APP_CONFIG.DEFAULT_EDITOR_HEIGHT,
   fontSize = APP_CONFIG.DEFAULT_FONT_SIZE,
   readOnly = false,
-  placeholder = 'Start writing...',
-  onSave,
+  placeholder: _placeholder = 'Start writing...',
+  onSave: _onSave,
   className = ''
 }: AdvancedTextEditorProps) {
   const [editorContent, setEditorContent] = useState(content);
@@ -77,7 +77,8 @@ export default function AdvancedTextEditor({
 
   const previewHtml = useMemo(() => {
     if (mode === 'markdown') {
-      return marked.parse(editorContent);
+      const result = marked.parse(editorContent);
+      return typeof result === 'string' ? result : '';
     }
     return editorContent.replace(/\n/g, '<br>');
   }, [mode, editorContent]);

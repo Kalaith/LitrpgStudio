@@ -1,3 +1,4 @@
 # Logs
 mcp
 .env
+backend/.env.preview

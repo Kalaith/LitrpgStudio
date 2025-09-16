@@ -47,11 +47,11 @@ interface DashboardWidgetProps {
   className?: string;
 }
 
-// Widget size mappings
+// Widget size mappings with better responsive design
 const sizeClasses = {
-  small: 'col-span-1 row-span-1 h-32',
-  medium: 'col-span-2 row-span-1 h-32',
-  large: 'col-span-2 row-span-2 h-64'
+  small: 'col-span-1 min-h-[8rem] max-h-[12rem]',
+  medium: 'col-span-1 md:col-span-2 min-h-[8rem] max-h-[16rem]',
+  large: 'col-span-1 md:col-span-2 lg:col-span-3 min-h-[12rem] max-h-[20rem]'
 };
 
 // Widget icons
@@ -290,31 +290,32 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         border border-gray-200 dark:border-gray-700
         rounded-lg shadow-sm
         transition-all duration-200
-        ${isDragging ? 'shadow-lg scale-105 rotate-1' : 'hover:shadow-md'}
-        ${config.collapsed ? 'h-12' : ''}
+        ${isDragging ? 'shadow-lg scale-105 rotate-1 z-10' : 'hover:shadow-md'}
+        ${config.collapsed ? 'h-12' : 'flex flex-col'}
+        overflow-hidden
         ${className}
       `}
     >
       {/* Widget Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
           {/* Drag Handle */}
           <div
             {...dragHandleProps}
-            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
           >
             <GripVertical size={14} />
           </div>
 
           {/* Widget Icon & Title */}
-          <Icon size={16} className="text-gray-500" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Icon size={16} className="text-gray-500 flex-shrink-0" />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
             {config.title}
           </span>
         </div>
 
         {/* Widget Controls */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 flex-shrink-0">
           {/* Refresh Button */}
           <button
             onClick={handleRefresh}
@@ -348,7 +349,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
-                  className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-10 min-w-32"
+                  className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50 min-w-32"
                   onMouseLeave={() => setShowMenu(false)}
                 >
                   <button
@@ -379,9 +380,11 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="p-3 flex-1 overflow-hidden"
+            className="p-3 flex-1 overflow-hidden min-h-0"
           >
-            {renderWidgetContent()}
+            <div className="h-full overflow-auto">
+              {renderWidgetContent()}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

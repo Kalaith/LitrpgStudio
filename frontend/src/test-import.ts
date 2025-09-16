@@ -1,5 +1,5 @@
 // Test file to check if imports work
-import { BaseEntity, EntityRelationship } from './types/entityRegistry';
+import type { BaseEntity } from './types/entityRegistry';
 
 console.log('Import test successful');
 

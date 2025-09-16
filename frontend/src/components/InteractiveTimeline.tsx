@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import type { StoryEvent } from '../types/story';
 import type { Character } from '../types/character';
 
-interface TimelineEvent extends StoryEvent {
+interface TimelineEvent extends Omit<StoryEvent, 'date'> {
   date: Date;
   position: number;
 }
@@ -152,16 +152,16 @@ export default function InteractiveTimeline({
 
         setTimeout(() => tooltip.remove(), 3000);
       })
-      .on("mouseout", function(event, d) {
+      .on("mouseout", function(_event, d) {
         d3.select(this).transition().duration(150).attr("r",
           d.importance === 'critical' ? 12 :
           d.importance === 'major' ? 10 :
           d.importance === 'moderate' ? 8 : 6
         );
       })
-      .on("click", (event, d) => {
-        setSelectedEvent(d);
-        if (onEventClick) onEventClick(d);
+      .on("click", (_event, d) => {
+        setSelectedEvent(d as unknown as StoryEvent);
+        if (onEventClick) onEventClick(d as unknown as StoryEvent);
       });
 
     // Event labels
@@ -185,7 +185,7 @@ export default function InteractiveTimeline({
 
     // Character connections
     filteredEvents.forEach((event, eventIndex) => {
-      event.charactersInvolved.forEach((characterId, charIndex) => {
+      event.charactersInvolved.forEach((characterId) => {
         const character = characters.find(c => c.id === characterId);
         if (!character) return;
 
@@ -197,10 +197,10 @@ export default function InteractiveTimeline({
         relatedEvents.forEach(relatedEvent => {
           if (relatedEvent.date > event.date) {
             container.append("line")
-              .attr("x1", xScale(event.date))
-              .attr("y1", yScale(event.importance))
-              .attr("x2", xScale(relatedEvent.date))
-              .attr("y2", yScale(relatedEvent.importance))
+              .attr("x1", xScale(event.date) as number)
+              .attr("y1", yScale(event.importance) as number)
+              .attr("x2", xScale(relatedEvent.date) as number)
+              .attr("y2", yScale(relatedEvent.importance) as number)
               .attr("stroke", `hsl(${(character.level * 30) % 360}, 50%, 50%)`)
               .attr("stroke-width", 1)
               .attr("stroke-opacity", 0.3)
@@ -212,7 +212,7 @@ export default function InteractiveTimeline({
 
     // Add axis
     const xAxis = d3.axisBottom(xScale)
-      .tickFormat(d3.timeFormat("%b %Y"));
+      .tickFormat((d) => d3.timeFormat("%b %Y")(d as Date));
 
     container.append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)

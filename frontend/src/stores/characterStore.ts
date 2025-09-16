@@ -1,18 +1,30 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Character, CharacterTemplate, Skill, Item, StoryReference, CharacterCrossReference } from '../types/character';
+import { api } from '../api';
 
 interface CharacterState {
   characters: Character[];
   currentCharacter: Character | null;
   templates: CharacterTemplate[];
   crossReferences: CharacterCrossReference[];
+  loading: boolean;
+  error: string | null;
 }
 
 interface CharacterActions {
-  createCharacter: (character: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateCharacter: (characterId: string, updates: Partial<Character>) => void;
-  deleteCharacter: (characterId: string) => void;
+  // Loading state management
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+
+  // Async API actions
+  fetchCharacters: () => Promise<void>;
+  fetchCharacterById: (id: string) => Promise<void>;
+
+  // Character management (async)
+  createCharacter: (character: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Character>;
+  updateCharacter: (characterId: string, updates: Partial<Character>) => Promise<void>;
+  deleteCharacter: (characterId: string) => Promise<void>;
   setCurrentCharacter: (character: Character | null) => void;
   
   // Character progression

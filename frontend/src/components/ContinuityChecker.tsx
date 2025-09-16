@@ -51,7 +51,7 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
   const [showSettings, setShowSettings] = useState(false);
 
   const { searchEntities, getEntity, getRelationshipsForEntity } = useEntityRegistryStore();
-  const { searchEvents, getEventsInView } = useUnifiedTimelineStore();
+  const { searchEvents } = useUnifiedTimelineStore();
 
   // Extract entity references from text
   const extractedEntities = useMemo(() => {
@@ -70,7 +70,6 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
       // Try to find the entity in the registry
       const searchResults = searchEntities({
         query: entityName,
-        exactMatch: true,
         limit: 1
       });
 
@@ -103,7 +102,7 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
         if (locationRels.length > 0) {
           const currentLocations = characterLocations.get(ref.entity.id) || [];
           locationRels.forEach(rel => {
-            const location = getEntity(rel.targetId);
+            const location = getEntity(rel.toEntity.id);
             if (location && !currentLocations.includes(location.name)) {
               currentLocations.push(location.name);
             }
