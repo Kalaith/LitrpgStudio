@@ -11,13 +11,26 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
+// Validate required environment variables
+$requiredEnvVars = ['DB_DRIVER', 'DB_HOST', 'DB_DATABASE', 'DB_USERNAME'];
+foreach ($requiredEnvVars as $var) {
+    if (!isset($_ENV[$var]) || empty($_ENV[$var])) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => "Configuration Error: Required environment variable {$var} is not set"
+        ]);
+        exit;
+    }
+}
+
 // Initialize database connection
 $capsule = new Capsule;
 $capsule->addConnection([
-    'driver'    => $_ENV['DB_DRIVER'] ?? 'mysql',
-    'host'      => $_ENV['DB_HOST'] ?? 'localhost',
-    'database'  => $_ENV['DB_DATABASE'] ?? 'litrpg_studio',
-    'username'  => $_ENV['DB_USERNAME'] ?? 'root',
+    'driver'    => $_ENV['DB_DRIVER'],
+    'host'      => $_ENV['DB_HOST'],
+    'database'  => $_ENV['DB_DATABASE'],
+    'username'  => $_ENV['DB_USERNAME'],
     'password'  => $_ENV['DB_PASSWORD'] ?? '',
     'charset'   => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',

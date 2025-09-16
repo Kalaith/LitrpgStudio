@@ -6,21 +6,28 @@ namespace LitRPGStudio\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use LitRPGStudio\Storage\JsonFileStorage;
+use LitRPGStudio\External\CharacterRepository;
+use LitRPGStudio\Actions\Character\CreateCharacterAction;
+use LitRPGStudio\Actions\Character\LevelUpCharacterAction;
+use LitRPGStudio\Actions\Character\AddSkillToCharacterAction;
+use LitRPGStudio\Actions\Character\AddItemToCharacterAction;
+use LitRPGStudio\Actions\Character\ManageCharacterEquipmentAction;
 
-class CharacterController
+final class CharacterController
 {
-    private $storage;
-
-    public function __construct()
-    {
-        $this->storage = new JsonFileStorage();
-    }
+    public function __construct(
+        private readonly CharacterRepository $characterRepository,
+        private readonly CreateCharacterAction $createCharacterAction,
+        private readonly LevelUpCharacterAction $levelUpCharacterAction,
+        private readonly AddSkillToCharacterAction $addSkillAction,
+        private readonly AddItemToCharacterAction $addItemAction,
+        private readonly ManageCharacterEquipmentAction $manageEquipmentAction
+    ) {}
 
     public function getAll(Request $request, Response $response): Response
     {
         try {
-            $characters = $this->storage->read('characters');
+            $characters = $this->characterRepository->findAll();
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -41,7 +48,7 @@ class CharacterController
     public function getById(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::with(['series'])->find($args['id']);
+            $character = $this->characterRepository->findWithRelations($args['id']);
 
             if (!$character) {
                 $response->getBody()->write(json_encode([
@@ -72,29 +79,7 @@ class CharacterController
     {
         try {
             $data = $request->getParsedBody();
-
-            $character = Character::create([
-                'id' => Uuid::uuid4()->toString(),
-                'series_id' => $data['series_id'] ?? null,
-                'name' => $data['name'] ?? '',
-                'race' => $data['race'] ?? '',
-                'class' => $data['class'] ?? '',
-                'background' => $data['background'] ?? '',
-                'personality' => $data['personality'] ?? '',
-                'appearance' => $data['appearance'] ?? '',
-                'stats' => $data['stats'] ?? [],
-                'skills' => $data['skills'] ?? [],
-                'inventory' => $data['inventory'] ?? [],
-                'equipment' => $data['equipment'] ?? [],
-                'status_effects' => $data['status_effects'] ?? [],
-                'level_progression' => $data['level_progression'] ?? [],
-                'relationships' => $data['relationships'] ?? [],
-                'backstory' => $data['backstory'] ?? '',
-                'motivations' => $data['motivations'] ?? '',
-                'flaws' => $data['flaws'] ?? '',
-                'story_references' => $data['story_references'] ?? [],
-                'cross_references' => $data['cross_references'] ?? []
-            ]);
+            $character = $this->createCharacterAction->execute($data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -102,6 +87,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -115,7 +107,8 @@ class CharacterController
     public function update(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['id']);
+            $data = $request->getParsedBody();
+            $character = $this->characterRepository->updateFromArray($args['id'], $data);
 
             if (!$character) {
                 $response->getBody()->write(json_encode([
@@ -125,9 +118,6 @@ class CharacterController
 
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
-
-            $data = $request->getParsedBody();
-            $character->update($data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -148,9 +138,9 @@ class CharacterController
     public function delete(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['id']);
+            $success = $this->characterRepository->delete($args['id']);
 
-            if (!$character) {
+            if (!$success) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Character not found'
@@ -158,8 +148,6 @@ class CharacterController
 
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
-
-            $character->delete();
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -180,26 +168,7 @@ class CharacterController
     public function levelUp(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['id']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
-            $stats = $character->stats;
-            $stats['level'] = ($stats['level'] ?? 1) + 1;
-
-            // Calculate derived stats
-            $stats['hitPoints'] = max(1, $stats['constitution'] * 10 + $stats['level'] * 5);
-            $stats['manaPoints'] = max(0, $stats['intelligence'] * 5 + $stats['level'] * 3);
-
-            $character->stats = $stats;
-            $character->save();
+            $character = $this->levelUpCharacterAction->execute($args['id']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -207,6 +176,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -220,33 +196,8 @@ class CharacterController
     public function addSkill(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['id']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
             $data = $request->getParsedBody();
-            $skills = $character->skills;
-
-            $skill = [
-                'id' => Uuid::uuid4()->toString(),
-                'name' => $data['name'] ?? '',
-                'level' => $data['level'] ?? 1,
-                'experience' => $data['experience'] ?? 0,
-                'description' => $data['description'] ?? '',
-                'type' => $data['type'] ?? 'combat',
-                'requirements' => $data['requirements'] ?? []
-            ];
-
-            $skills[] = $skill;
-            $character->skills = $skills;
-            $character->save();
+            $character = $this->addSkillAction->execute($args['id'], $data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -254,6 +205,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -267,7 +225,7 @@ class CharacterController
     public function updateSkill(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['characterId']);
+            $character = $this->characterRepository->findById($args['characterId']);
 
             if (!$character) {
                 $response->getBody()->write(json_encode([
@@ -279,7 +237,7 @@ class CharacterController
             }
 
             $data = $request->getParsedBody();
-            $skills = $character->skills;
+            $skills = $character->skills ?? [];
 
             foreach ($skills as &$skill) {
                 if ($skill['id'] === $args['skillId']) {
@@ -289,7 +247,7 @@ class CharacterController
             }
 
             $character->skills = $skills;
-            $character->save();
+            $character = $this->characterRepository->update($character);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -310,37 +268,8 @@ class CharacterController
     public function addItem(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['id']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
             $data = $request->getParsedBody();
-            $inventory = $character->inventory;
-
-            $item = [
-                'id' => Uuid::uuid4()->toString(),
-                'name' => $data['name'] ?? '',
-                'type' => $data['type'] ?? 'misc',
-                'rarity' => $data['rarity'] ?? 'common',
-                'value' => $data['value'] ?? 0,
-                'weight' => $data['weight'] ?? 0,
-                'description' => $data['description'] ?? '',
-                'stats' => $data['stats'] ?? [],
-                'effects' => $data['effects'] ?? [],
-                'quantity' => $data['quantity'] ?? 1,
-                'equipped' => false
-            ];
-
-            $inventory[] = $item;
-            $character->inventory = $inventory;
-            $character->save();
+            $character = $this->addItemAction->execute($args['id'], $data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -348,6 +277,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -361,22 +297,7 @@ class CharacterController
     public function removeItem(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['characterId']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
-            $inventory = $character->inventory;
-            $inventory = array_filter($inventory, fn($item) => $item['id'] !== $args['itemId']);
-
-            $character->inventory = array_values($inventory);
-            $character->save();
+            $character = $this->manageEquipmentAction->removeItem($args['characterId'], $args['itemId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -384,6 +305,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -397,31 +325,7 @@ class CharacterController
     public function equipItem(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['characterId']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
-            $inventory = $character->inventory;
-            $equipment = $character->equipment;
-
-            foreach ($inventory as &$item) {
-                if ($item['id'] === $args['itemId']) {
-                    $item['equipped'] = true;
-                    $equipment[$item['type']] = $item;
-                    break;
-                }
-            }
-
-            $character->inventory = $inventory;
-            $character->equipment = $equipment;
-            $character->save();
+            $character = $this->manageEquipmentAction->equipItem($args['characterId'], $args['itemId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -429,6 +333,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -442,31 +353,7 @@ class CharacterController
     public function unequipItem(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = Character::find($args['characterId']);
-
-            if (!$character) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => 'Character not found'
-                ]));
-
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
-            }
-
-            $inventory = $character->inventory;
-            $equipment = $character->equipment;
-
-            foreach ($inventory as &$item) {
-                if ($item['id'] === $args['itemId']) {
-                    $item['equipped'] = false;
-                    unset($equipment[$item['type']]);
-                    break;
-                }
-            }
-
-            $character->inventory = $inventory;
-            $character->equipment = $equipment;
-            $character->save();
+            $character = $this->manageEquipmentAction->unequipItem($args['characterId'], $args['itemId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -474,6 +361,13 @@ class CharacterController
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
@@ -487,9 +381,9 @@ class CharacterController
     public function getTemplates(Request $request, Response $response): Response
     {
         try {
-            $templates = CharacterTemplate::where('is_public', true)
-                ->orWhere('character_id', $request->getQueryParams()['character_id'] ?? null)
-                ->get();
+            $templates = $this->characterRepository->findTemplates(
+                $request->getQueryParams()['character_id'] ?? null
+            );
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -511,15 +405,7 @@ class CharacterController
     {
         try {
             $data = $request->getParsedBody();
-
-            $template = CharacterTemplate::create([
-                'character_id' => $data['character_id'] ?? null,
-                'name' => $data['name'] ?? '',
-                'description' => $data['description'] ?? '',
-                'template_data' => $data['template_data'] ?? [],
-                'is_public' => $data['is_public'] ?? false,
-                'usage_count' => 0
-            ]);
+            $template = $this->characterRepository->createTemplate($data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -540,9 +426,10 @@ class CharacterController
     public function createFromTemplate(Request $request, Response $response, array $args): Response
     {
         try {
-            $template = CharacterTemplate::find($args['templateId']);
+            $data = $request->getParsedBody();
+            $character = $this->characterRepository->createFromTemplate($args['templateId'], $data['name'] ?? '');
 
-            if (!$template) {
+            if (!$character) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Template not found'
@@ -550,16 +437,6 @@ class CharacterController
 
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
-
-            $data = $request->getParsedBody();
-            $templateData = $template->template_data;
-            $templateData['name'] = $data['name'] ?? $templateData['name'];
-            $templateData['id'] = Uuid::uuid4()->toString();
-
-            $character = Character::create($templateData);
-
-            // Increment template usage
-            $template->increment('usage_count');
 
             $response->getBody()->write(json_encode([
                 'success' => true,
