@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import { useSeriesStore } from '../stores/seriesStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useStoryStore } from '../stores/storyStore';
-import { api } from '../api';
+import { seriesApi } from '../api/series';
+import { charactersApi } from '../api/characters';
+import { storiesApi } from '../api/stories';
 
 // Hook to manage API integration and sync with stores
 export function useApiIntegration() {
@@ -14,7 +16,7 @@ export function useApiIntegration() {
   const loadInitialData = async () => {
     try {
       // Check if backend is available
-      const isHealthy = await api.series.getAll().then(() => true).catch(() => false);
+      const isHealthy = await seriesApi.getAll().then(() => true).catch(() => false);
 
       if (!isHealthy) {
         console.warn('Backend API is not available, using local storage only');
@@ -22,20 +24,20 @@ export function useApiIntegration() {
       }
 
       // Load series data
-      const seriesResponse = await api.series.getAll();
+      const seriesResponse = await seriesApi.getAll();
       if (seriesResponse.success && seriesResponse.data) {
         // Merge with local data, preferring backend data
         seriesStore.series = seriesResponse.data;
       }
 
       // Load characters data
-      const charactersResponse = await api.characters.getAll();
+      const charactersResponse = await charactersApi.getAll();
       if (charactersResponse.success && charactersResponse.data) {
         characterStore.characters = charactersResponse.data;
       }
 
       // Load stories data
-      const storiesResponse = await api.stories.getAll();
+      const storiesResponse = await storiesApi.getAll();
       if (storiesResponse.success && storiesResponse.data) {
         storyStore.stories = storiesResponse.data;
       }
@@ -50,10 +52,10 @@ export function useApiIntegration() {
     try {
       if (series.id && !series.id.includes('local-')) {
         // Update existing
-        await api.series.update(series.id, series);
+        await seriesApi.update(series.id, series);
       } else {
         // Create new
-        const response = await api.series.create(series);
+        const response = await seriesApi.create(series);
         if (response.success && response.data) {
           return response.data;
         }
@@ -69,10 +71,10 @@ export function useApiIntegration() {
     try {
       if (character.id && !character.id.includes('local-')) {
         // Update existing
-        await api.characters.update(character.id, character);
+        await charactersApi.update(character.id, character);
       } else {
         // Create new
-        const response = await api.characters.create(character);
+        const response = await charactersApi.create(character);
         if (response.success && response.data) {
           return response.data;
         }
@@ -99,7 +101,7 @@ export function useSeriesWithApi() {
   const createSeries = async (seriesData: any) => {
     try {
       // Try to create on backend first
-      const response = await api.series.create(seriesData);
+      const response = await seriesApi.create(seriesData);
       if (response.success && response.data) {
         // Update store with backend data
         store.createSeries(response.data);
@@ -115,7 +117,7 @@ export function useSeriesWithApi() {
 
   const updateSeries = async (seriesId: string, updates: any) => {
     try {
-      const response = await api.series.update(seriesId, updates);
+      const response = await seriesApi.update(seriesId, updates);
       if (response.success && response.data) {
         store.updateSeries(seriesId, response.data);
         return;
@@ -130,7 +132,7 @@ export function useSeriesWithApi() {
 
   const deleteSeries = async (seriesId: string) => {
     try {
-      await api.series.delete(seriesId);
+      await seriesApi.delete(seriesId);
     } catch (error) {
       console.warn('Backend delete failed, proceeding with local delete:', error);
     }
@@ -153,7 +155,7 @@ export function useCharactersWithApi() {
 
   const createCharacter = async (characterData: any) => {
     try {
-      const response = await api.characters.create(characterData);
+      const response = await charactersApi.create(characterData);
       if (response.success && response.data) {
         store.createCharacter(response.data);
         return response.data;
@@ -168,7 +170,7 @@ export function useCharactersWithApi() {
 
   const updateCharacter = async (characterId: string, updates: any) => {
     try {
-      const response = await api.characters.update(characterId, updates);
+      const response = await charactersApi.update(characterId, updates);
       if (response.success && response.data) {
         store.updateCharacter(characterId, response.data);
         return;
@@ -183,7 +185,7 @@ export function useCharactersWithApi() {
 
   const levelUpCharacter = async (characterId: string) => {
     try {
-      const response = await api.characters.levelUp(characterId);
+      const response = await charactersApi.levelUp(characterId);
       if (response.success && response.data) {
         store.updateCharacter(characterId, response.data);
         return;

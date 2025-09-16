@@ -1,6 +1,8 @@
 // API Client for LitRPG Studio Backend
-export interface ApiResponse<T = any> {
-  success: boolean;
+
+// Type definitions - using class instead of interface to survive compilation
+export class ApiResponse<T = any> {
+  success!: boolean;
   data?: T;
   error?: string;
   message?: string;
@@ -116,4 +118,9 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient();
+// Create and export instance as default
+const apiClient = new ApiClient();
+export default apiClient;
+
+// Also export as named export for compatibility
+export { apiClient };

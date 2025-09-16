@@ -18,7 +18,7 @@ import type {
   CrossBookRelationship
 } from '../types/series';
 import type { Character } from '../types/character';
-import { api } from '../api';
+import { seriesApi } from '../api/series';
 
 interface SeriesState {
   series: Series[];
@@ -149,7 +149,7 @@ export const useSeriesStore = create<SeriesStore>()(
       fetchSeries: async () => {
         set({ loading: true, error: null });
         try {
-          const response = await api.series.getAll();
+          const response = await seriesApi.getAll();
           if (response.success && response.data) {
             set({ series: response.data });
           } else {
@@ -165,7 +165,7 @@ export const useSeriesStore = create<SeriesStore>()(
       fetchSeriesById: async (id: string) => {
         set({ loading: true, error: null });
         try {
-          const response = await api.series.getById(id);
+          const response = await seriesApi.getById(id);
           if (response.success && response.data) {
             set({ currentSeries: response.data });
           } else {
@@ -182,7 +182,7 @@ export const useSeriesStore = create<SeriesStore>()(
       createSeries: async (seriesData) => {
         set({ loading: true, error: null });
         try {
-          const response = await api.series.create(seriesData);
+          const response = await seriesApi.create(seriesData);
           if (response.success && response.data) {
             const newSeries = response.data;
             set((state) => ({
@@ -205,7 +205,7 @@ export const useSeriesStore = create<SeriesStore>()(
       updateSeries: async (seriesId, updates) => {
         set({ loading: true, error: null });
         try {
-          const response = await api.series.update(seriesId, updates);
+          const response = await seriesApi.update(seriesId, updates);
           if (response.success && response.data) {
             const updatedSeries = response.data;
             set((state) => ({
@@ -225,7 +225,7 @@ export const useSeriesStore = create<SeriesStore>()(
       deleteSeries: async (seriesId) => {
         set({ loading: true, error: null });
         try {
-          const response = await api.series.delete(seriesId);
+          const response = await seriesApi.delete(seriesId);
           if (response.success) {
             set((state) => ({
               series: state.series.filter(s => s.id !== seriesId),
