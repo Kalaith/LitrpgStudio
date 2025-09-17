@@ -43,11 +43,6 @@ $capsule->bootEloquent();
 // Container setup
 $container = new Container();
 
-// Register Storage (for backwards compatibility)
-$container->set('JsonFileStorage', function() {
-    return new \App\Storage\JsonFileStorage();
-});
-
 // Register Repositories
 $container->set(\App\External\CharacterRepository::class, function() {
     return new \App\External\CharacterRepository();
@@ -114,7 +109,9 @@ $container->set(\App\Actions\Character\ManageCharacterEquipmentAction::class, fu
 
 // Register Controllers
 $container->set(\App\Controllers\SeriesController::class, function() use ($container) {
-    return new \App\Controllers\SeriesController();
+    return new \App\Controllers\SeriesController(
+        $container->get(\App\External\SeriesRepository::class)
+    );
 });
 
 $container->set(\App\Controllers\BookController::class, function() use ($container) {

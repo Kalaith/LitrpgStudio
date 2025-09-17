@@ -6,21 +6,20 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Storage\JsonFileStorage;
+use App\External\SeriesRepository;
+use App\Models\Series;
+use Ramsey\Uuid\Uuid;
 
 class SeriesController
 {
-    private $storage;
-
-    public function __construct()
-    {
-        $this->storage = new JsonFileStorage();
-    }
+    public function __construct(
+        private readonly SeriesRepository $seriesRepository
+    ) {}
 
     public function getAll(Request $request, Response $response): Response
     {
         try {
-            $series = $this->storage->read('series');
+            $series = $this->seriesRepository->findAll();
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -41,7 +40,7 @@ class SeriesController
     public function getById(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = $this->storage->findById('series', $args['id']);
+            $series = $this->seriesRepository->findWithRelations($args['id']);
 
             if (!$series) {
                 $response->getBody()->write(json_encode([
@@ -74,6 +73,7 @@ class SeriesController
             $data = $request->getParsedBody();
 
             $seriesData = [
+                'id' => Uuid::uuid4()->toString(),
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
                 'genre' => $data['genre'] ?? '',
@@ -84,7 +84,7 @@ class SeriesController
                 'shared_elements' => $data['shared_elements'] ?? []
             ];
 
-            $series = $this->storage->create('series', $seriesData);
+            $series = $this->seriesRepository->createFromArray($seriesData);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -105,7 +105,8 @@ class SeriesController
     public function update(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['id']);
+            $data = $request->getParsedBody();
+            $series = $this->seriesRepository->updateFromArray($args['id'], $data);
 
             if (!$series) {
                 $response->getBody()->write(json_encode([
@@ -115,9 +116,6 @@ class SeriesController
 
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
-
-            $data = $request->getParsedBody();
-            $series->update($data);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -138,7 +136,7 @@ class SeriesController
     public function delete(Request $request, Response $response, array $args): Response
     {
         try {
-            $deleted = $this->storage->delete('series', $args['id']);
+            $deleted = $this->seriesRepository->delete($args['id']);
 
             if (!$deleted) {
                 $response->getBody()->write(json_encode([
@@ -180,7 +178,12 @@ class SeriesController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
 
-            $series = Series::create($seriesData);
+            // Ensure ID is set for import
+            if (!isset($seriesData['id'])) {
+                $seriesData['id'] = Uuid::uuid4()->toString();
+            }
+
+            $series = $this->seriesRepository->createFromArray($seriesData);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -201,9 +204,9 @@ class SeriesController
     public function addCharacterToSeries(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['seriesId']);
+            $success = $this->seriesRepository->addCharacterToSeries($args['seriesId'], $args['characterId']);
 
-            if (!$series) {
+            if (!$success) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Series not found'
@@ -212,19 +215,7 @@ class SeriesController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
 
-            $data = $request->getParsedBody();
-            $sharedElements = $series->shared_elements;
-
-            $characterEntry = [
-                'characterId' => $args['characterId'],
-                'appearances' => $data['appearances'] ?? [],
-                'developmentArc' => [],
-                'relationships' => []
-            ];
-
-            $sharedElements['characters'][] = $characterEntry;
-            $series->shared_elements = $sharedElements;
-            $series->save();
+            $series = $this->seriesRepository->findById($args['seriesId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -245,9 +236,9 @@ class SeriesController
     public function removeCharacterFromSeries(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['seriesId']);
+            $success = $this->seriesRepository->removeCharacterFromSeries($args['seriesId'], $args['characterId']);
 
-            if (!$series) {
+            if (!$success) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Series not found'
@@ -256,14 +247,7 @@ class SeriesController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
 
-            $sharedElements = $series->shared_elements;
-            $sharedElements['characters'] = array_filter(
-                $sharedElements['characters'],
-                fn($char) => $char['characterId'] !== $args['characterId']
-            );
-
-            $series->shared_elements = $sharedElements;
-            $series->save();
+            $series = $this->seriesRepository->findById($args['seriesId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -284,9 +268,10 @@ class SeriesController
     public function addCharacterAppearance(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['seriesId']);
+            $data = $request->getParsedBody();
+            $success = $this->seriesRepository->addCharacterAppearance($args['seriesId'], $args['characterId'], $data);
 
-            if (!$series) {
+            if (!$success) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Series not found'
@@ -295,18 +280,7 @@ class SeriesController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
 
-            $data = $request->getParsedBody();
-            $sharedElements = $series->shared_elements;
-
-            foreach ($sharedElements['characters'] as &$character) {
-                if ($character['characterId'] === $args['characterId']) {
-                    $character['appearances'][] = $data;
-                    break;
-                }
-            }
-
-            $series->shared_elements = $sharedElements;
-            $series->save();
+            $series = $this->seriesRepository->findById($args['seriesId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,
@@ -327,9 +301,10 @@ class SeriesController
     public function updateCharacterDevelopment(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['seriesId']);
+            $data = $request->getParsedBody();
+            $success = $this->seriesRepository->updateCharacterDevelopment($args['seriesId'], $args['characterId'], $data);
 
-            if (!$series) {
+            if (!$success) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
                     'error' => 'Series not found'
@@ -338,22 +313,7 @@ class SeriesController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
 
-            $data = $request->getParsedBody();
-            $sharedElements = $series->shared_elements;
-
-            foreach ($sharedElements['characters'] as &$character) {
-                if ($character['characterId'] === $args['characterId']) {
-                    $character['developmentArc'] = array_filter(
-                        $character['developmentArc'],
-                        fn($dev) => $dev['bookNumber'] !== $data['bookNumber']
-                    );
-                    $character['developmentArc'][] = $data;
-                    break;
-                }
-            }
-
-            $series->shared_elements = $sharedElements;
-            $series->save();
+            $series = $this->seriesRepository->findById($args['seriesId']);
 
             $response->getBody()->write(json_encode([
                 'success' => true,

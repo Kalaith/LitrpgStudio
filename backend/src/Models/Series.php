@@ -11,7 +11,11 @@ class Series extends Model
 {
     protected $table = 'series';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id',
         'title',
         'description',
         'genre',

@@ -12,7 +12,11 @@ class Character extends Model
 {
     protected $table = 'characters';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id',
         'series_id',
         'name',
         'race',
