@@ -1,6 +1,5 @@
 import type { BaseEntity, EntityRelationship } from '../types/entityRegistry';
 import type { TimelineEvent } from '../types/unifiedTimeline';
-import type { Story } from '../types/story';
 
 export interface PerformanceMetrics {
   entityCount: number;
@@ -46,7 +45,7 @@ export class PerformanceOptimizer {
   private relationshipCache: Map<string, { data: EntityRelationship[]; timestamp: number; accessCount: number }> = new Map();
   private searchCache: Map<string, { data: any; timestamp: number; accessCount: number }> = new Map();
   private isOptimizing = false;
-  private optimizationInterval: NodeJS.Timeout | null = null;
+  private optimizationInterval: number | null = null;
 
   constructor() {
     this.metrics = {
@@ -453,12 +452,12 @@ export class PerformanceOptimizer {
     return [];
   }
 
-  private async getEntityRelationships(entityId: string): Promise<EntityRelationship[]> {
+  private async getEntityRelationships(_entityId: string): Promise<EntityRelationship[]> {
     // Mock implementation
     return [];
   }
 
-  private async performSearch(query: string): Promise<any[]> {
+  private async performSearch(_query: string): Promise<any[]> {
     // Mock implementation
     return [];
   }
@@ -466,7 +465,7 @@ export class PerformanceOptimizer {
   // Lazy Loading Utilities
   async loadEntitiesPage(page: number, pageSize?: number): Promise<BaseEntity[]> {
     const size = pageSize || this.lazyLoadConfig.entitiesPerPage;
-    const offset = page * size;
+    const _offset = page * size;
 
     // Check cache first
     const cacheKey = `entities-${page}-${size}`;
@@ -492,7 +491,7 @@ export class PerformanceOptimizer {
 
   async loadEventsPage(page: number, pageSize?: number): Promise<TimelineEvent[]> {
     const size = pageSize || this.lazyLoadConfig.eventsPerPage;
-    const offset = page * size;
+    const _offset = page * size;
 
     const cacheKey = `events-${page}-${size}`;
     const cached = this.searchCache.get(cacheKey);

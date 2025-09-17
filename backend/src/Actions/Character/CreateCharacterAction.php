@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace LitRPGStudio\Actions\Character;
+namespace App\Actions\Character;
 
-use LitRPGStudio\External\CharacterRepository;
-use LitRPGStudio\Models\Character;
+use App\External\CharacterRepository;
+use App\Models\Character;
 use Ramsey\Uuid\Uuid;
 
 final class CreateCharacterAction

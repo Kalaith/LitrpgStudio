@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace LitRPGStudio\External;
+namespace App\External;
 
-use LitRPGStudio\Models\Character;
-use LitRPGStudio\Models\CharacterTemplate;
+use App\Models\Character;
+use App\Models\CharacterTemplate;
 
 final class CharacterRepository
 {

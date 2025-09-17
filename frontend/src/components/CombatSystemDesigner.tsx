@@ -66,7 +66,7 @@ export default function CombatSystemDesigner({
   const [activeTab, setActiveTab] = useState<'actions' | 'simulator' | 'balance'>('actions');
   const [actions, setActions] = useState<CombatAction[]>([]);
   const [selectedAction, setSelectedAction] = useState<CombatAction | null>(null);
-  const [isCreatingAction, setIsCreatingAction] = useState(false);
+  const [_isCreatingAction, _setIsCreatingAction] = useState(false);
   const [simulationResults, setSimulationResults] = useState<any>(null);
 
   // Default combat stats for testing
@@ -258,7 +258,7 @@ export default function CombatSystemDesigner({
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Combat Actions</h3>
         <button
-          onClick={() => setIsCreatingAction(true)}
+          onClick={() => _setIsCreatingAction(true)}
           className="btn-primary"
         >
           Create New Action

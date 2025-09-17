@@ -23,16 +23,16 @@
     },
     "autoload": {
         "psr-4": {
-            "LitRPGStudio\\": "src/"
+            "App\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "LitRPGStudio\\Tests\\": "tests/"
+            "App\\Tests\\": "tests/"
         }
     },
     "scripts": {
-        "start": "php -S localhost:8080 -t public/",
+        "start": "php -S localhost:8000 -t public/",
         "test": "phpunit",
         "cs-check": "phpcs --standard=PSR12 src/ tests/",
         "cs-fix": "phpcbf --standard=PSR12 src/ tests/"

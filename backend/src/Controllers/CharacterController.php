@@ -2,24 +2,28 @@
 
 declare(strict_types=1);
 
-namespace LitRPGStudio\Controllers;
+namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use LitRPGStudio\External\CharacterRepository;
-use LitRPGStudio\Actions\Character\CreateCharacterAction;
-use LitRPGStudio\Actions\Character\LevelUpCharacterAction;
-use LitRPGStudio\Actions\Character\AddSkillToCharacterAction;
-use LitRPGStudio\Actions\Character\AddItemToCharacterAction;
-use LitRPGStudio\Actions\Character\ManageCharacterEquipmentAction;
+use App\External\CharacterRepository;
+use App\Actions\Character\CreateCharacterAction;
+use App\Actions\Character\UpdateCharacterAction;
+use App\Actions\Character\LevelUpCharacterAction;
+use App\Actions\Character\AddSkillToCharacterAction;
+use App\Actions\Character\UpdateCharacterSkillAction;
+use App\Actions\Character\AddItemToCharacterAction;
+use App\Actions\Character\ManageCharacterEquipmentAction;
 
 final class CharacterController
 {
     public function __construct(
         private readonly CharacterRepository $characterRepository,
         private readonly CreateCharacterAction $createCharacterAction,
+        private readonly UpdateCharacterAction $updateCharacterAction,
         private readonly LevelUpCharacterAction $levelUpCharacterAction,
         private readonly AddSkillToCharacterAction $addSkillAction,
+        private readonly UpdateCharacterSkillAction $updateSkillAction,
         private readonly AddItemToCharacterAction $addItemAction,
         private readonly ManageCharacterEquipmentAction $manageEquipmentAction
     ) {}
@@ -108,7 +112,7 @@ final class CharacterController
     {
         try {
             $data = $request->getParsedBody();
-            $character = $this->characterRepository->updateFromArray($args['id'], $data);
+            $character = $this->updateCharacterAction->execute($args['id'], $data);
 
             if (!$character) {
                 $response->getBody()->write(json_encode([
@@ -225,7 +229,8 @@ final class CharacterController
     public function updateSkill(Request $request, Response $response, array $args): Response
     {
         try {
-            $character = $this->characterRepository->findById($args['characterId']);
+            $data = $request->getParsedBody();
+            $character = $this->updateSkillAction->execute($args['characterId'], $args['skillId'], $data);
 
             if (!$character) {
                 $response->getBody()->write(json_encode([
@@ -236,25 +241,19 @@ final class CharacterController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
             }
 
-            $data = $request->getParsedBody();
-            $skills = $character->skills ?? [];
-
-            foreach ($skills as &$skill) {
-                if ($skill['id'] === $args['skillId']) {
-                    $skill = array_merge($skill, $data);
-                    break;
-                }
-            }
-
-            $character->skills = $skills;
-            $character = $this->characterRepository->update($character);
-
             $response->getBody()->write(json_encode([
                 'success' => true,
                 'data' => $character
             ]));
 
             return $response->withHeader('Content-Type', 'application/json');
+        } catch (\InvalidArgumentException $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,

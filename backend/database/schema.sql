@@ -154,11 +154,11 @@ CREATE TABLE IF NOT EXISTS series_analytics (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_books_series_id ON books(series_id);
-CREATE INDEX IF NOT EXISTS idx_books_book_number ON books(series_id, book_number);
-CREATE INDEX IF NOT EXISTS idx_characters_series_id ON characters(series_id);
-CREATE INDEX IF NOT EXISTS idx_stories_series_id ON stories(series_id);
-CREATE INDEX IF NOT EXISTS idx_stories_book_id ON stories(book_id);
-CREATE INDEX IF NOT EXISTS idx_chapters_story_id ON chapters(story_id);
-CREATE INDEX IF NOT EXISTS idx_chapters_number ON chapters(story_id, chapter_number);
-CREATE INDEX IF NOT EXISTS idx_analytics_series_id ON series_analytics(series_id);
+CREATE INDEX idx_books_series_id ON books(series_id);
+CREATE INDEX idx_books_book_number ON books(series_id, book_number);
+CREATE INDEX idx_characters_series_id ON characters(series_id);
+CREATE INDEX idx_stories_series_id ON stories(series_id);
+CREATE INDEX idx_stories_book_id ON stories(book_id);
+CREATE INDEX idx_chapters_story_id ON chapters(story_id);
+CREATE INDEX idx_chapters_number ON chapters(story_id, chapter_number);
+CREATE INDEX idx_analytics_series_id ON series_analytics(series_id);

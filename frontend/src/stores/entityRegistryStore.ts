@@ -654,31 +654,46 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
     }),
     {
       name: 'entity-registry-store',
-      // Custom serialization to handle Maps
-      serialize: (state) => {
-        return JSON.stringify({
-          ...state,
-          registry: {
-            entities: Array.from(state.registry.entities.entries()),
-            relationships: Array.from(state.registry.relationships.entries()),
-            typeIndex: Array.from(state.registry.typeIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
-            tagIndex: Array.from(state.registry.tagIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
-            nameIndex: Array.from(state.registry.nameIndex.entries()).map(([k, v]: [string, Set<string>]) => [k, Array.from(v)])
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          try {
+            const parsed = JSON.parse(str);
+            return {
+              state: {
+                ...parsed.state,
+                registry: {
+                  entities: new Map(parsed.state.registry?.entities || []),
+                  relationships: new Map(parsed.state.registry?.relationships || []),
+                  typeIndex: new Map((parsed.state.registry?.typeIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)])),
+                  tagIndex: new Map((parsed.state.registry?.tagIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)])),
+                  nameIndex: new Map((parsed.state.registry?.nameIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)]))
+                }
+              },
+              version: parsed.version
+            };
+          } catch {
+            return null;
           }
-        });
-      },
-      deserialize: (str: string) => {
-        const parsed = JSON.parse(str);
-        return {
-          ...parsed,
-          registry: {
-            entities: new Map(parsed.registry.entities),
-            relationships: new Map(parsed.registry.relationships),
-            typeIndex: new Map(parsed.registry.typeIndex.map(([k, v]: [string, string[]]) => [k, new Set(v)])),
-            tagIndex: new Map(parsed.registry.tagIndex.map(([k, v]: [string, string[]]) => [k, new Set(v)])),
-            nameIndex: new Map(parsed.registry.nameIndex.map(([k, v]: [string, string[]]) => [k, new Set(v)]))
-          }
-        };
+        },
+        setItem: (name, value) => {
+          const serializedState = {
+            state: {
+              ...value.state,
+              registry: {
+                entities: Array.from(value.state.registry.entities.entries()),
+                relationships: Array.from(value.state.registry.relationships.entries()),
+                typeIndex: Array.from(value.state.registry.typeIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
+                tagIndex: Array.from(value.state.registry.tagIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
+                nameIndex: Array.from(value.state.registry.nameIndex.entries()).map(([k, v]) => [k, Array.from(v)])
+              }
+            },
+            version: value.version
+          };
+          localStorage.setItem(name, JSON.stringify(serializedState));
+        },
+        removeItem: (name) => localStorage.removeItem(name)
       }
     }
   )

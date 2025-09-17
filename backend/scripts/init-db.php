@@ -51,19 +51,31 @@ try {
         echo "⚠ Database creation skipped: " . $e->getMessage() . "\n";
     }
 
+    // Reconnect to the specific database
+    $capsule = new Capsule;
+    $capsule->addConnection([
+        'driver'    => $_ENV['DB_DRIVER'] ?? 'mysql',
+        'host'      => $_ENV['DB_HOST'] ?? 'localhost',
+        'port'      => $_ENV['DB_PORT'] ?? 3306,
+        'database'  => $_ENV['DB_DATABASE'] ?? 'litrpg_studio',
+        'username'  => $_ENV['DB_USERNAME'] ?? 'root',
+        'password'  => $_ENV['DB_PASSWORD'] ?? '',
+        'charset'   => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix'    => $_ENV['DB_PREFIX'] ?? '',
+    ]);
+    $capsule->setAsGlobal();
+    $capsule->bootEloquent();
+
     // Read and execute schema
     $schema = file_get_contents(__DIR__ . '/../database/schema.sql');
 
-    // Split by semicolons and execute each statement
-    $statements = explode(';', $schema);
+    // Use PDO directly to handle the multi-statement execution
+    $connection = Capsule::connection()->getPdo();
 
-    foreach ($statements as $statement) {
-        $statement = trim($statement);
-        if (empty($statement)) continue;
-
-        Capsule::statement($statement);
-        echo "✓ Executed: " . substr($statement, 0, 50) . "...\n";
-    }
+    echo "✓ Executing full schema...\n";
+    $connection->exec($schema);
+    echo "✓ Schema executed successfully!\n";
 
     echo "\n✅ Database initialized successfully!\n";
 

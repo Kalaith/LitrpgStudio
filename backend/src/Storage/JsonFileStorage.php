@@ -1,6 +1,6 @@
 <?php
 
-namespace LitRPGStudio\Storage;
+namespace App\Storage;
 
 class JsonFileStorage
 {

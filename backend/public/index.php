@@ -42,6 +42,53 @@ $capsule->bootEloquent();
 
 // Container setup
 $container = new Container();
+
+// Register Storage
+$container->set('JsonFileStorage', function() {
+    return new \App\Storage\JsonFileStorage();
+});
+
+// Register Controllers
+$container->set(\App\Controllers\SeriesController::class, function() use ($container) {
+    return new \App\Controllers\SeriesController();
+});
+
+$container->set(\App\Controllers\BookController::class, function() use ($container) {
+    return new \App\Controllers\BookController();
+});
+
+$container->set(\App\Controllers\CharacterController::class, function() use ($container) {
+    return new \App\Controllers\CharacterController();
+});
+
+$container->set(\App\Controllers\StoryController::class, function() use ($container) {
+    return new \App\Controllers\StoryController();
+});
+
+$container->set(\App\Controllers\ChapterController::class, function() use ($container) {
+    return new \App\Controllers\ChapterController();
+});
+
+$container->set(\App\Controllers\TimelineController::class, function() use ($container) {
+    return new \App\Controllers\TimelineController();
+});
+
+$container->set(\App\Controllers\WorldBuildingController::class, function() use ($container) {
+    return new \App\Controllers\WorldBuildingController();
+});
+
+$container->set(\App\Controllers\ConsistencyController::class, function() use ($container) {
+    return new \App\Controllers\ConsistencyController();
+});
+
+$container->set(\App\Controllers\AnalyticsController::class, function() use ($container) {
+    return new \App\Controllers\AnalyticsController();
+});
+
+$container->set(\App\Controllers\ExportController::class, function() use ($container) {
+    return new \App\Controllers\ExportController();
+});
+
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 

@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Activity,
   Zap,
   Settings,
-  TrendingUp,
-  TrendingDown,
   Database,
   Search,
-  Clock,
   Cpu,
-  HardDrive,
   BarChart3,
   RefreshCw,
   CheckCircle,
@@ -58,7 +54,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   useEffect(() => {
     updateData();
 
-    let interval: NodeJS.Timeout | undefined;
+    let interval: number | undefined;
     if (autoRefresh) {
       interval = setInterval(updateData, 5000); // Update every 5 seconds
     }
@@ -93,14 +89,6 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     return 'critical';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'good': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
-      case 'warning': return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
-      case 'critical': return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-700';
-    }
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -111,13 +99,6 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     }
   };
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   if (!isVisible) {
     return (

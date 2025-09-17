@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace LitRPGStudio\Controllers;
+namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use LitRPGStudio\Models\Story;
-use LitRPGStudio\Models\StoryTemplate;
+use App\Models\Story;
+use App\Models\StoryTemplate;
 use Ramsey\Uuid\Uuid;
 
 class StoryController

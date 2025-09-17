@@ -2,20 +2,25 @@
 
 // Type definitions - using class instead of interface to survive compilation
 export class ApiResponse<T = any> {
-  success!: boolean;
+  success: boolean = false;
   data?: T;
   error?: string;
   message?: string;
 }
 
 export class ApiError extends Error {
+  public status: number;
+  public response?: any;
+
   constructor(
     message: string,
-    public status: number = 500,
-    public response?: any
+    status: number = 500,
+    response?: any
   ) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.response = response;
   }
 }
 

@@ -1,73 +1,67 @@
 <?php
-
+// ✅ CORRECT: Standardized Auth0Middleware
 declare(strict_types=1);
 
-namespace LitRPGStudio\Middleware;
+namespace App\Middleware;
 
+use App\Services\Auth0Service;
+use App\Actions\Auth0\CreateOrUpdateUserAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Http\Server\MiddlewareInterface;
-use LitRPGStudio\Services\Auth0Service;
-use Slim\Psr7\Response as SlimResponse;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class Auth0Middleware implements MiddlewareInterface
+final class Auth0Middleware implements MiddlewareInterface
 {
-    private Auth0Service $auth0Service;
-    private array $requiredScopes;
+    public function __construct(
+        private readonly Auth0Service $auth0Service,
+        private readonly CreateOrUpdateUserAction $createOrUpdateUserAction
+    ) {}
 
-    public function __construct(array $requiredScopes = [])
+    public function process(Request $request, RequestHandlerInterface $handler): Response
     {
-        $this->auth0Service = new Auth0Service();
-        $this->requiredScopes = $requiredScopes;
-    }
+        // Get Authorization header
+        $authHeader = $request->getHeaderLine('Authorization');
 
-    public function process(Request $request, RequestHandler $handler): Response
-    {
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return $this->createUnauthorizedResponse('Authorization header missing or invalid');
+        }
+
+        $token = substr($authHeader, 7); // Remove "Bearer " prefix
+
         try {
-            // Get Authorization header
-            $authHeader = $request->getHeaderLine('Authorization');
+            // Validate the JWT token
+            $payload = $this->auth0Service->validateToken($token);
 
-            if (empty($authHeader)) {
-                return $this->createErrorResponse('Authorization header missing', 401);
+            // Add Auth0 user info to request
+            $request = $request->withAttribute('auth0_payload', $payload);
+
+            // Get or create user in our database
+            $user = $this->createOrUpdateUserAction->execute($payload);
+            if ($user) {
+                $request = $request->withAttribute('user', $user);
+                $request = $request->withAttribute('user_id', $user->id);
             }
 
-            // Extract token from header
-            $token = $this->auth0Service->extractTokenFromHeader($authHeader);
-
-            // Validate token
-            $tokenData = $this->auth0Service->validateToken($token);
-
-            // Validate scopes if required
-            if (!$this->auth0Service->validateScopes($tokenData, $this->requiredScopes)) {
-                return $this->createErrorResponse('Insufficient permissions', 403);
-            }
-
-            // Add user data to request attributes
-            $request = $request->withAttribute('user', $tokenData);
-            $request = $request->withAttribute('user_id', $tokenData['sub'] ?? null);
-
-            // Continue to next middleware/handler
             return $handler->handle($request);
+
         } catch (\Exception $e) {
-            return $this->createErrorResponse('Authentication failed: ' . $e->getMessage(), 401);
+            error_log("Auth0 Middleware Error: " . $e->getMessage());
+            return $this->createUnauthorizedResponse('Token validation failed');
         }
     }
 
-    private function createErrorResponse(string $message, int $status): Response
+    private function createUnauthorizedResponse(string $message = 'Unauthorized'): Response
     {
-        $response = new SlimResponse();
-
-        $body = json_encode([
+        $response = new \Slim\Psr7\Response();
+        $response->getBody()->write(json_encode([
             'success' => false,
-            'error' => $message,
-            'timestamp' => date('c')
-        ]);
-
-        $response->getBody()->write($body);
+            'message' => $message,
+            'error' => 'Authentication required'
+        ]));
 
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus($status);
+            ->withStatus(401);
     }
 }

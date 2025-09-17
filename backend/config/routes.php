@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 use Slim\App;
-use LitRPGStudio\Controllers\SeriesController;
-use LitRPGStudio\Controllers\BookController;
-use LitRPGStudio\Controllers\CharacterController;
-use LitRPGStudio\Controllers\StoryController;
-use LitRPGStudio\Controllers\ChapterController;
-use LitRPGStudio\Controllers\TimelineController;
-use LitRPGStudio\Controllers\WorldBuildingController;
-use LitRPGStudio\Controllers\ConsistencyController;
-use LitRPGStudio\Controllers\AnalyticsController;
-use LitRPGStudio\Controllers\ExportController;
-use LitRPGStudio\Controllers\Auth0Controller;
-use LitRPGStudio\Middleware\Auth0Middleware;
+use App\Controllers\SeriesController;
+use App\Controllers\BookController;
+use App\Controllers\CharacterController;
+use App\Controllers\StoryController;
+use App\Controllers\ChapterController;
+use App\Controllers\TimelineController;
+use App\Controllers\WorldBuildingController;
+use App\Controllers\ConsistencyController;
+use App\Controllers\AnalyticsController;
+use App\Controllers\ExportController;
+use App\Controllers\Auth0Controller;
+use App\Middleware\Auth0Middleware;
 
 return function (App $app) {
     // API base path
@@ -148,6 +148,29 @@ return function (App $app) {
                 'timestamp' => date('c')
             ]));
             return $response->withHeader('Content-Type', 'application/json');
+        });
+
+        // Database initialization endpoint
+        $group->post('/init-database', function ($request, $response) {
+            try {
+                // Execute the init-db.php script
+                ob_start();
+                $result = include __DIR__ . '/../scripts/init-db.php';
+                $output = ob_get_clean();
+
+                $response->getBody()->write(json_encode([
+                    'success' => true,
+                    'message' => 'Database initialized successfully',
+                    'output' => $output
+                ]));
+                return $response->withHeader('Content-Type', 'application/json');
+            } catch (Exception $e) {
+                $response->getBody()->write(json_encode([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+            }
         });
     });
 

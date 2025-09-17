@@ -852,24 +852,40 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
     }),
     {
       name: 'unified-timeline-store',
-      serialize: (state: any) => {
-        return JSON.stringify({
-          ...state,
-          events: Array.from(state.events.entries()),
-          views: Array.from(state.views.entries()),
-          templates: Array.from(state.templates.entries()),
-          selectedEventIds: Array.from(state.selectedEventIds)
-        });
-      },
-      deserialize: (str: string) => {
-        const parsed = JSON.parse(str);
-        return {
-          ...parsed,
-          events: new Map(parsed.events || []),
-          views: new Map(parsed.views || []),
-          templates: new Map(parsed.templates || []),
-          selectedEventIds: new Set(parsed.selectedEventIds || [])
-        };
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          try {
+            const parsed = JSON.parse(str);
+            return {
+              state: {
+                ...parsed.state,
+                events: new Map(parsed.state.events || []),
+                views: new Map(parsed.state.views || []),
+                templates: new Map(parsed.state.templates || []),
+                selectedEventIds: new Set(parsed.state.selectedEventIds || [])
+              },
+              version: parsed.version
+            };
+          } catch {
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          const serializedState = {
+            state: {
+              ...value.state,
+              events: Array.from(value.state.events.entries()),
+              views: Array.from(value.state.views.entries()),
+              templates: Array.from(value.state.templates.entries()),
+              selectedEventIds: Array.from(value.state.selectedEventIds)
+            },
+            version: value.version
+          };
+          localStorage.setItem(name, JSON.stringify(serializedState));
+        },
+        removeItem: (name) => localStorage.removeItem(name)
       }
     }
   )
