@@ -20,6 +20,7 @@ import type {
   TimeOfDayStats,
 } from '../types/analytics';
 import { useStoryStore } from './storyStore';
+import { analyticsApi } from '../api/analytics';
 
 const generateId = () => crypto.randomUUID();
 

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>LitRPG Studio API Test</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testAPIs() {
+            const results = document.getElementById('results');
+            const baseUrl = 'http://localhost:8000/api/v1';
+
+            async function testEndpoint(name, url) {
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    results.innerHTML += `<p><strong>${name}:</strong> ✅ ${JSON.stringify(data).substring(0, 100)}...</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p><strong>${name}:</strong> ❌ ${error.message}</p>`;
+                }
+            }
+
+            await testEndpoint('Health', `${baseUrl}/health`);
+            await testEndpoint('Series', `${baseUrl}/series`);
+            await testEndpoint('Characters', `${baseUrl}/characters`);
+            await testEndpoint('Stories', `${baseUrl}/stories`);
+        }
+
+        testAPIs();
+    </script>
+</body>
+</html>
