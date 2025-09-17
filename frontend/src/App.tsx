@@ -46,9 +46,9 @@ function App() {
           </div>
         )}
 
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden relative">
           <Sidebar activeView={activeView} onViewChange={setActiveView} />
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
             <MainContent activeView={activeView} />
           </div>
         </div>

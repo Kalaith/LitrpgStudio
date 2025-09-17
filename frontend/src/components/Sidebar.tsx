@@ -139,9 +139,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobile}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg"
+        className="lg:hidden fixed top-3 left-3 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-shadow touch-manipulation"
+        aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
       >
-        {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
+        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Mobile Overlay */}
@@ -162,8 +163,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
         className={`
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           fixed lg:relative inset-y-0 left-0 z-40 lg:z-0
+          w-80 lg:w-auto
           bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
           flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out
+          max-w-[85vw] sm:max-w-80
         `}
       >
         {/* Header */}
@@ -227,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                 {pinnedNavItems.map(({ id, icon, label }) => (
                   <div key={`pinned-${id}`} className="group relative">
                     <button
-                      className={`w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm
+                      className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
                         ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
                       onClick={() => onViewChange(id)}
                       title={isCollapsed ? label : undefined}
@@ -307,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                       .map(({ id, icon, label }) => (
                         <div key={id} className="group relative">
                           <button
-                            className={`w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm
+                            className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
                               ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
                             onClick={() => onViewChange(id)}
                             title={isCollapsed ? label : undefined}

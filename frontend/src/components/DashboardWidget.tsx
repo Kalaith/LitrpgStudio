@@ -50,9 +50,9 @@ interface DashboardWidgetProps {
 
 // Widget size mappings with better responsive design
 const sizeClasses = {
-  small: 'col-span-1 min-h-[8rem] max-h-[12rem]',
-  medium: 'col-span-1 md:col-span-2 min-h-[8rem] max-h-[16rem]',
-  large: 'col-span-1 md:col-span-2 lg:col-span-3 min-h-[12rem] max-h-[20rem]'
+  small: 'col-span-1 min-h-[7rem] sm:min-h-[8rem] max-h-[10rem] sm:max-h-[12rem]',
+  medium: 'col-span-1 sm:col-span-1 md:col-span-2 min-h-[8rem] sm:min-h-[8rem] max-h-[14rem] sm:max-h-[16rem]',
+  large: 'col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-3 min-h-[10rem] sm:min-h-[12rem] max-h-[18rem] sm:max-h-[20rem]'
 };
 
 // Widget icons
@@ -328,7 +328,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
       `}
     >
       {/* Widget Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="flex items-center space-x-2 min-w-0 flex-1">
           {/* Drag Handle */}
           <div
@@ -411,7 +411,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="p-3 flex-1 overflow-hidden min-h-0"
+            className="p-2 sm:p-3 flex-1 overflow-hidden min-h-0"
           >
             <div className="h-full overflow-auto">
               {renderWidgetContent()}

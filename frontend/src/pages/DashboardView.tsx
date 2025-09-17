@@ -86,10 +86,10 @@ const DashboardView: React.FC = () => {
   // Grid layout calculations with responsive design
   const gridClasses = useMemo(() => {
     switch (gridSize) {
-      case 'compact': return 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2';
-      case 'comfortable': return 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
-      case 'spacious': return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
-      default: return 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
+      case 'compact': return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-2';
+      case 'comfortable': return 'grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4';
+      case 'spacious': return 'grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6';
+      default: return 'grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4';
     }
   }, [gridSize]);
 
@@ -132,11 +132,12 @@ const DashboardView: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Dashboard Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 gap-4">
-        <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between p-3 sm:p-4 lg:p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 gap-3 lg:gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="flex items-center space-x-2">
-            <Grid size={24} className="text-primary-600 dark:text-primary-400" />
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Author Dashboard</h1>
+            <Grid size={20} className="text-primary-600 dark:text-primary-400 sm:hidden" />
+            <Grid size={24} className="text-primary-600 dark:text-primary-400 hidden sm:block" />
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">Author Dashboard</h1>
           </div>
 
           {/* API Status Indicator */}
@@ -159,21 +160,21 @@ const DashboardView: React.FC = () => {
         </div>
 
         {/* Dashboard Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Grid Size Selector */}
           <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             {['compact', 'comfortable', 'spacious'].map((size) => (
               <button
                 key={size}
                 onClick={() => setGridSize(size as typeof gridSize)}
-                className={`px-2 md:px-3 py-1 text-xs rounded transition-colors ${
+                className={`px-2 sm:px-3 py-1.5 sm:py-1 text-xs rounded transition-colors touch-manipulation ${
                   gridSize === size
                     ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
-                <span className="hidden sm:inline">{size.charAt(0).toUpperCase() + size.slice(1)}</span>
-                <span className="sm:hidden">{size.charAt(0).toUpperCase()}</span>
+                <span className="hidden md:inline">{size.charAt(0).toUpperCase() + size.slice(1)}</span>
+                <span className="md:hidden">{size.charAt(0).toUpperCase()}</span>
               </button>
             ))}
           </div>
@@ -181,21 +182,21 @@ const DashboardView: React.FC = () => {
           {/* Reset Button */}
           <button
             onClick={resetToDefault}
-            className="flex items-center space-x-1 md:space-x-2 px-2 md:px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center space-x-1 lg:space-x-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors touch-manipulation"
           >
             <RotateCcw size={16} />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden md:inline">Reset</span>
           </button>
 
           {/* Add Widget Button */}
           <div className="relative">
             <button
               onClick={() => setShowAddWidget(!showAddWidget)}
-              className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              className="flex items-center space-x-1 lg:space-x-2 px-3 sm:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors touch-manipulation"
             >
               <Plus size={16} />
-              <span className="hidden sm:inline">Add Widget</span>
-              <span className="sm:hidden">Add</span>
+              <span className="hidden md:inline">Add Widget</span>
+              <span className="md:hidden">Add</span>
             </button>
 
             {/* Add Widget Dropdown */}
@@ -205,7 +206,7 @@ const DashboardView: React.FC = () => {
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
-                  className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50"
                 >
                   <div className="p-2">
                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2 py-1">
@@ -234,7 +235,7 @@ const DashboardView: React.FC = () => {
       </div>
 
       {/* Dashboard Grid */}
-      <div className="flex-1 p-4 md:p-6 overflow-auto">
+      <div className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
         <div className="max-w-7xl mx-auto">
           {/* Empty Database State */}
           {isOnline && !hasData && (
