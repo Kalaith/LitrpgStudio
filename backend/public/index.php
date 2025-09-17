@@ -43,9 +43,73 @@ $capsule->bootEloquent();
 // Container setup
 $container = new Container();
 
-// Register Storage
+// Register Storage (for backwards compatibility)
 $container->set('JsonFileStorage', function() {
     return new \App\Storage\JsonFileStorage();
+});
+
+// Register Repositories
+$container->set(\App\External\CharacterRepository::class, function() {
+    return new \App\External\CharacterRepository();
+});
+
+$container->set(\App\External\BookRepository::class, function() {
+    return new \App\External\BookRepository();
+});
+
+$container->set(\App\External\StoryRepository::class, function() {
+    return new \App\External\StoryRepository();
+});
+
+$container->set(\App\External\ChapterRepository::class, function() {
+    return new \App\External\ChapterRepository();
+});
+
+$container->set(\App\External\SeriesRepository::class, function() {
+    return new \App\External\SeriesRepository();
+});
+
+// Register Character Actions
+$container->set(\App\Actions\Character\CreateCharacterAction::class, function() use ($container) {
+    return new \App\Actions\Character\CreateCharacterAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\UpdateCharacterAction::class, function() use ($container) {
+    return new \App\Actions\Character\UpdateCharacterAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\LevelUpCharacterAction::class, function() use ($container) {
+    return new \App\Actions\Character\LevelUpCharacterAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\AddSkillToCharacterAction::class, function() use ($container) {
+    return new \App\Actions\Character\AddSkillToCharacterAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\UpdateCharacterSkillAction::class, function() use ($container) {
+    return new \App\Actions\Character\UpdateCharacterSkillAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\AddItemToCharacterAction::class, function() use ($container) {
+    return new \App\Actions\Character\AddItemToCharacterAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
+});
+
+$container->set(\App\Actions\Character\ManageCharacterEquipmentAction::class, function() use ($container) {
+    return new \App\Actions\Character\ManageCharacterEquipmentAction(
+        $container->get(\App\External\CharacterRepository::class)
+    );
 });
 
 // Register Controllers
@@ -58,7 +122,16 @@ $container->set(\App\Controllers\BookController::class, function() use ($contain
 });
 
 $container->set(\App\Controllers\CharacterController::class, function() use ($container) {
-    return new \App\Controllers\CharacterController();
+    return new \App\Controllers\CharacterController(
+        $container->get(\App\External\CharacterRepository::class),
+        $container->get(\App\Actions\Character\CreateCharacterAction::class),
+        $container->get(\App\Actions\Character\UpdateCharacterAction::class),
+        $container->get(\App\Actions\Character\LevelUpCharacterAction::class),
+        $container->get(\App\Actions\Character\AddSkillToCharacterAction::class),
+        $container->get(\App\Actions\Character\UpdateCharacterSkillAction::class),
+        $container->get(\App\Actions\Character\AddItemToCharacterAction::class),
+        $container->get(\App\Actions\Character\ManageCharacterEquipmentAction::class)
+    );
 });
 
 $container->set(\App\Controllers\StoryController::class, function() use ($container) {
