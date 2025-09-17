@@ -2,3 +2,41 @@
 mcp
 .env
 backend/.env.preview
+frontend/.env.production
+
+# Dependencies
+node_modules/
+backend/vendor/
+frontend/dist/
+
+# Environment files
+*.env
+*.env.local
+*.env.production
+*.env.staging
+
+# Build outputs
+frontend/dist/
+backend/storage/logs/
+backend/storage/cache/
+
+# Development files
+backend/.phpunit.cache/
+backend/phpunit.xml
+backend/tests/
+backend/docs/
+backend/server.log
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment artifacts
+backend/DEPLOYMENT_SUMMARY.md
