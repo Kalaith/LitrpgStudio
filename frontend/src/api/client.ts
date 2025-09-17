@@ -116,7 +116,8 @@ class ApiClient {
   async healthCheck(): Promise<boolean> {
     try {
       const response = await this.get('/health');
-      return response.success;
+      // Backend returns {status: "healthy"} not {success: true}
+      return response.status === 'healthy' || response.success === true;
     } catch {
       return false;
     }

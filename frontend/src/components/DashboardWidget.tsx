@@ -16,6 +16,7 @@ import {
   BarChart3,
   Calendar
 } from 'lucide-react';
+import { useDashboardData } from '../hooks/useDashboardData';
 
 export type WidgetType =
   | 'word_count'
@@ -80,6 +81,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   const [showMenu, setShowMenu] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const { stats, isLoading, refresh } = useDashboardData();
   const Icon = getWidgetIcon(config.type);
 
   const handleToggleCollapse = () => {
@@ -102,20 +104,30 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Simulate refresh delay
-    setTimeout(() => setIsRefreshing(false), 1000);
+    await refresh();
+    setIsRefreshing(false);
   };
 
   const renderWidgetContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full text-gray-400">
+          <RefreshCw size={20} className="animate-spin" />
+        </div>
+      );
+    }
+
     switch (config.type) {
       case 'word_count':
         return (
           <div className="flex flex-col h-full justify-center">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-              12,847
+              {stats.totalWords.toLocaleString()}
             </div>
             <div className="text-sm text-gray-500">Total Words</div>
-            <div className="text-xs text-green-500 mt-1">+324 today</div>
+            <div className="text-xs text-green-500 mt-1">
+              +{stats.todayWords} today
+            </div>
           </div>
         );
 
@@ -123,10 +135,12 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         return (
           <div className="flex flex-col h-full justify-center">
             <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-              7
+              {stats.writingStreak}
             </div>
             <div className="text-sm text-gray-500">Day Streak</div>
-            <div className="text-xs text-gray-400 mt-1">Keep it up!</div>
+            <div className="text-xs text-gray-400 mt-1">
+              {stats.writingStreak > 0 ? 'Keep it up!' : 'Start writing today!'}
+            </div>
           </div>
         );
 
@@ -135,17 +149,21 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Characters</span>
-              <span className="text-lg font-bold">8</span>
+              <span className="text-lg font-bold">{stats.totalCharacters}</span>
             </div>
             {config.size !== 'small' && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span>Main Characters</span>
-                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">3</span>
+                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                    {stats.mainCharacters}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span>Supporting</span>
-                  <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">5</span>
+                  <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">
+                    {stats.supportingCharacters}
+                  </span>
                 </div>
               </div>
             )}
@@ -157,41 +175,54 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Upcoming Events</span>
-              <span className="text-lg font-bold">4</span>
+              <span className="text-lg font-bold">{stats.upcomingEvents}</span>
             </div>
             {config.size !== 'small' && (
               <div className="space-y-1">
-                <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                  • Chapter 12: Dragon encounter
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                  • Chapter 13: Guild meeting
-                </div>
+                {stats.upcomingEvents === 0 ? (
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    No upcoming events
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Timeline events available
+                  </div>
+                )}
               </div>
             )}
           </div>
         );
 
       case 'writing_goals':
+        const progressPercent = stats.dailyGoal > 0 ? Math.round((stats.todayWords / stats.dailyGoal) * 100) : 0;
         return (
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Daily Goal</span>
-              <span className="text-xs text-green-600">64%</span>
+              <span className="text-xs text-green-600">{progressPercent}%</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
               <motion.div
                 className="bg-green-500 h-2 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: '64%' }}
+                animate={{ width: `${Math.min(progressPercent, 100)}%` }}
                 transition={{ duration: 1, delay: 0.5 }}
               />
             </div>
-            <div className="text-xs text-gray-500">324 / 500 words</div>
+            <div className="text-xs text-gray-500">
+              {stats.todayWords} / {stats.dailyGoal} words
+            </div>
           </div>
         );
 
       case 'story_progress':
+        const chapterProgress = stats.storyProgress.chaptersTotal > 0
+          ? Math.round((stats.storyProgress.chaptersComplete / stats.storyProgress.chaptersTotal) * 100)
+          : 0;
+        const wordProgress = stats.storyProgress.wordsTarget > 0
+          ? Math.round((stats.storyProgress.wordsComplete / stats.storyProgress.wordsTarget) * 100)
+          : 0;
+
         return (
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
@@ -200,19 +231,19 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span>Chapters</span>
-                <span>12/20</span>
+                <span>{stats.storyProgress.chaptersComplete}/{stats.storyProgress.chaptersTotal}</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
-                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${chapterProgress}%` }}></div>
               </div>
               {config.size !== 'small' && (
                 <>
                   <div className="flex items-center justify-between text-xs">
                     <span>Target Words</span>
-                    <span>12,847/80,000</span>
+                    <span>{stats.storyProgress.wordsComplete.toLocaleString()}/{stats.storyProgress.wordsTarget.toLocaleString()}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
-                    <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: '16%' }}></div>
+                    <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${wordProgress}%` }}></div>
                   </div>
                 </>
               )}
@@ -227,18 +258,18 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
               <span className="text-sm font-medium">Recent Activity</span>
             </div>
             <div className="flex-1 space-y-2 text-xs text-gray-600 dark:text-gray-400">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Added character "Lyra"</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Updated Chapter 11</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>Created timeline event</span>
-              </div>
+              {stats.recentActivity.length === 0 ? (
+                <div className="text-center py-4">
+                  No recent activity
+                </div>
+              ) : (
+                stats.recentActivity.slice(0, 3).map((activity) => (
+                  <div key={activity.id} className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="truncate">{activity.description}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         );
@@ -247,22 +278,22 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         return (
           <div className="grid grid-cols-2 gap-4 h-full">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">8</div>
+              <div className="text-2xl font-bold text-blue-600">{stats.totalCharacters}</div>
               <div className="text-xs text-gray-500">Characters</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">12</div>
-              <div className="text-xs text-gray-500">Chapters</div>
+              <div className="text-2xl font-bold text-green-600">{stats.totalSeries}</div>
+              <div className="text-xs text-gray-500">Series</div>
             </div>
             {config.size !== 'small' && (
               <>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">24</div>
-                  <div className="text-xs text-gray-500">Events</div>
+                  <div className="text-2xl font-bold text-purple-600">{stats.totalBooks}</div>
+                  <div className="text-xs text-gray-500">Books</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">7</div>
-                  <div className="text-xs text-gray-500">Days</div>
+                  <div className="text-2xl font-bold text-orange-600">{stats.totalChapters}</div>
+                  <div className="text-xs text-gray-500">Chapters</div>
                 </div>
               </>
             )}

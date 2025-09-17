@@ -36,17 +36,21 @@ function App() {
   return (
     <>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-        {/* API Status Bar */}
-        <div className={`px-4 py-2 text-sm ${isOnline ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-          <span className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-            {isOnline ? 'Connected to backend' : 'Using offline mode'} - {baseUrl}
-          </span>
-        </div>
+        {/* API Status Bar - Only show when offline */}
+        {!isOnline && (
+          <div className="px-4 py-2 text-sm bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+              Using offline mode - Backend unavailable at {baseUrl}
+            </span>
+          </div>
+        )}
 
         <div className="flex h-screen overflow-hidden">
           <Sidebar activeView={activeView} onViewChange={setActiveView} />
-          <MainContent activeView={activeView} />
+          <div className="flex-1 flex flex-col min-w-0">
+            <MainContent activeView={activeView} />
+          </div>
         </div>
       </div>
       <ToastContainer />
