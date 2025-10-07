@@ -28,13 +28,6 @@ param(
 # Auto-detect project name from current directory
 $PROJECT_NAME = Split-Path -Leaf $PSScriptRoot
 
-# Automatically enable production mode when using FTP deployment
-# (unless explicitly building for file system with -FileSystemOnly)
-if ($FTP -and -not $FileSystemOnly) {
-    $Production = $true
-    Write-Host "FTP deployment detected - automatically enabling production mode" -ForegroundColor Cyan
-}
-
 # Load .env file for configuration
 $envFile = Join-Path $PSScriptRoot ".env"
 if (Test-Path $envFile) {
@@ -111,20 +104,17 @@ FTP_PASSIVE_MODE=true
 
 # Set destination paths based on Production flag and deployment mode
 $DEST_ROOT = if ($Production) { $PRODUCTION_ROOT } else { $PREVIEW_ROOT }
-Write-Host "Using destination root: $DEST_ROOT (Production: $Production)" -ForegroundColor Gray
 
 if ($deployToRoot) {
     # Root deployment (like frontpage)
     $DEST_DIR = $DEST_ROOT
     $FRONTEND_DEST = $DEST_DIR
     $BACKEND_DEST = "$DEST_DIR\backend"
-    Write-Host "Root deployment - BACKEND_DEST: $BACKEND_DEST" -ForegroundColor Yellow
 } else {
     # Subfolder deployment (like other projects)
     $DEST_DIR = Join-Path $DEST_ROOT $PROJECT_NAME
     $FRONTEND_DEST = $DEST_DIR
     $BACKEND_DEST = "$DEST_DIR\backend"
-    Write-Host "Subfolder deployment - BACKEND_DEST: $BACKEND_DEST" -ForegroundColor Yellow
 }
 
 $FRONTEND_SRC = "$PSScriptRoot\frontend"
@@ -149,22 +139,6 @@ function Write-Error($message) {
 
 function Write-Progress($message) {
     Write-Host $message -ForegroundColor Magenta
-}
-
-# Format file size for human-readable output
-function Format-FileSize($sizeInBytes) {
-    if ($sizeInBytes -eq 0) { return "0 B" }
-
-    $units = @("B", "KB", "MB", "GB", "TB")
-    $unitIndex = 0
-    $size = [double]$sizeInBytes
-
-    while ($size -ge 1024 -and $unitIndex -lt ($units.Length - 1)) {
-        $size = $size / 1024
-        $unitIndex++
-    }
-
-    return "{0:N2} {1}" -f $size, $units[$unitIndex]
 }
 
 # FTP Helper Functions
@@ -441,11 +415,11 @@ function Build-Frontend {
         }
     }
     
-    $environment = if ($Production) { "production" } else { "preview" }
+    $environment = if ($Production -or $FTP) { "production" } else { "preview" }
     Write-Info "Setting up $environment environment for frontend build..."
     $envSrc = ".env.$environment"
     $envTemp = ".env.local"
-
+    
     if (Test-Path $envSrc) {
         Copy-Item $envSrc $envTemp -Force
         Write-Info "Using $envSrc for frontend build"
@@ -506,8 +480,8 @@ function Publish-Frontend {
         return $false
     }
     
-    # File system deployment (always deploy to production_root when using FTP)
-    if (-not $FTP -or $FileSystemOnly -or ($FTP -and $Production)) {
+    # File system deployment (if not FTP-only)
+    if (-not $FTP -or $FileSystemOnly) {
         if ($Clean) {
             if ($deployToRoot) {
                 Write-Warning "Cleaning specific frontend files from root directory..."
@@ -554,18 +528,15 @@ function Publish-Frontend {
     if ($FTP) {
         if (Test-FTPConnection -config $FTPConfig) {
             $excludePatterns = @("*.map", "*.tmp")
-
+            
             # Set FTP destination path based on deployment mode
             $ftpDestPath = if ($deployToRoot) {
                 $FTPConfig.RemoteRoot
             } else {
                 "$($FTPConfig.RemoteRoot)/$PROJECT_NAME".Replace('//', '/')
             }
-
-            # Upload from the production directory, not the local dist directory
-            $ftpSourcePath = $FRONTEND_DEST
-            Write-Info "Uploading from production directory: $ftpSourcePath"
-            Upload-DirectoryToFTP -LocalPath $ftpSourcePath -RemotePath $ftpDestPath -Config $FTPConfig -ExcludePatterns $excludePatterns
+            
+            Upload-DirectoryToFTP -LocalPath $distPath -RemotePath $ftpDestPath -Config $FTPConfig -ExcludePatterns $excludePatterns
             Write-Success "Frontend published to FTP server"
         } else {
             Write-Error "FTP connection failed - skipping FTP upload"
@@ -576,61 +547,33 @@ function Publish-Frontend {
     return $success
 }
 
-# Install PHP backend dependencies with production optimization
+# Install PHP backend dependencies
 function Install-BackendDependencies {
     Write-Progress "Installing PHP backend dependencies..."
-
+    
     # Check if backend directory exists
     if (-not (Test-Path $BACKEND_SRC)) {
         Write-Warning "Backend directory not found: $BACKEND_SRC"
         Write-Info "Skipping backend dependency installation - this project appears to be frontend-only"
         return $true  # Return true to indicate success (no backend to install)
     }
-
+    
     Set-Location $BACKEND_SRC
-
+    
     try {
         composer --version | Out-Null
     } catch {
         Write-Error "Composer not found. Please install Composer first."
         return $false
     }
-
-    # Get vendor size before optimization (if exists)
-    $sizeBefore = 0
-    if (Test-Path "vendor") {
-        $sizeBefore = (Get-ChildItem -Path "vendor" -Recurse -File | Measure-Object -Property Length -Sum).Sum
-    }
-
-    # Install with production optimizations
-    Write-Info "Installing production dependencies with optimizations..."
-    composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --quiet
+    
+    composer install --no-dev --optimize-autoloader
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to install PHP dependencies"
         return $false
     }
-
-    # Run vendor cleanup if script exists
-    if (Test-Path "scripts\vendor-cleanup.php") {
-        Write-Info "Running vendor cleanup to remove unnecessary files..."
-        php scripts\vendor-cleanup.php
-        if ($LASTEXITCODE -eq 0) {
-            # Calculate space saved
-            $sizeAfter = (Get-ChildItem -Path "vendor" -Recurse -File | Measure-Object -Property Length -Sum).Sum
-            $spaceSaved = $sizeBefore - $sizeAfter
-            $percentSaved = if ($sizeBefore -gt 0) { [math]::Round(($spaceSaved / $sizeBefore) * 100, 1) } else { 0 }
-
-            Write-Success "Vendor cleanup completed"
-            Write-Info "  Space saved: $(Format-FileSize $spaceSaved) ($percentSaved% reduction)"
-            Write-Info "  Final vendor size: $(Format-FileSize $sizeAfter)"
-        } else {
-            Write-Warning "Vendor cleanup script failed, continuing with standard vendor directory"
-        }
-    } else {
-        Write-Info "Vendor cleanup script not found, skipping optimization"
-    }
-
-    Write-Success "PHP dependencies installed and optimized"
+    
+    Write-Success "PHP dependencies installed"
     return $true
 }
 
@@ -651,8 +594,8 @@ function Publish-Backend {
     
     $success = $true
     
-    # File system deployment (always deploy to production_root when using FTP)
-    if (-not $FTP -or $FileSystemOnly -or ($FTP -and $Production)) {
+    # File system deployment (if not FTP-only)
+    if (-not $FTP -or $FileSystemOnly) {
         if ($Clean) {
             Clean-Directory $BACKEND_DEST
         }
@@ -660,14 +603,15 @@ function Publish-Backend {
         $excludePatterns = @(
             "node_modules\*", ".git\*", ".env", ".env.local", ".env.example",
             "tests\*", "*.log", "*.tmp", "storage\logs\*", "storage\cache\*",
-            "var\cache\*", "composer.lock", "phpunit.xml", "*.ps1", "debug*.php",
-            "test*.php", "install.php", "scripts\vendor-cleanup.php", "scripts\production-deploy.sh"
+            "var\cache\*", "vendor\*\tests\*", "vendor\*\test\*", "vendor\*\.git\*",
+            "*.md", "composer.lock", "phpunit.xml", "*.ps1", "debug*.php",
+            "test*.php", "install.php", "*.md"
         )
         
         Copy-WithExclusions $BACKEND_SRC $BACKEND_DEST $excludePatterns
         
         # Handle environment configuration
-        $environment = if ($Production) { "production" } else { "preview" }
+        $environment = if ($Production -or $FTP) { "production" } else { "preview" }
         Write-Info "Setting up $environment environment configuration..."
         $envSrc = "$BACKEND_SRC\.env.$environment"
         $envDest = "$BACKEND_DEST\.env"
@@ -695,9 +639,9 @@ function Publish-Backend {
         if (Test-FTPConnection -config $FTPConfig) {
             $excludePatterns = @(
                 "node_modules/*", ".git/*", ".env*", "tests/*", "*.log", "*.tmp",
-                "storage/logs/*", "storage/cache/*", "var/cache/*", "composer.lock",
-                "phpunit.xml", "*.ps1", "debug*.php", "test*.php", "install.php",
-                "scripts/vendor-cleanup.php", "scripts/production-deploy.sh"
+                "storage/logs/*", "storage/cache/*", "var/cache/*", "vendor/*/tests/*",
+                "vendor/*/test/*", "vendor/*/.git/*", "*.md", "composer.lock",
+                "phpunit.xml", "*.ps1", "debug*.php", "test*.php", "install.php"
             )
             
             # Set FTP backend destination path based on deployment mode
@@ -707,26 +651,18 @@ function Publish-Backend {
                 "$($FTPConfig.RemoteRoot)/$PROJECT_NAME/backend".Replace('//', '/')
             }
             
-            # Upload from the production directory, not the local source directory
-            Write-Info "Debug: BACKEND_DEST = $BACKEND_DEST"
-            Write-Info "Debug: Production flag = $Production"
-            Write-Info "Debug: DEST_ROOT = $DEST_ROOT"
-
-            if (Test-Path $BACKEND_DEST) {
-                Write-Info "Uploading backend from production directory: $BACKEND_DEST"
-                Upload-DirectoryToFTP -LocalPath $BACKEND_DEST -RemotePath $backendRemotePath -Config $FTPConfig -ExcludePatterns $excludePatterns
-            } else {
-                Write-Error "Production backend directory not found: $BACKEND_DEST"
-                Write-Warning "Falling back to source directory: $BACKEND_SRC"
-                Upload-DirectoryToFTP -LocalPath $BACKEND_SRC -RemotePath $backendRemotePath -Config $FTPConfig -ExcludePatterns $excludePatterns
-            }
+            # Note: Vendor uploads are skipped by default unless -ForceVendor is used
+            # This is handled in the Upload-DirectoryToFTP function
             
-            # Upload environment file from production directory
-            $envDestFile = "$BACKEND_DEST\.env"
-            if (Test-Path $envDestFile) {
+            Upload-DirectoryToFTP -LocalPath $BACKEND_SRC -RemotePath $backendRemotePath -Config $FTPConfig -ExcludePatterns $excludePatterns
+            
+            # Upload environment file
+            $environment = if ($Production -or $FTP) { "production" } else { "preview" }
+            $envSrc = "$BACKEND_SRC\.env.$environment"
+            if (Test-Path $envSrc) {
                 $envRemotePath = "$backendRemotePath/.env"
-                Upload-FileToFTP -LocalPath $envDestFile -RemotePath $envRemotePath -Config $FTPConfig -CreateDirectories
-                Write-Success "Uploaded environment configuration from production directory"
+                Upload-FileToFTP -LocalPath $envSrc -RemotePath $envRemotePath -Config $FTPConfig -CreateDirectories
+                Write-Success "Uploaded environment configuration"
             }
             
             Write-Success "PHP backend published to FTP server"
