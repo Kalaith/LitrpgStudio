@@ -160,8 +160,8 @@ export interface CharacterProgressionEvent {
   characterId: string;
   type: 'level_up' | 'skill_gain' | 'item_acquired' | 'stat_change';
   details: string;
-  before?: any;
-  after?: any;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
 }
 
 export interface StoryTemplate {

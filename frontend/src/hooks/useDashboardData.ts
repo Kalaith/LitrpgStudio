@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
+import { useErrorHandler } from './useErrorHandler';
+
+interface Character {
+  id: string;
+  character_type?: 'main' | 'supporting';
+  is_main?: boolean;
+}
+
+interface Series {
+  id: string;
+  name: string;
+}
 
 export interface DashboardStats {
   totalCharacters: number;
@@ -54,6 +66,7 @@ export function useDashboardData() {
   const [stats, setStats] = useState<DashboardStats>(defaultStats);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { handleError } = useErrorHandler();
 
   const fetchDashboardStats = async () => {
     try {
@@ -65,8 +78,8 @@ export function useDashboardData() {
         seriesResponse,
         charactersResponse
       ] = await Promise.all([
-        apiClient.get('/series').catch(() => ({ success: false, data: [] })),
-        apiClient.get('/characters').catch(() => ({ success: false, data: [] }))
+        apiClient.get<Series[]>('/series').catch(() => ({ success: false, data: [] })),
+        apiClient.get<Character[]>('/characters').catch(() => ({ success: false, data: [] }))
       ]);
 
       const series = seriesResponse.success ? (seriesResponse.data || []) : [];
@@ -76,8 +89,8 @@ export function useDashboardData() {
       const totalSeries = series.length;
       const totalCharacters = characters.length;
 
-      // Count main vs supporting characters (assuming a property exists)
-      const mainCharacters = characters.filter((char: any) => char.character_type === 'main' || char.is_main).length;
+      // Count main vs supporting characters
+      const mainCharacters = characters.filter((char) => char.character_type === 'main' || char.is_main).length;
       const supportingCharacters = totalCharacters - mainCharacters;
 
       // For now, set other values to 0 since the database is empty
@@ -106,7 +119,7 @@ export function useDashboardData() {
 
       setStats(calculatedStats);
     } catch (err) {
-      console.error('Failed to fetch dashboard data:', err);
+      handleError(err, 'Failed to load dashboard data');
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       setStats(defaultStats);
     } finally {

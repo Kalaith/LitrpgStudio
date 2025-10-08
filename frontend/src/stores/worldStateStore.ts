@@ -41,7 +41,7 @@ interface WorldStateStoreActions {
   updateLocationState: (worldStateId: string, locationId: string, updates: Partial<LocationState>) => void;
   addLocationOccupant: (worldStateId: string, locationId: string, characterId: string) => void;
   removeLocationOccupant: (worldStateId: string, locationId: string, characterId: string) => void;
-  setLocationProperty: (worldStateId: string, locationId: string, property: string, value: any) => void;
+  setLocationProperty: (worldStateId: string, locationId: string, property: string, value: unknown) => void;
 
   // Item State Management
   updateItemState: (worldStateId: string, itemId: string, updates: Partial<ItemState>) => void;
