@@ -1,21 +1,28 @@
 // API Client for LitRPG Studio Backend
 
 // Type definitions - using class instead of interface to survive compilation
-export class ApiResponse<T = any> {
+export class ApiResponse<T = unknown> {
   success: boolean = false;
   data?: T;
   error?: string;
   message?: string;
 }
 
+export interface ErrorResponse {
+  error?: string;
+  message?: string;
+  success?: boolean;
+  [key: string]: unknown;
+}
+
 export class ApiError extends Error {
   public status: number;
-  public response?: any;
+  public response?: ErrorResponse;
 
   constructor(
     message: string,
     status: number = 500,
-    response?: any
+    response?: ErrorResponse
   ) {
     super(message);
     this.name = 'ApiError';
@@ -38,7 +45,7 @@ class ApiClient {
     return `${this.baseUrl}/api/${this.version}/${cleanEndpoint}`;
   }
 
-  private async request<T = any>(
+  private async request<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
@@ -90,25 +97,25 @@ class ApiClient {
   }
 
   // HTTP Methods
-  async get<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  async post<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { method: 'DELETE' });
   }
 

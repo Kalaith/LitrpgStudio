@@ -1,4 +1,38 @@
-// Application Constants
+/**
+ * Application Constants
+ *
+ * Centralized constants for LitRPG Studio.
+ * Organized by category for easy maintenance and consistency.
+ */
+
+// =============================================================================
+// WRITING DEFAULTS
+// =============================================================================
+
+export const WRITING_DEFAULTS = {
+  /** Default daily word count goal */
+  DAILY_WORD_GOAL: 500,
+
+  /** Default target word count for a book */
+  DEFAULT_BOOK_TARGET: 80000,
+
+  /** Target words per minute for writing sessions */
+  WORDS_PER_MINUTE_TARGET: 30,
+
+  /** Default word target for a writing session */
+  SESSION_WORD_TARGET: 500,
+
+  /** Auto-save interval in milliseconds (30 seconds) */
+  AUTO_SAVE_INTERVAL: 30000,
+
+  /** Default chapter target words */
+  DEFAULT_CHAPTER_TARGET: 3000,
+} as const;
+
+// =============================================================================
+// APPLICATION CONFIGURATION
+// =============================================================================
+
 export const APP_CONFIG = {
   // Timer defaults
   DEFAULT_WORK_DURATION: 25,
@@ -48,6 +82,161 @@ export const APP_CONFIG = {
   MAX_INPUT_LENGTH: 1000,
   MIN_LEVEL: 1,
   MAX_LEVEL: 100
+} as const;
+
+// =============================================================================
+// DESIGN TOKENS
+// =============================================================================
+
+export const DESIGN_TOKENS = {
+  spacing: {
+    /** Spacing for small widgets/cards: p-2 sm:p-3 */
+    widget: 'p-2 sm:p-3',
+
+    /** Spacing for medium cards: p-4 sm:p-6 */
+    card: 'p-4 sm:p-6',
+
+    /** Spacing for large containers: p-6 sm:p-8 */
+    container: 'p-6 sm:p-8',
+
+    /** Gap between grid items: gap-4 */
+    gridGap: 'gap-4',
+
+    /** Gap between flex items: gap-2 */
+    flexGap: 'gap-2',
+  },
+
+  sizes: {
+    icon: {
+      sm: 16,
+      md: 20,
+      lg: 24,
+      xl: 32,
+    },
+
+    button: {
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-4 py-2 text-base',
+      lg: 'px-6 py-3 text-lg',
+    },
+
+    input: {
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-4 py-2 text-base',
+      lg: 'px-5 py-3 text-lg',
+    },
+  },
+
+  radius: {
+    sm: 'rounded',
+    md: 'rounded-lg',
+    lg: 'rounded-xl',
+    full: 'rounded-full',
+  },
+
+  shadow: {
+    sm: 'shadow-sm',
+    md: 'shadow-md',
+    lg: 'shadow-lg',
+    xl: 'shadow-xl',
+  },
+
+  transition: {
+    fast: 'transition-all duration-150',
+    normal: 'transition-all duration-300',
+    slow: 'transition-all duration-500',
+  },
+} as const;
+
+// =============================================================================
+// ANALYTICS DEFAULTS
+// =============================================================================
+
+export const ANALYTICS_DEFAULTS = {
+  /** Number of days to calculate streak */
+  STREAK_LOOKBACK_DAYS: 2,
+
+  /** Number of recent sessions to analyze */
+  RECENT_SESSIONS_COUNT: 10,
+
+  /** Number of sessions to display in charts */
+  CHART_SESSIONS_COUNT: 30,
+
+  /** Days to include in recent analytics */
+  RECENT_ANALYTICS_DAYS: 30,
+
+  /** Minimum WPM considered productive */
+  MIN_PRODUCTIVE_WPM: 20,
+
+  /** Good WPM target */
+  GOOD_WPM_TARGET: 40,
+
+  /** Excellent WPM target */
+  EXCELLENT_WPM_TARGET: 60,
+} as const;
+
+// =============================================================================
+// VALIDATION RULES
+// =============================================================================
+
+export const VALIDATION = {
+  title: {
+    minLength: 1,
+    maxLength: 200,
+  },
+
+  description: {
+    minLength: 0,
+    maxLength: 2000,
+  },
+
+  characterName: {
+    minLength: 1,
+    maxLength: 100,
+  },
+
+  seriesName: {
+    minLength: 1,
+    maxLength: 150,
+  },
+
+  storyTitle: {
+    minLength: 1,
+    maxLength: 200,
+  },
+
+  chapterTitle: {
+    minLength: 1,
+    maxLength: 150,
+  },
+} as const;
+
+// =============================================================================
+// STATUS VALUES
+// =============================================================================
+
+export const STATUS = {
+  story: {
+    DRAFT: 'draft',
+    IN_PROGRESS: 'in_progress',
+    COMPLETED: 'completed',
+    PUBLISHED: 'published',
+    ARCHIVED: 'archived',
+  },
+
+  book: {
+    PLANNING: 'planning',
+    DRAFTING: 'drafting',
+    REVISION: 'revision',
+    EDITING: 'editing',
+    PUBLISHED: 'published',
+  },
+
+  character: {
+    ACTIVE: 'active',
+    INACTIVE: 'inactive',
+    DECEASED: 'deceased',
+  },
 } as const;
 
 export const RARITY_COLORS = {
