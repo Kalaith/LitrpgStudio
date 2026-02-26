@@ -12,7 +12,7 @@ export function useApiStatus() {
       const isHealthy = await apiClient.healthCheck();
       setIsOnline(isHealthy);
       setLastCheck(new Date());
-    } catch (error) {
+    } catch {
       setIsOnline(false);
       setLastCheck(new Date());
     } finally {

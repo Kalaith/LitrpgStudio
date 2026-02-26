@@ -1,7 +1,3 @@
-import type { BaseEntity, EntityRelationship } from '../types/entityRegistry';
-import type { TimelineEvent } from '../types/unifiedTimeline';
-import type { Story } from '../types/story';
-
 export interface CollaborationUser {
   id: string;
   name: string;
@@ -38,8 +34,8 @@ export interface CollaborationChange {
   type: 'create' | 'update' | 'delete' | 'comment';
   target: 'story' | 'character' | 'timeline' | 'entity' | 'relationship';
   targetId: string;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: unknown;
+  newValue?: unknown;
   description: string;
   conflictsWith?: string[];
   isResolved: boolean;
@@ -217,8 +213,8 @@ export class CollaborationService {
     type: CollaborationChange['type'],
     target: CollaborationChange['target'],
     targetId: string,
-    oldValue: any,
-    newValue: any,
+    oldValue: unknown,
+    newValue: unknown,
     description: string
   ): Promise<CollaborationChange> {
     if (!this.currentUser || !this.currentSession) {

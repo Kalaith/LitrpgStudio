@@ -29,6 +29,8 @@ interface PerformanceMonitorProps {
   className?: string;
 }
 
+type PerformanceTab = 'metrics' | 'strategies' | 'config';
+
 export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   isVisible,
   onToggle,
@@ -39,7 +41,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   const [lazyLoadConfig, setLazyLoadConfig] = useState<LazyLoadConfig | null>(null);
   const [cacheStrategy, setCacheStrategy] = useState<CacheStrategy | null>(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'metrics' | 'strategies' | 'config'>('metrics');
+  const [activeTab, setActiveTab] = useState<PerformanceTab>('metrics');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Update data from performance optimizer
@@ -164,12 +166,12 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
           { key: 'metrics', label: 'Metrics', icon: BarChart3 },
           { key: 'strategies', label: 'Optimization', icon: Zap },
           { key: 'config', label: 'Config', icon: Settings }
-        ].map(tab => {
+        ].map((tab: { key: PerformanceTab; label: string; icon: React.ComponentType<{ size?: number }> }) => {
           const TabIcon = tab.icon;
           return (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
+              onClick={() => setActiveTab(tab.key)}
               className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-xs font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'text-green-600 bg-green-50 border-b-2 border-green-600 dark:text-green-400 dark:bg-green-900/30'
@@ -437,7 +439,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                 <select
                   value={cacheStrategy.strategy}
                   onChange={(e) => {
-                    const newStrategy = { ...cacheStrategy, strategy: e.target.value as any };
+                    const newStrategy = { ...cacheStrategy, strategy: e.target.value as CacheStrategy['strategy'] };
                     setCacheStrategy(newStrategy);
                     performanceOptimizer.updateCacheStrategy(newStrategy);
                   }}

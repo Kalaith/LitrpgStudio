@@ -20,7 +20,6 @@ import type {
   TimeOfDayStats,
 } from '../types/analytics';
 import { useStoryStore } from './storyStore';
-import { analyticsApi } from '../api/analytics';
 
 const generateId = () => crypto.randomUUID();
 
@@ -114,15 +113,15 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       },
 
       pauseSession: () => {
-        set(state => ({
+        set({
           isTrackingSession: false,
-        }));
+        });
       },
 
       resumeSession: () => {
-        set(state => ({
+        set({
           isTrackingSession: true,
-        }));
+        });
       },
 
       // Goal Management
@@ -194,12 +193,6 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       },
 
       calculateWeeklyStats: (weekStart) => {
-        const { sessions } = get();
-        const weekEnd = format(subDays(parseISO(weekStart), -6), 'yyyy-MM-dd');
-        const weekSessions = sessions.filter(
-          s => s.date >= weekStart && s.date <= weekEnd && !s.isActive
-        );
-
         const dailyStats: DailyWritingStats[] = [];
         for (let i = 0; i < 7; i++) {
           const date = format(subDays(parseISO(weekStart), -i), 'yyyy-MM-dd');
@@ -225,11 +218,6 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
 
       calculateMonthlyStats: (month) => {
         const monthStart = format(startOfMonth(parseISO(month + '-01')), 'yyyy-MM-dd');
-        const { sessions } = get();
-        const monthSessions = sessions.filter(
-          s => s.date.startsWith(month) && !s.isActive
-        );
-
         const weeklyStats: WeeklyWritingStats[] = [];
         const currentWeek = startOfWeek(parseISO(monthStart), { weekStartsOn: 1 });
         const monthEnd = parseISO(month + '-01');
@@ -354,7 +342,6 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         });
 
         // Goal achievement rate
-        const activeGoals = goals.filter(g => g.isActive);
         const completedGoals = goals.filter(g => g.completedAt);
         const achievementRate = goals.length > 0 ? (completedGoals.length / goals.length) * 100 : 0;
 

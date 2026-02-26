@@ -372,7 +372,7 @@ export default function InteractiveTimeline({
                     value={selectedEvent.importance}
                     onChange={(e) => {
                       if (onEventUpdate) {
-                        onEventUpdate(selectedEvent.id, { importance: e.target.value as any });
+                        onEventUpdate(selectedEvent.id, { importance: e.target.value as StoryEvent['importance'] });
                       }
                     }}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"

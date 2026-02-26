@@ -13,8 +13,6 @@ import { adapterRegistry } from '../services/entityAdapters';
 export const useUnifiedSystem = () => {
   const {
     addEntity,
-    updateEntity,
-    removeEntity,
     getEntity,
     addRelationship,
     searchEntities
@@ -22,7 +20,6 @@ export const useUnifiedSystem = () => {
 
   const {
     addEvent,
-    updateEvent,
     getEventsByEntity,
     createView,
     setActiveView

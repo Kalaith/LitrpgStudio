@@ -298,7 +298,7 @@ describe('withRetry utility', () => {
       .mockResolvedValueOnce('success');
 
     const delays: number[] = [];
-    const onRetry = vi.fn((_, attempt) => {
+    const onRetry = vi.fn((_, _attempt) => {
       delays.push(Date.now());
     });
 

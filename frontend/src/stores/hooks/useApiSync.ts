@@ -19,7 +19,7 @@ export function useApiSync(seriesId: string | null) {
     lastSync: null
   });
 
-  const syncTimeline = useCallback(async (localTimelineEvents: any[]) => {
+  const syncTimeline = useCallback(async (localTimelineEvents: unknown[]) => {
     if (!seriesId) return;
 
     try {

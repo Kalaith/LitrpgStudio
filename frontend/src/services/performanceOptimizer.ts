@@ -43,7 +43,7 @@ export class PerformanceOptimizer {
   private cacheStrategy: CacheStrategy;
   private entityCache: Map<string, { data: BaseEntity; timestamp: number; accessCount: number }> = new Map();
   private relationshipCache: Map<string, { data: EntityRelationship[]; timestamp: number; accessCount: number }> = new Map();
-  private searchCache: Map<string, { data: any; timestamp: number; accessCount: number }> = new Map();
+  private searchCache: Map<string, { data: unknown; timestamp: number; accessCount: number }> = new Map();
   private isOptimizing = false;
   private optimizationInterval: number | null = null;
 
@@ -277,7 +277,7 @@ export class PerformanceOptimizer {
     });
 
     // Store indexes (in a real implementation, these would be persisted)
-    (window as any).__entityIndexes = { nameIndex, typeIndex, tagIndex };
+    (window as Window & { __entityIndexes?: unknown }).__entityIndexes = { nameIndex, typeIndex, tagIndex };
   }
 
   private async implementRelationshipCaching(): Promise<void> {
@@ -321,8 +321,9 @@ export class PerformanceOptimizer {
     }
 
     // Force garbage collection if available
-    if ((window as any).gc) {
-      (window as any).gc();
+    const globalWindow = window as Window & { gc?: () => void };
+    if (globalWindow.gc) {
+      globalWindow.gc();
     }
   }
 
@@ -457,7 +458,7 @@ export class PerformanceOptimizer {
     return [];
   }
 
-  private async performSearch(_query: string): Promise<any[]> {
+  private async performSearch(_query: string): Promise<unknown[]> {
     // Mock implementation
     return [];
   }
@@ -465,7 +466,8 @@ export class PerformanceOptimizer {
   // Lazy Loading Utilities
   async loadEntitiesPage(page: number, pageSize?: number): Promise<BaseEntity[]> {
     const size = pageSize || this.lazyLoadConfig.entitiesPerPage;
-    const _offset = page * size;
+    void page;
+    void size;
 
     // Check cache first
     const cacheKey = `entities-${page}-${size}`;
@@ -473,7 +475,7 @@ export class PerformanceOptimizer {
 
     if (cached && Date.now() - cached.timestamp < this.cacheStrategy.ttl) {
       cached.accessCount++;
-      return cached.data;
+      return cached.data as BaseEntity[];
     }
 
     // Load from store (mock)
@@ -491,14 +493,15 @@ export class PerformanceOptimizer {
 
   async loadEventsPage(page: number, pageSize?: number): Promise<TimelineEvent[]> {
     const size = pageSize || this.lazyLoadConfig.eventsPerPage;
-    const _offset = page * size;
+    void page;
+    void size;
 
     const cacheKey = `events-${page}-${size}`;
     const cached = this.searchCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < this.cacheStrategy.ttl) {
       cached.accessCount++;
-      return cached.data;
+      return cached.data as TimelineEvent[];
     }
 
     const events: TimelineEvent[] = []; // Would load actual data

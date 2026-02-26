@@ -15,8 +15,10 @@ interface LootTableDesignerProps {
   onSave?: (table: LootTable) => void;
 }
 
+type LootDesignerTab = 'design' | 'test' | 'balance' | 'export';
+
 export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) => {
-  const [activeTab, setActiveTab] = useState<'design' | 'test' | 'balance' | 'export'>('design');
+  const [activeTab, setActiveTab] = useState<LootDesignerTab>('design');
   const [lootTable, setLootTable] = useState<Partial<LootTable>>({
     name: 'New Loot Table',
     description: '',
@@ -189,10 +191,10 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
             { id: 'test', label: 'Test & Roll', icon: '🎲' },
             { id: 'balance', label: 'Balance Analysis', icon: '⚖️' },
             { id: 'export', label: 'Export', icon: '📤' }
-          ].map(tab => (
+          ].map((tab: { id: LootDesignerTab; label: string; icon: string }) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'bg-blue-500 text-white'
@@ -432,7 +434,7 @@ const BalanceTab: React.FC<{
 // Export Tab Component
 const ExportTab: React.FC<{
   lootTable: Partial<LootTable>;
-}> = ({ lootTable }) => (
+}> = ({ lootTable: _lootTable }) => (
   <div className="space-y-6">
     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Export Options</h3>
 
@@ -693,7 +695,7 @@ const LootEntryModal: React.FC<{
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as LootEntry['type'] })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="item">Item</option>
@@ -803,14 +805,14 @@ const ProbabilityChart: React.FC<{ entries: LootEntry[] }> = () => (
   </div>
 );
 
-const BalanceRecommendations: React.FC<{ lootTable: Partial<LootTable>; testResults: TestResult[] }> = () => (
+const BalanceRecommendations: React.FC<{ lootTable: Partial<LootTable>; testResults: TestResult[] }> = ({ lootTable: _lootTable, testResults: _testResults }) => (
   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
     <h4 className="font-medium text-gray-900 dark:text-white mb-2">Balance Recommendations</h4>
     <div className="text-gray-500 dark:text-gray-400">Analysis and recommendations would go here...</div>
   </div>
 );
 
-const IndustryComparison: React.FC<{ lootTable: Partial<LootTable> }> = () => (
+const IndustryComparison: React.FC<{ lootTable: Partial<LootTable> }> = ({ lootTable: _lootTable }) => (
   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
     <h4 className="font-medium text-gray-900 dark:text-white mb-2">Industry Standards</h4>
     <div className="text-gray-500 dark:text-gray-400">Comparison data would go here...</div>

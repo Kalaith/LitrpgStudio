@@ -44,6 +44,8 @@ interface Milestone {
   };
 }
 
+type ProgressionView = 'simulator' | 'settings' | 'milestones';
+
 export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
   character,
   storyLength = 50
@@ -56,7 +58,7 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
     customMilestones: []
   });
 
-  const [activeView, setActiveView] = useState<'simulator' | 'settings' | 'milestones'>('simulator');
+  const [activeView, setActiveView] = useState<ProgressionView>('simulator');
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
 
@@ -105,10 +107,10 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
         </div>
 
         <div className="flex gap-2">
-          {['simulator', 'settings', 'milestones'].map(view => (
+          {(['simulator', 'settings', 'milestones'] as ProgressionView[]).map(view => (
             <button
               key={view}
-              onClick={() => setActiveView(view as any)}
+              onClick={() => setActiveView(view)}
               className={`px-4 py-2 rounded-lg capitalize transition-colors ${
                 activeView === view
                   ? 'bg-blue-500 text-white'

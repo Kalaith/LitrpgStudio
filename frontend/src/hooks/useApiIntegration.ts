@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
 import { useSeriesStore } from '../stores/seriesStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useStoryStore } from '../stores/storyStore';
 import { seriesApi } from '../api/series';
 import { charactersApi } from '../api/characters';
 import { storiesApi } from '../api/stories';
+import type { Series } from '../types/series';
+import type { Character } from '../types/character';
 
 // Hook to manage API integration and sync with stores
 export function useApiIntegration() {
@@ -48,7 +49,7 @@ export function useApiIntegration() {
   };
 
   // Sync series to backend
-  const syncSeriesToBackend = async (series: any) => {
+  const syncSeriesToBackend = async (series: Partial<Series> & { id?: string }) => {
     try {
       if (series.id && !series.id.includes('local-')) {
         // Update existing
@@ -67,7 +68,7 @@ export function useApiIntegration() {
   };
 
   // Sync character to backend
-  const syncCharacterToBackend = async (character: any) => {
+  const syncCharacterToBackend = async (character: Partial<Character> & { id?: string }) => {
     try {
       if (character.id && !character.id.includes('local-')) {
         // Update existing
@@ -96,9 +97,8 @@ export function useApiIntegration() {
 // Hook specifically for series operations with API integration
 export function useSeriesWithApi() {
   const store = useSeriesStore();
-  const { syncSeriesToBackend } = useApiIntegration();
 
-  const createSeries = async (seriesData: any) => {
+  const createSeries = async (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       // Try to create on backend first
       const response = await seriesApi.create(seriesData);
@@ -115,7 +115,7 @@ export function useSeriesWithApi() {
     return store.createSeries(seriesData);
   };
 
-  const updateSeries = async (seriesId: string, updates: any) => {
+  const updateSeries = async (seriesId: string, updates: Partial<Series>) => {
     try {
       const response = await seriesApi.update(seriesId, updates);
       if (response.success && response.data) {
@@ -153,7 +153,7 @@ export function useSeriesWithApi() {
 export function useCharactersWithApi() {
   const store = useCharacterStore();
 
-  const createCharacter = async (characterData: any) => {
+  const createCharacter = async (characterData: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       const response = await charactersApi.create(characterData);
       if (response.success && response.data) {
@@ -168,7 +168,7 @@ export function useCharactersWithApi() {
     store.createCharacter(characterData);
   };
 
-  const updateCharacter = async (characterId: string, updates: any) => {
+  const updateCharacter = async (characterId: string, updates: Partial<Character>) => {
     try {
       const response = await charactersApi.update(characterId, updates);
       if (response.success && response.data) {

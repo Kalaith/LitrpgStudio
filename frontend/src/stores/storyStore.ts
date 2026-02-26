@@ -66,8 +66,6 @@ interface StoryActions {
 
 type StoryStore = StoryState & StoryActions;
 
-const generateId = () => crypto.randomUUID();
-
 export const useStoryStore = create<StoryStore>()(
   persist(
     (set, get) => ({

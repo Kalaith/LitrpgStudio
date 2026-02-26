@@ -16,7 +16,6 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
     updateGoal,
     deleteGoal,
     markGoalComplete,
-    getTotalWordsWritten,
   } = useAnalyticsStore();
 
   const { stories } = useStoryStore();
@@ -53,7 +52,6 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
   const calculateGoalProgress = (goal: WritingGoal) => {
     // This is a simplified calculation. In a real implementation,
     // you'd want to track progress more precisely based on the goal type and timeframe.
-    const totalWords = getTotalWordsWritten();
     return Math.min((goal.current / goal.target) * 100, 100);
   };
 
@@ -172,7 +170,7 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                 <select
                   value={newGoal.type}
                   onChange={(e) => {
-                    const type = e.target.value as any;
+                    const type = e.target.value as WritingGoal['type'];
                     setNewGoal({
                       ...newGoal,
                       type,

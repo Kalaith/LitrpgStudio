@@ -59,12 +59,12 @@ export const chaptersApi = {
 };
 
 export const writingSessionsApi = {
-  start: (storyId: string, chapterId?: string, wordTarget?: number): Promise<ApiResponse<any>> =>
+  start: (storyId: string, chapterId?: string, wordTarget?: number): Promise<ApiResponse<Record<string, unknown>>> =>
     apiClient.post('/writing-sessions/start', { story_id: storyId, chapter_id: chapterId, word_target: wordTarget }),
 
-  end: (): Promise<ApiResponse<any>> =>
+  end: (): Promise<ApiResponse<Record<string, unknown>>> =>
     apiClient.post('/writing-sessions/end'),
 
-  updateProgress: (wordsWritten: number): Promise<ApiResponse<any>> =>
+  updateProgress: (wordsWritten: number): Promise<ApiResponse<Record<string, unknown>>> =>
     apiClient.put('/writing-sessions/progress', { words_written: wordsWritten }),
 };

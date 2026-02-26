@@ -13,7 +13,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
+import { format, subDays, startOfWeek, eachDayOfInterval } from 'date-fns';
 import { useAnalyticsStore } from '../stores/analyticsStore';
 import { WritingSession } from './WritingSession';
 import { WritingGoals } from './WritingGoals';
@@ -40,7 +40,6 @@ type TimeRange = 'week' | 'month' | 'quarter' | 'year';
 
 export const WritingAnalytics: React.FC<WritingAnalyticsProps> = ({ className = '' }) => {
   const {
-    sessions,
     streak,
     insights,
     generateInsights,
@@ -106,7 +105,7 @@ export const WritingAnalytics: React.FC<WritingAnalyticsProps> = ({ className = 
         },
       ],
     };
-  }, [timeRange, sessions, calculateDailyStats]);
+  }, [timeRange, calculateDailyStats]);
 
   // Writing pace chart data
   const paceData = useMemo(() => {
@@ -179,7 +178,7 @@ export const WritingAnalytics: React.FC<WritingAnalyticsProps> = ({ className = 
 
   const totalWords = getTotalWordsWritten();
   const avgSessionDuration = getAverageSessionDuration();
-  const paceData_obj = getWritingPaceData();
+  const paceDataObj = getWritingPaceData();
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -201,7 +200,7 @@ export const WritingAnalytics: React.FC<WritingAnalyticsProps> = ({ className = 
 
         <div className="bg-purple-50 rounded-lg p-4 text-center">
           <div className="text-3xl font-bold text-purple-600">
-            {paceData_obj.recentWPM}
+            {paceDataObj.recentWPM}
           </div>
           <div className="text-sm text-gray-600">Avg WPM</div>
         </div>

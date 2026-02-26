@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { SystemBible, GameSystemDefinition, CoreSystem, ExportFormat } from '../types/systemBible';
+import type {
+  SystemBible,
+  GameSystemDefinition,
+  CoreSystem,
+  ExportFormat,
+  AttributeDefinition,
+  CombatSystem,
+  MagicSystem,
+  SkillSystem,
+  ItemSystem,
+  CharacterSystem,
+  ProgressionSystem,
+  EconomySystem,
+  SocialSystem
+} from '../types/systemBible';
 
 interface SystemBibleGeneratorProps {
   onGenerate?: (systemBible: SystemBible) => void;
@@ -270,7 +284,7 @@ const CoreSystemStep: React.FC<{
           </label>
           <select
             value={systemBible.gameSystem?.core?.complexity || ''}
-            onChange={(e) => updateCoreSystem({ complexity: e.target.value as any })}
+            onChange={(e) => updateCoreSystem({ complexity: e.target.value as CoreSystem['complexity'] })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">Select Complexity</option>
@@ -304,7 +318,7 @@ const CoreSystemStep: React.FC<{
             <select
               value={systemBible.gameSystem?.core?.dice?.type || ''}
               onChange={(e) => updateCoreSystem({
-                dice: { ...systemBible.gameSystem?.core?.dice, type: e.target.value as any }
+                dice: { ...systemBible.gameSystem?.core?.dice, type: e.target.value as CoreSystem['dice']['type'] }
               })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
@@ -346,7 +360,7 @@ const CoreSystemStep: React.FC<{
 const CombatSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
-}> = ({ systemBible, onChange }) => (
+}> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Combat System</h3>
 
@@ -391,7 +405,7 @@ const CombatSystemStep: React.FC<{
 const MagicSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
-}> = ({ systemBible, onChange }) => (
+}> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Magic System</h3>
 
@@ -437,7 +451,7 @@ const MagicSystemStep: React.FC<{
 const SkillSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
-}> = ({ systemBible, onChange }) => (
+}> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Skill System</h3>
 
@@ -465,7 +479,7 @@ const SkillSystemStep: React.FC<{
 const ItemSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
-}> = ({ systemBible, onChange }) => (
+}> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Item System</h3>
 
@@ -479,7 +493,7 @@ const ItemSystemStep: React.FC<{
 const CharacterSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
-}> = ({ systemBible, onChange }) => (
+}> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Character System</h3>
 
@@ -541,15 +555,24 @@ const GenerateStep: React.FC<{
 
 // Helper Components
 const AttributeBuilder: React.FC<{
-  attributes: any[];
-  onChange: (attributes: any[]) => void;
+  attributes: AttributeDefinition[];
+  onChange: (attributes: AttributeDefinition[]) => void;
 }> = ({ attributes, onChange }) => {
-  const [newAttribute, setNewAttribute] = useState({ name: '', description: '' });
+  const [newAttribute, setNewAttribute] = useState({ name: '', abbreviation: '', description: '' });
 
   const addAttribute = () => {
     if (newAttribute.name) {
-      onChange([...attributes, { id: crypto.randomUUID(), ...newAttribute }]);
-      setNewAttribute({ name: '', description: '' });
+      const attribute: AttributeDefinition = {
+        id: crypto.randomUUID(),
+        name: newAttribute.name,
+        abbreviation: newAttribute.abbreviation || newAttribute.name.slice(0, 3).toUpperCase(),
+        description: newAttribute.description,
+        range: { min: 1, max: 100 },
+        derivedStats: [],
+        useIn: [],
+      };
+      onChange([...attributes, attribute]);
+      setNewAttribute({ name: '', abbreviation: '', description: '' });
     }
   };
 
@@ -615,6 +638,15 @@ const CharacterRaceBuilder: React.FC = () => <div className="text-gray-500">Char
 
 // Helper functions for generating complete system data
 const generateCompleteGameSystem = (partial: Partial<GameSystemDefinition>): GameSystemDefinition => {
+  const emptyCombat = {} as unknown as CombatSystem;
+  const emptyMagic = {} as unknown as MagicSystem;
+  const emptySkills = {} as unknown as SkillSystem;
+  const emptyItems = {} as unknown as ItemSystem;
+  const emptyCharacter = {} as unknown as CharacterSystem;
+  const emptyProgression = {} as unknown as ProgressionSystem;
+  const emptyEconomy = {} as unknown as EconomySystem;
+  const emptySocial = {} as unknown as SocialSystem;
+
   // This would generate a complete game system based on the partial data provided
   return {
     core: partial.core || {
@@ -626,14 +658,14 @@ const generateCompleteGameSystem = (partial: Partial<GameSystemDefinition>): Gam
       attributes: [],
       coreLoop: 'Standard gameplay loop'
     },
-    combat: {} as any,
-    magic: {} as any,
-    skills: {} as any,
-    items: {} as any,
-    character: {} as any,
-    progression: {} as any,
-    economy: {} as any,
-    social: {} as any
+    combat: emptyCombat,
+    magic: emptyMagic,
+    skills: emptySkills,
+    items: emptyItems,
+    character: emptyCharacter,
+    progression: emptyProgression,
+    economy: emptyEconomy,
+    social: emptySocial
   };
 };
 

@@ -337,7 +337,7 @@ const SkillsView: React.FC = () => {
             {['list', 'tree'].map((mode) => (
               <button
                 key={mode}
-                onClick={() => setViewMode(mode as any)}
+                onClick={() => setViewMode(mode as 'list' | 'tree')}
                 className={`
                   px-3 py-1 text-sm capitalize
                   ${viewMode === mode

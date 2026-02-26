@@ -1014,7 +1014,7 @@ export const useSeriesStore = create<SeriesStore>()(
             series: [...state.series, series]
           }));
           return series;
-        } catch (error) {
+        } catch {
           throw new Error('Invalid series data');
         }
       },
@@ -1036,7 +1036,7 @@ export const useSeriesStore = create<SeriesStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.analytics = new Map(Array.from(state.analytics as any));
+          state.analytics = new Map(state.analytics as [string, SeriesAnalytics][]);
         }
       }
     }

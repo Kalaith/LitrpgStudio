@@ -1,10 +1,21 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Location, Faction, WorldMap, WorldTimelineEvent } from '../types/story';
+import type { Location, Faction, WorldTimelineEvent } from '../types/story';
 
 interface WorldBuildingToolsProps {
-  worldDetails: any;
-  onUpdate: (updates: any) => void;
+  worldDetails: {
+    name?: string;
+    description?: string;
+    magicSystem?: string;
+    technology?: string;
+    politics?: string;
+    geography?: string;
+    locations?: Location[];
+    factions?: Faction[];
+    maps?: unknown[];
+    timeline?: WorldTimelineEvent[];
+  };
+  onUpdate: (updates: Partial<WorldBuildingToolsProps['worldDetails']>) => void;
 }
 
 type ActiveTab = 'locations' | 'factions' | 'maps' | 'timeline' | 'overview';
@@ -13,7 +24,6 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [selectedFaction, setSelectedFaction] = useState<Faction | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
 
   const locations = worldDetails?.locations || [];
   const factions = worldDetails?.factions || [];
@@ -132,7 +142,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold">Locations</h3>
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {}}
             className="btn-primary text-sm"
           >
             Add Location
@@ -176,9 +186,6 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         {selectedLocation ? (
           <LocationDetails
             location={selectedLocation}
-            onUpdate={(updates) => {
-              // Update location logic
-            }}
           />
         ) : (
           <div className="flex items-center justify-center h-64 text-gray-500">
@@ -195,7 +202,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold">Factions</h3>
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {}}
             className="btn-primary text-sm"
           >
             Add Faction
@@ -235,9 +242,6 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         {selectedFaction ? (
           <FactionDetails
             faction={selectedFaction}
-            onUpdate={(updates) => {
-              // Update faction logic
-            }}
           />
         ) : (
           <div className="flex items-center justify-center h-64 text-gray-500">
@@ -347,7 +351,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
 }
 
 // Helper components
-function LocationDetails({ location, onUpdate }: { location: Location; onUpdate: (updates: any) => void }) {
+function LocationDetails({ location }: { location: Location }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">{location.name}</h3>
@@ -422,7 +426,7 @@ function LocationDetails({ location, onUpdate }: { location: Location; onUpdate:
   );
 }
 
-function FactionDetails({ faction, onUpdate }: { faction: Faction; onUpdate: (updates: any) => void }) {
+function FactionDetails({ faction }: { faction: Faction }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">{faction.name}</h3>

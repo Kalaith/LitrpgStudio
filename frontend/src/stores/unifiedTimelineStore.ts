@@ -87,7 +87,7 @@ interface UnifiedTimelineState {
   combineEvents: (eventIds: string[]) => string;
 
   // Import/Export
-  exportTimeline: (viewId?: string, format?: 'json' | 'csv' | 'pdf') => any;
+  exportTimeline: (viewId?: string, format?: 'json' | 'csv' | 'pdf') => string | TimelineEvent[];
   importEvents: (events: TimelineEvent[], replaceExisting?: boolean) => void;
 
   // Collaboration Features
@@ -212,9 +212,9 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const duplicatedEvent = {
           ...event,
           name: `${event.name} (Copy)`,
-          id: undefined as any,
-          createdAt: undefined as any,
-          updatedAt: undefined as any
+          id: undefined as unknown as string,
+          createdAt: undefined as unknown as Date,
+          updatedAt: undefined as unknown as Date
         };
 
         return get().addEvent(duplicatedEvent);
@@ -321,9 +321,9 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const duplicatedView = {
           ...view,
           name: newName,
-          id: undefined as any,
-          createdAt: undefined as any,
-          updatedAt: undefined as any
+          id: undefined as unknown as string,
+          createdAt: undefined as unknown as Date,
+          updatedAt: undefined as unknown as Date
         };
 
         return get().createView(duplicatedView);
@@ -352,7 +352,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
         const createdEventIds: string[] = [];
 
-        template.templateEvents.forEach((templateEvent, index) => {
+        template.templateEvents.forEach((templateEvent) => {
           const eventData = {
             name: templateEvent.name,
             description: templateEvent.description,
@@ -424,7 +424,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
         // Apply time range filter
         if (view.timeRange) {
-          events = events.filter(event => {
+          events = events.filter(() => {
             // Simple time range filtering - would need more sophisticated logic
             return true; // TODO: Implement proper time range filtering
           });
@@ -433,15 +433,17 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         // Sort events
         events.sort((a, b) => {
           switch (view.sortBy) {
-            case 'chronological':
+            case 'chronological': {
               // Simple chronological sort by story day
               const aDays = a.timestamp.storyDay || 0;
               const bDays = b.timestamp.storyDay || 0;
               return aDays - bDays;
-            case 'importance':
+            }
+            case 'importance': {
               const aImportance = a.plotImpact?.importance || 1;
               const bImportance = b.plotImpact?.importance || 1;
               return bImportance - aImportance;
+            }
             default:
               return a.name.localeCompare(b.name);
           }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSeriesStore } from '../stores/seriesStore';
-import { useCharacterStore } from '../stores/characterStore';
 import type { Series, Book, SeriesStatus, BookStatus } from '../types/series';
 import {
   OverviewTab,
@@ -15,8 +14,10 @@ interface SeriesManagerProps {
   onSeriesSelect?: (series: Series) => void;
 }
 
+type SeriesTab = 'overview' | 'books' | 'characters' | 'worldbuilding' | 'consistency';
+
 export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'books' | 'characters' | 'worldbuilding' | 'consistency'>('overview');
+  const [activeTab, setActiveTab] = useState<SeriesTab>('overview');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBookModal, setShowBookModal] = useState(false);
 
@@ -25,13 +26,10 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
     currentSeries,
     setCurrentSeries,
     createSeries,
-    updateSeries,
     addBookToSeries,
     checkConsistency,
     generateSeriesAnalytics
   } = useSeriesStore();
-
-  const { characters } = useCharacterStore();
 
   const handleSeriesSelect = (selectedSeries: Series) => {
     setCurrentSeries(selectedSeries);
@@ -159,10 +157,10 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
             { id: 'characters', label: 'Characters', icon: '👥' },
             { id: 'worldbuilding', label: 'World Building', icon: '🌍' },
             { id: 'consistency', label: 'Consistency', icon: '✓' }
-          ].map(tab => (
+          ].map((tab: { id: SeriesTab; label: string; icon: string }) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'bg-blue-500 text-white'

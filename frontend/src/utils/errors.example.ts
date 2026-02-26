@@ -95,17 +95,9 @@ function ExampleComponent() {
     }
   };
 
-  return (
-    <div>
-      <button onClick={fetchData}>Load Data</button>
-      {hasError && (
-        <div className="error-banner">
-          <p>{error?.message}</p>
-          <button onClick={clearError}>Dismiss</button>
-        </div>
-      )}
-    </div>
-  );
+  void fetchData;
+  void clearError;
+  return { error, hasError };
 }
 
 // =============================================================================
@@ -143,6 +135,7 @@ async function exampleWithRetry() {
     }
     return response.json();
   });
+  void data;
 
   // Custom retry configuration
   const customRetry = await withRetry(
@@ -154,7 +147,7 @@ async function exampleWithRetry() {
       delay: 500,
       backoffMultiplier: 1.5,
       maxDelay: 10000,
-      shouldRetry: (error, attempt) => {
+      shouldRetry: (error, _attempt) => {
         // Don't retry validation errors
         if (error instanceof ValidationError) return false;
         // Don't retry 404s
@@ -203,8 +196,6 @@ function exampleErrorTypeChecking(error: unknown) {
 
 // In a store or API module
 async function exampleCompleteApiPattern() {
-  const { handleError } = useErrorHandler();
-
   try {
     // Attempt API call with retry logic
     const data = await withRetry(
@@ -226,15 +217,15 @@ async function exampleCompleteApiPattern() {
       },
       {
         attempts: 3,
-        shouldRetry: (error, attempt) => {
+        shouldRetry: (error, _attempt) => {
           // Don't retry auth errors or not found
           if (isApiError(error) && [401, 404].includes(error.status)) {
             return false;
           }
           return true;
         },
-        onRetry: (error, attempt) => {
-          toast.info(`Retrying... (${attempt}/3)`);
+        onRetry: (_error, _attempt) => {
+          toast.info('Retrying...');
         },
       }
     );
@@ -254,7 +245,7 @@ async function exampleCompleteApiPattern() {
 // EXAMPLE 8: Form Validation Pattern
 // =============================================================================
 
-function exampleFormValidation(formData: any) {
+function exampleFormValidation(formData: Record<string, string | undefined>) {
   const errors: Record<string, string[]> = {};
 
   if (!formData.name || formData.name.trim().length === 0) {
@@ -302,39 +293,18 @@ async function exampleNetworkErrorHandling() {
 // EXAMPLE 10: Error Boundary Pattern (for React error boundaries)
 // =============================================================================
 
-class ErrorBoundaryExample extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+class ErrorBoundaryExample {
+  hasError = false;
+  error: Error | null = null;
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: Record<string, unknown>) {
     const errorDetails = handleError(error);
     console.error('Error boundary caught:', errorDetails, errorInfo);
     toast.error(errorDetails.message);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="error-boundary">
-          <h1>Something went wrong</h1>
-          <p>{this.state.error?.message}</p>
-          <button onClick={() => this.setState({ hasError: false, error: null })}>
-            Try again
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
   }
 }
 

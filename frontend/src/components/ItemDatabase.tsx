@@ -76,8 +76,6 @@ export default function ItemDatabase({
 }: ItemDatabaseProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   // Filters and sorting
   const [searchTerm, setSearchTerm] = useState('');
@@ -228,8 +226,8 @@ export default function ItemDatabase({
 
     // Apply sorting
     result.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: string | number = a[sortField];
+      let bValue: string | number = b[sortField];
 
       // Special handling for rarity sorting
       if (sortField === 'rarity') {
@@ -272,20 +270,9 @@ export default function ItemDatabase({
       tradeable: true
     };
 
-    setEditingItem(newItem);
-    setIsCreating(true);
-  };
-
-  const handleSaveItem = (item: Item) => {
-    if (isCreating) {
-      setItems([...items, item]);
-    } else {
-      setItems(items.map(i => i.id === item.id ? item : i));
-    }
-
-    setEditingItem(null);
-    setIsCreating(false);
-    if (onItemSave) onItemSave(item);
+    setItems(prev => [newItem, ...prev]);
+    setSelectedItem(newItem);
+    onItemSave?.(newItem);
   };
 
 
@@ -578,8 +565,7 @@ export default function ItemDatabase({
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
-                      setEditingItem(selectedItem);
-                      setIsCreating(false);
+                      onItemSave?.(selectedItem);
                     }}
                     className="flex-1 btn-secondary text-sm"
                   >

@@ -3,7 +3,11 @@ import type { StateStorage } from 'zustand/middleware';
 interface ApiSyncOptions {
   seriesId?: string;
   endpoint: string;
-  apiClient: any;
+  apiClient: {
+    get: (path: string) => Promise<{ success: boolean; data?: unknown }>;
+    post: (path: string, body: unknown) => Promise<unknown>;
+    delete: (path: string) => Promise<unknown>;
+  };
   syncOnLoad?: boolean;
   syncOnSave?: boolean;
 }
@@ -99,7 +103,7 @@ export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
  * Simple API-aware storage that gracefully degrades to localStorage
  */
 export function createHybridStorage(options: Partial<ApiSyncOptions> = {}): StateStorage {
-  const { syncOnLoad = false, syncOnSave = false } = options;
+  const { syncOnSave = false } = options;
 
   return {
     getItem: (name: string): string | null => {

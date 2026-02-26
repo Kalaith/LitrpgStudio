@@ -117,13 +117,15 @@ export default function SkillTreeVisualizer({
       const treeData = treeLayout(root);
 
       // Create links (connections)
-      const links = container.selectAll(".skill-link")
+      const linkGenerator = d3.linkVertical<d3.HierarchyPointLink<SkillNode>, d3.HierarchyPointNode<SkillNode>>()
+        .x((d) => d.x + margin.left)
+        .y((d) => d.y + margin.top);
+
+      container.selectAll(".skill-link")
         .data(treeData.links())
         .enter().append("path")
         .attr("class", "skill-link")
-        .attr("d", d3.linkVertical()
-          .x((d: any) => d.x + margin.left)
-          .y((d: any) => d.y + margin.top))
+        .attr("d", linkGenerator)
         .attr("fill", "none")
         .attr("stroke", "#E5E7EB")
         .attr("stroke-width", 2);
@@ -221,14 +223,20 @@ export default function SkillTreeVisualizer({
     }
 
     // Add interactivity
+    const getSkillData = (datum: unknown): SkillNode => {
+      return viewMode === 'tree'
+        ? (datum as d3.HierarchyPointNode<SkillNode>).data
+        : (datum as SkillNode);
+    };
+
     container.selectAll(".skill-node")
-      .on("click", (event, d: any) => {
-        const skillData = viewMode === 'tree' ? d.data : d;
+      .on("click", (_event, d) => {
+        const skillData = getSkillData(d);
         setSelectedSkill(skillData);
         if (onSkillClick) onSkillClick(skillData);
       })
-      .on("mouseover", (event, d: any) => {
-        const skillData = viewMode === 'tree' ? d.data : d;
+      .on("mouseover", (_event, d) => {
+        const skillData = getSkillData(d);
         setHoveredSkill(skillData);
       })
       .on("mouseout", () => {
@@ -272,7 +280,7 @@ export default function SkillTreeVisualizer({
     return "#10B981"; // Green for partially learned
   };
 
-  const createHierarchy = (nodes: SkillNode[], connections: any[]): any => {
+  const createHierarchy = (nodes: SkillNode[], _connections: SkillTree['connections']): { name: string; children: SkillNode[] } => {
     // Simple hierarchy creation - this could be enhanced
     const rootNodes = nodes.filter(n => n.prerequisites.length === 0);
 
@@ -310,10 +318,10 @@ export default function SkillTreeVisualizer({
 
           {/* View Mode Toggle */}
           <div className="flex rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
-            {['tree', 'grid'].map((mode) => (
+            {(['tree', 'grid'] as const).map((mode) => (
               <button
                 key={mode}
-                onClick={() => setViewMode(mode as any)}
+                onClick={() => setViewMode(mode)}
                 className={`
                   px-3 py-1 text-sm capitalize
                   ${viewMode === mode

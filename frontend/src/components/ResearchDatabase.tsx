@@ -14,7 +14,6 @@ import {
   Settings,
   Download,
   Upload,
-  Users,
   BarChart3,
   Eye,
   EyeOff,
@@ -30,13 +29,9 @@ import {
   User
 } from 'lucide-react';
 import type {
-  ResearchDatabase as ResearchDatabaseType,
   ResearchSource,
   ResearchCollection,
-  SourceType,
-  CollectionCategory,
-  AnnotationType,
-  LinkType
+  SourceType
 } from '../types/research';
 
 interface ResearchDatabaseProps {
@@ -47,15 +42,14 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
   const [activeTab, setActiveTab] = useState<'sources' | 'collections' | 'links' | 'analytics'>('sources');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CollectionCategory | 'all'>('all');
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<ResearchSource | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddSource, setShowAddSource] = useState(false);
-  const [showAddCollection, setShowAddCollection] = useState(false);
+  const [, setShowAddSource] = useState(false);
+  const [, setShowAddCollection] = useState(false);
 
   // Mock data for demonstration
-  const mockSources: ResearchSource[] = [
+  const mockSources = useMemo<ResearchSource[]>(() => [
     {
       id: '1',
       title: 'Medieval Combat Techniques',
@@ -140,9 +134,9 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
       updatedAt: new Date(),
       lastAccessed: new Date()
     }
-  ];
+  ], []);
 
-  const mockCollections: ResearchCollection[] = [
+  const mockCollections = useMemo<ResearchCollection[]>(() => [
     {
       id: 'worldbuilding',
       name: 'World Building',
@@ -171,7 +165,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
       createdAt: new Date(),
       updatedAt: new Date()
     }
-  ];
+  ], []);
 
   const filteredSources = useMemo(() => {
     return mockSources.filter(source => {
@@ -391,7 +385,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'sources' | 'collections' | 'links' | 'analytics')}
               className={`py-3 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'

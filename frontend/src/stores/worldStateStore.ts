@@ -545,7 +545,11 @@ export const useWorldStateStore = create<WorldStateStore>()(
               const newProperty: WorldProperty = {
                 key,
                 value,
-                type: typeof value as any,
+                type: (
+                  typeof value === 'string' ||
+                  typeof value === 'number' ||
+                  typeof value === 'boolean'
+                ) ? typeof value : 'object',
                 description: reason,
                 lastChanged: new Date(),
                 changeReason: reason
@@ -663,7 +667,11 @@ export const useWorldStateStore = create<WorldStateStore>()(
                 results.push({
                   id: generateId(),
                   type: 'error',
-                  category: rule.category as any,
+                  category: (
+                    ['character', 'location', 'item', 'timeline', 'logic'].includes(rule.category)
+                      ? rule.category
+                      : 'logic'
+                  ) as ConsistencyResult['category'],
                   description: rule.name,
                   details: rule.message,
                   affectedElements: [],
@@ -762,7 +770,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
       importWorldState: (data) => {
         try {
           return JSON.parse(data) as WorldState;
-        } catch (_error) {
+        } catch {
           throw new Error('Invalid world state data');
         }
       },
@@ -786,7 +794,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.worldStates = new Map(Array.from(state.worldStates as any));
+          state.worldStates = new Map(state.worldStates as [string, WorldState[]][]);
         }
       }
     }

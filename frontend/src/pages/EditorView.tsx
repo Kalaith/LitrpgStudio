@@ -1,13 +1,18 @@
 import { useState, useCallback } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import AdvancedTextEditor from '../components/AdvancedTextEditor';
 import { ContextSidebar } from '../components/ContextSidebar';
 import { ContinuityChecker } from '../components/ContinuityChecker';
 import { AIConsistencyPanel } from '../components/AIConsistencyPanel';
 import type { BaseEntity } from '../types/entityRegistry';
 import type { TimelineEvent } from '../types/unifiedTimeline';
+
+interface ContinuityIssueSummary {
+  id: string;
+  type: 'error' | 'warning' | 'suggestion';
+  title: string;
+}
 
 const EditorView = () => {
   const [chapterTitle, setChapterTitle] = useState<string>('');
@@ -21,9 +26,8 @@ const EditorView = () => {
   const [currentChapterId, setCurrentChapterId] = useState<string | undefined>();
   const [cursorPosition, setCursorPosition] = useState(0);
 
-  const { currentStory, addChapter, updateChapter } = useStoryStore();
+  const { currentStory } = useStoryStore();
   const { addToRecentEntities } = useEntityRegistryStore();
-  const { addEvent } = useUnifiedTimelineStore();
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
@@ -66,7 +70,7 @@ const EditorView = () => {
   }, [showAIAnalysis]);
 
   // Handle continuity issue clicks
-  const handleContinuityIssueClick = useCallback((issue: any) => {
+  const handleContinuityIssueClick = useCallback((issue: ContinuityIssueSummary) => {
     // Could scroll to position, highlight text, or show details
     console.log('Continuity issue clicked:', issue);
   }, []);
@@ -82,7 +86,7 @@ const EditorView = () => {
               <button className="btn-secondary text-sm">+ Add</button>
             </div>
             <div className="space-y-2">
-              {currentStory?.chapters?.map((chapter, index) => (
+              {currentStory?.chapters?.map((chapter) => (
                 <button
                   key={chapter.id}
                   onClick={() => setCurrentChapterId(chapter.id)}

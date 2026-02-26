@@ -1,5 +1,5 @@
 import type { Character, StoryReference, CharacterCrossReference } from '../types/character';
-import type { Story, Chapter } from '../types/story';
+import type { Story, Chapter, CharacterProgressionEvent } from '../types/story';
 import { useCharacterStore } from '../stores/characterStore';
 
 export interface CharacterMention {
@@ -84,8 +84,8 @@ export class CrossReferenceService {
   // Analyze story consistency
   public analyzeConsistency(
     characters: Character[],
-    stories: Story[],
-    chapters: Chapter[]
+    _stories: Story[],
+    _chapters: Chapter[]
   ): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
 
@@ -148,7 +148,7 @@ export class CrossReferenceService {
   public trackCharacterProgression(
     characterId: string,
     chapters: Chapter[]
-  ): { chapter: Chapter; progressionEvents: any[] }[] {
+  ): { chapter: Chapter; progressionEvents: CharacterProgressionEvent[] }[] {
     return chapters
       .filter(chapter =>
         chapter.characterProgression.some(event => event.characterId === characterId)
@@ -194,7 +194,7 @@ export class CrossReferenceService {
   private calculateMentionConfidence(
     variation: string,
     originalName: string,
-    _context: string
+    context: string
   ): number {
     let confidence = 0.5;
 

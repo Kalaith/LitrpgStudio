@@ -3,17 +3,10 @@ import { useStoryStore } from '../stores/storyStore';
 import { useCharacterStore } from '../stores/characterStore';
 import InteractiveTimeline from '../components/InteractiveTimeline';
 import type { StoryEvent } from '../types/story';
+import type { Character } from '../types/character';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface TimelineViewProps {
-  isCreating?: boolean;
-  onCreateComplete?: () => void;
-}
-
-const TimelineView: React.FC<TimelineViewProps> = ({
-  isCreating = false,
-  onCreateComplete
-}) => {
+const TimelineView: React.FC = () => {
   const { currentStory, addStoryEvent, updateStoryEvent } = useStoryStore();
   const { characters } = useCharacterStore();
   const [viewMode, setViewMode] = useState<'interactive' | 'list'>('interactive');
@@ -176,7 +169,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({
 // List View Component
 interface ListViewProps {
   events: StoryEvent[];
-  characters: any[];
+  characters: Character[];
   onEventUpdate: (eventId: string, updates: Partial<StoryEvent>) => void;
   onAddEvent: (event: Omit<StoryEvent, 'id'>) => void;
 }
@@ -311,7 +304,7 @@ function ListView({ events, characters, onEventUpdate, onAddEvent }: ListViewPro
                     <label className="block text-sm font-medium mb-1">Importance</label>
                     <select
                       value={event.importance}
-                      onChange={(e) => onEventUpdate(event.id, { importance: e.target.value as any })}
+                      onChange={(e) => onEventUpdate(event.id, { importance: e.target.value as StoryEvent['importance'] })}
                       className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded"
                     >
                       <option value="minor">Minor</option>

@@ -60,14 +60,40 @@ interface CombatSystemDesignerProps {
   onSimulate?: (simulation: CombatSimulation) => void;
 }
 
+interface DamageCalculation {
+  hit: boolean;
+  damage: number;
+  critical: boolean;
+  effects: CombatEffect[];
+  baseDamage?: number;
+  damageReduction?: number;
+  hitChance?: number;
+  critChance?: number;
+}
+
+interface SimulationAnalysis {
+  totalSimulations: number;
+  hits: number;
+  misses: number;
+  criticals: number;
+  averageDamage: number;
+  maxDamage: number;
+  minDamage: number;
+  hitRate: number;
+  critRate: number;
+  sampleResult?: DamageCalculation;
+}
+
+type CombatTab = 'actions' | 'simulator' | 'balance';
+
 export default function CombatSystemDesigner({
   onSimulate
 }: CombatSystemDesignerProps) {
-  const [activeTab, setActiveTab] = useState<'actions' | 'simulator' | 'balance'>('actions');
+  const [activeTab, setActiveTab] = useState<CombatTab>('actions');
   const [actions, setActions] = useState<CombatAction[]>([]);
   const [selectedAction, setSelectedAction] = useState<CombatAction | null>(null);
-  const [_isCreatingAction, _setIsCreatingAction] = useState(false);
-  const [simulationResults, setSimulationResults] = useState<any>(null);
+  const [showCreateActionPrompt, setShowCreateActionPrompt] = useState(false);
+  const [simulationResults, setSimulationResults] = useState<SimulationAnalysis | null>(null);
 
   // Default combat stats for testing
   const defaultStats: CombatStats = {
@@ -164,7 +190,7 @@ export default function CombatSystemDesigner({
     setActions(sampleActions);
   }, []);
 
-  const calculateDamage = (action: CombatAction, attacker: CombatStats, defender: CombatStats): any => {
+  const calculateDamage = (action: CombatAction, attacker: CombatStats, defender: CombatStats): DamageCalculation => {
     // Base damage calculation
     let baseDmg = action.baseDamage;
 
@@ -217,7 +243,7 @@ export default function CombatSystemDesigner({
   const runSimulation = () => {
     if (!selectedAction) return;
 
-    const results = [];
+    const results: DamageCalculation[] = [];
     const numSimulations = 1000;
 
     for (let i = 0; i < numSimulations; i++) {
@@ -258,12 +284,17 @@ export default function CombatSystemDesigner({
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Combat Actions</h3>
         <button
-          onClick={() => _setIsCreatingAction(true)}
+          onClick={() => setShowCreateActionPrompt(prev => !prev)}
           className="btn-primary"
         >
           Create New Action
         </button>
       </div>
+      {showCreateActionPrompt && (
+        <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+          Custom action creation is not wired yet. Edit `sampleActions` in this component to add more actions.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {actions.map(action => (
@@ -533,10 +564,10 @@ export default function CombatSystemDesigner({
             { key: 'actions', label: 'Combat Actions', icon: '⚔️' },
             { key: 'simulator', label: 'Battle Simulator', icon: '🎯' },
             { key: 'balance', label: 'Balance Analysis', icon: '⚖️' }
-          ].map(({ key, label, icon }) => (
+          ].map(({ key, label, icon }: { key: CombatTab; label: string; icon: string }) => (
             <button
               key={key}
-              onClick={() => setActiveTab(key as any)}
+              onClick={() => setActiveTab(key)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
                 activeTab === key
                   ? 'bg-blue-600 text-white'

@@ -7,7 +7,7 @@ import { useAnalyticsStore } from '../stores/analyticsStore';
  * This hook monitors story changes and updates analytics accordingly
  */
 export const useAnalyticsIntegration = () => {
-  const { stories, currentStory } = useStoryStore();
+  const { currentStory } = useStoryStore();
   const { currentSession, updateSessionProgress } = useAnalyticsStore();
 
   const previousWordCount = useRef<number>(0);

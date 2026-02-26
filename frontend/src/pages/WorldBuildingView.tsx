@@ -2,12 +2,29 @@ import { useState } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import WorldBuildingTools from '../components/WorldBuildingTools';
 import { motion } from 'framer-motion';
+import type { WorldDetails } from '../types/story';
+
+type IssueType = 'error' | 'warning' | 'info';
+
+interface ConsistencyIssue {
+  type: IssueType;
+  message: string;
+  character?: string;
+  events?: string[];
+}
+
+interface ConsistencyReport {
+  timestamp: string;
+  issuesCount: number;
+  issues: ConsistencyIssue[];
+  suggestions: string[];
+}
 
 export default function WorldBuildingView() {
   const { currentStory, updateStory } = useStoryStore();
-  const [consistencyReport, setConsistencyReport] = useState<any>(null);
+  const [consistencyReport, setConsistencyReport] = useState<ConsistencyReport | null>(null);
 
-  const handleWorldUpdate = (updates: any) => {
+  const handleWorldUpdate = (updates: Partial<WorldDetails>) => {
     if (!currentStory) return;
 
     const updatedWorldBuilding = {
@@ -24,7 +41,7 @@ export default function WorldBuildingView() {
     if (!currentStory) return;
 
     // This would be a real consistency checking algorithm
-    const issues = [];
+    const issues: ConsistencyIssue[] = [];
     const world = currentStory.worldBuilding;
 
     // Check for missing information
@@ -144,19 +161,19 @@ export default function WorldBuildingView() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-red-600">
-                  {consistencyReport.issues.filter((i: any) => i.type === 'error').length}
+                  {consistencyReport.issues.filter((i) => i.type === 'error').length}
                 </div>
                 <div className="text-sm text-red-600">Errors</div>
               </div>
               <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-yellow-600">
-                  {consistencyReport.issues.filter((i: any) => i.type === 'warning').length}
+                  {consistencyReport.issues.filter((i) => i.type === 'warning').length}
                 </div>
                 <div className="text-sm text-yellow-600">Warnings</div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-blue-600">
-                  {consistencyReport.issues.filter((i: any) => i.type === 'info').length}
+                  {consistencyReport.issues.filter((i) => i.type === 'info').length}
                 </div>
                 <div className="text-sm text-blue-600">Info</div>
               </div>
@@ -166,7 +183,7 @@ export default function WorldBuildingView() {
               <div className="mb-6">
                 <h4 className="font-semibold mb-3">Issues Found</h4>
                 <div className="space-y-2">
-                  {consistencyReport.issues.map((issue: any, index: number) => (
+                  {consistencyReport.issues.map((issue, index: number) => (
                     <div
                       key={index}
                       className={`

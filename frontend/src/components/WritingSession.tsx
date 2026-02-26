@@ -29,7 +29,6 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
   const [sectionName, setSectionName] = useState('');
   const [wordTarget, setWordTarget] = useState(500);
   const [sessionTime, setSessionTime] = useState(0);
-  const [currentWordCount, setCurrentWordCount] = useState(0);
 
   // Timer effect
   useEffect(() => {
@@ -48,7 +47,6 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     if (currentSession && selectedStoryId) {
       const story = stories.find(s => s.id === selectedStoryId);
       if (story) {
-        setCurrentWordCount(story.wordCount);
         updateSessionProgress(story.wordCount);
       }
     }
@@ -72,9 +70,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     );
 
     const story = stories.find(s => s.id === selectedStoryId);
-    if (story) {
-      setCurrentWordCount(story.wordCount);
-    }
+    void story;
   };
 
   const isSessionReady = () => {

@@ -2,14 +2,16 @@
 import type { BaseEntity, EntityAdapter, EntityValidationResult, EntityType } from '../types/entityRegistry';
 import type { Character } from '../types/character';
 import type { Story, Chapter } from '../types/story';
-import type { Series, Book } from '../types/series';
+import type { Series } from '../types/series';
 import type { ResearchSource } from '../types/research';
 import type { LootTable } from '../types/lootTable';
+
+type MetadataRecord = Record<string, unknown>;
 
 // Character Adapter
 export class CharacterAdapter implements EntityAdapter<Character> {
   fromEntity(entity: BaseEntity): Character {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Character> & MetadataRecord;
     return {
       id: entity.id,
       name: entity.name,
@@ -81,7 +83,7 @@ export class CharacterAdapter implements EntityAdapter<Character> {
       });
     }
 
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Character> & MetadataRecord;
     if (metadata.level && (metadata.level < 1 || metadata.level > 100)) {
       warnings.push({
         entityId: entity.id,
@@ -101,7 +103,7 @@ export class CharacterAdapter implements EntityAdapter<Character> {
 // Story Adapter
 export class StoryAdapter implements EntityAdapter<Story> {
   fromEntity(entity: BaseEntity): Story {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Story> & MetadataRecord;
     return {
       id: entity.id,
       title: entity.name,
@@ -161,7 +163,7 @@ export class StoryAdapter implements EntityAdapter<Story> {
       });
     }
 
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Story> & MetadataRecord;
     if (metadata.wordCount < 0) {
       errors.push({
         entityId: entity.id,
@@ -190,7 +192,7 @@ export class StoryAdapter implements EntityAdapter<Story> {
 // Chapter Adapter
 export class ChapterAdapter implements EntityAdapter<Chapter> {
   fromEntity(entity: BaseEntity): Chapter {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Chapter> & MetadataRecord;
     return {
       id: entity.id,
       title: entity.name,
@@ -246,7 +248,7 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
       });
     }
 
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Chapter> & MetadataRecord;
     if (metadata.order < 0) {
       errors.push({
         entityId: entity.id,
@@ -267,7 +269,7 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
 // Series Adapter
 export class SeriesAdapter implements EntityAdapter<Series> {
   fromEntity(entity: BaseEntity): Series {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<Series> & MetadataRecord;
     return {
       id: entity.id,
       name: entity.name,
@@ -351,7 +353,7 @@ export class SeriesAdapter implements EntityAdapter<Series> {
 // Research Source Adapter
 export class ResearchAdapter implements EntityAdapter<ResearchSource> {
   fromEntity(entity: BaseEntity): ResearchSource {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<ResearchSource> & MetadataRecord;
     return {
       id: entity.id,
       title: entity.name,
@@ -443,7 +445,7 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
 // Loot Table Adapter
 export class LootTableAdapter implements EntityAdapter<LootTable> {
   fromEntity(entity: BaseEntity): LootTable {
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<LootTable> & MetadataRecord;
     return {
       id: entity.id,
       name: entity.name,
@@ -507,7 +509,7 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
       });
     }
 
-    const metadata = entity.metadata as any;
+    const metadata = entity.metadata as Partial<LootTable> & MetadataRecord;
     if (!metadata.entries || metadata.entries.length === 0) {
       warnings.push({
         entityId: entity.id,
@@ -526,7 +528,7 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
 
 // Adapter Registry
 export class AdapterRegistry {
-  private adapters = new Map<EntityType, EntityAdapter<any>>();
+  private adapters = new Map<EntityType, EntityAdapter<unknown>>();
 
   constructor() {
     this.adapters.set('character', new CharacterAdapter());

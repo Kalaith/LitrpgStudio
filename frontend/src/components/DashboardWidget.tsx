@@ -44,7 +44,7 @@ interface DashboardWidgetProps {
   onUpdate: (config: WidgetConfig) => void;
   onRemove: (id: string) => void;
   isDragging?: boolean;
-  dragHandleProps?: any;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   className?: string;
 }
 
@@ -193,7 +193,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           </div>
         );
 
-      case 'writing_goals':
+      case 'writing_goals': {
         const progressPercent = stats.dailyGoal > 0 ? Math.round((stats.todayWords / stats.dailyGoal) * 100) : 0;
         return (
           <div className="flex flex-col h-full justify-between">
@@ -214,8 +214,9 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             </div>
           </div>
         );
+      }
 
-      case 'story_progress':
+      case 'story_progress': {
         const chapterProgress = stats.storyProgress.chaptersTotal > 0
           ? Math.round((stats.storyProgress.chaptersComplete / stats.storyProgress.chaptersTotal) * 100)
           : 0;
@@ -250,6 +251,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             </div>
           </div>
         );
+      }
 
       case 'recent_activity':
         return (

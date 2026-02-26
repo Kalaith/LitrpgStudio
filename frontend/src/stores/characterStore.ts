@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Character, CharacterTemplate, Skill, Item, StoryReference, CharacterCrossReference } from '../types/character';
-import { charactersApi } from '../api/characters';
 
 interface CharacterState {
   characters: Character[];

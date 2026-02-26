@@ -5,11 +5,9 @@ import type {
   EntityType,
   EntityRelationship,
   EntityRegistry,
-  EntityReference,
   EntitySearchResult,
   EntitySearchOptions,
   EntityFilter,
-  RelationshipType,
   EntityChangeEvent,
   CrossReference
 } from '../types/entityRegistry';

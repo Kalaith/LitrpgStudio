@@ -1,11 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Grid, Settings, RotateCcw, Wifi, WifiOff } from 'lucide-react';
+import { Plus, Grid, RotateCcw, Wifi, WifiOff } from 'lucide-react';
 import { DashboardWidget } from '../components/DashboardWidget';
 import type { WidgetConfig, WidgetType } from '../components/DashboardWidget';
 import { useStoryStore } from '../stores/storyStore';
-import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import { useApiStatus } from '../hooks/useApiStatus';
 import { useSeriesWithApi, useCharactersWithApi } from '../hooks/useApiIntegration';
 
@@ -72,11 +70,9 @@ const DashboardView: React.FC = () => {
   const [gridSize, setGridSize] = useState<'compact' | 'comfortable' | 'spacious'>('comfortable');
 
   const { currentStory } = useStoryStore();
-  const { getEntityStats } = useEntityRegistryStore();
-  const { getEventStats } = useUnifiedTimelineStore();
 
   // API integration hooks
-  const { isOnline, baseUrl, checkApiStatus } = useApiStatus();
+  const { isOnline } = useApiStatus();
   const seriesApi = useSeriesWithApi();
   const charactersApi = useCharactersWithApi();
 

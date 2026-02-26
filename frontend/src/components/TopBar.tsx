@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Command } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { GlobalSearch } from './GlobalSearch';
 
 interface TopBarProps {

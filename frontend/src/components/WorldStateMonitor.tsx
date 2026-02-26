@@ -2,28 +2,28 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useCharacterStore } from '../stores/characterStore';
-import type { WorldState, ConsistencyResult, CharacterState, LocationState } from '../types/worldState';
+import type { Character } from '../types/character';
+import type { WorldState, ConsistencyResult } from '../types/worldState';
 
 interface WorldStateMonitorProps {
   storyId: string;
   chapterNumber?: number;
 }
 
+type MonitorTab = 'overview' | 'characters' | 'locations' | 'events' | 'consistency';
+
 export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
   storyId,
   chapterNumber
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'characters' | 'locations' | 'events' | 'consistency'>('overview');
+  const [activeTab, setActiveTab] = useState<MonitorTab>('overview');
   const [autoCheck, setAutoCheck] = useState(true);
 
   const {
     getCurrentWorldState,
     getWorldStateHistory,
     runConsistencyCheck,
-    createWorldState,
-    updateCharacterState,
-    updateLocationState,
-    setWorldProperty
+    createWorldState
   } = useWorldStateStore();
 
   const { characters } = useCharacterStore();
@@ -148,10 +148,10 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
             { id: 'locations', label: 'Locations', icon: '📍' },
             { id: 'events', label: 'Events', icon: '📅' },
             { id: 'consistency', label: 'Consistency', icon: '✓' }
-          ].map(tab => (
+          ].map((tab: { id: MonitorTab; label: string; icon: string }) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'bg-blue-500 text-white'
@@ -241,7 +241,7 @@ const OverviewTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
 // Characters Tab
 const CharactersTab: React.FC<{
   worldState: WorldState;
-  characters: any[];
+  characters: Character[];
 }> = ({ worldState, characters }) => (
   <div className="space-y-4">
     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Character States</h3>

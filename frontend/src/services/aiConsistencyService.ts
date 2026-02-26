@@ -232,7 +232,6 @@ export class AIConsistencyService {
     // Check for causality violations
     for (let i = 0; i < sortedEvents.length - 1; i++) {
       const currentEvent = sortedEvents[i];
-      const nextEvent = sortedEvents[i + 1];
 
       // Check if effects happen before causes
       if (currentEvent.dependencies && currentEvent.dependencies.length > 0) {
@@ -276,7 +275,7 @@ export class AIConsistencyService {
 
     for (const rule of this.worldRules.values()) {
       switch (rule.id) {
-        case 'power-progression':
+        case 'power-progression': {
           // Analyze power level consistency
           const powerEvents = timeline.filter(e =>
             e.description.toLowerCase().includes('level') ||
@@ -315,8 +314,9 @@ export class AIConsistencyService {
             }
           }
           break;
+        }
 
-        case 'economic-consistency':
+        case 'economic-consistency': {
           // Analyze economic transactions
           const economicEvents = timeline.filter(e =>
             e.description.toLowerCase().includes('gold') ||
@@ -348,6 +348,7 @@ export class AIConsistencyService {
             }
           }
           break;
+        }
       }
     }
 

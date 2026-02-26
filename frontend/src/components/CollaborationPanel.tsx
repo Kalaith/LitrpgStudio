@@ -31,6 +31,8 @@ interface CollaborationPanelProps {
   className?: string;
 }
 
+type CollaborationTab = 'users' | 'comments' | 'conflicts' | 'history';
+
 export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
   isVisible,
   onToggle,
@@ -41,7 +43,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
   const [conflicts, setConflicts] = useState<CollaborationConflict[]>([]);
   const [changes, setChanges] = useState<CollaborationChange[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'comments' | 'conflicts' | 'history'>('users');
+  const [activeTab, setActiveTab] = useState<CollaborationTab>('users');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [selectedEntity] = useState<string | null>(null);
@@ -197,10 +199,10 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           { key: 'comments', label: 'Comments', count: comments.length },
           { key: 'conflicts', label: 'Conflicts', count: conflicts.length },
           { key: 'history', label: 'History', count: changes.length }
-        ].map(tab => (
+        ].map((tab: { key: CollaborationTab; label: string; count: number }) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
+            onClick={() => setActiveTab(tab.key)}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
               activeTab === tab.key
                 ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600 dark:text-blue-400 dark:bg-blue-900/30'
