@@ -1,6 +1,23 @@
 <?php
 // LitRPG Studio Backend - Based on WebHatchery standards
-require __DIR__ . '/../vendor/autoload.php';
+$autoloadCandidates = [
+    __DIR__ . '/../../../vendor/autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+];
+$autoloader = null;
+foreach ($autoloadCandidates as $candidate) {
+    if (file_exists($candidate)) {
+        $autoloader = $candidate;
+        break;
+    }
+}
+if (!$autoloader) {
+    throw new RuntimeException("Composer autoload.php not found for litrpg_studio backend.");
+}
+$loader = require $autoloader;
+if (is_object($loader) && method_exists($loader, 'addPsr4')) {
+    $loader->addPsr4('App\\', __DIR__ . '/../src/');
+}
 
 use Slim\Factory\AppFactory;
 use DI\Container;

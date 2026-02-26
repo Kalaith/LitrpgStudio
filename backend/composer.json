@@ -14,7 +14,7 @@
         "respect/validation": "^2.2",
         "ramsey/uuid": "^4.9",
         "auth0/auth0-php": "^8.0",
-        "firebase/php-jwt": "^6.0",
+        "firebase/php-jwt": "^7.0",
         "guzzlehttp/guzzle": "^7.10"
     },
     "require-dev": {

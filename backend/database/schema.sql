@@ -133,6 +133,52 @@ CREATE TABLE IF NOT EXISTS story_templates (
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL
 );
 
+-- Writing Sessions table
+CREATE TABLE IF NOT EXISTS writing_sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    story_id VARCHAR(255),
+    chapter_id VARCHAR(255),
+    start_time DATETIME NOT NULL,
+    end_time DATETIME,
+    word_target INT DEFAULT 500,
+    initial_word_count INT DEFAULT 0,
+    final_word_count INT DEFAULT 0,
+    words_written INT DEFAULT 0,
+    duration INT DEFAULT 0,
+    date DATE NOT NULL,
+    is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,
+    FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL,
+    INDEX idx_date (date),
+    INDEX idx_story_id (story_id),
+    INDEX idx_active (is_active)
+);
+
+-- Writing Goals table
+CREATE TABLE IF NOT EXISTS writing_goals (
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    type ENUM('daily', 'weekly', 'monthly', 'custom', 'story', 'book') NOT NULL,
+    target INT NOT NULL,
+    current INT DEFAULT 0,
+    start_date DATE,
+    deadline DATE,
+    is_active BOOLEAN DEFAULT 1,
+    completed_at DATETIME,
+    story_id VARCHAR(255),
+    book_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE SET NULL,
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE SET NULL,
+    INDEX idx_active (is_active),
+    INDEX idx_type (type),
+    INDEX idx_deadline (deadline)
+);
+
 -- Series Analytics table
 CREATE TABLE IF NOT EXISTS series_analytics (
     id VARCHAR(255) PRIMARY KEY,
