@@ -1,21 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Location, Faction, WorldTimelineEvent } from '../types/story';
+import type { Location, Faction, WorldTimelineEvent, WorldDetails } from '../types/story';
 
 interface WorldBuildingToolsProps {
-  worldDetails: {
-    name?: string;
-    description?: string;
-    magicSystem?: string;
-    technology?: string;
-    politics?: string;
-    geography?: string;
-    locations?: Location[];
-    factions?: Faction[];
-    maps?: unknown[];
-    timeline?: WorldTimelineEvent[];
-  };
-  onUpdate: (updates: Partial<WorldBuildingToolsProps['worldDetails']>) => void;
+  worldDetails: Partial<WorldDetails>;
+  onUpdate: (updates: Partial<WorldDetails>) => void;
 }
 
 type ActiveTab = 'locations' | 'factions' | 'maps' | 'timeline' | 'overview';

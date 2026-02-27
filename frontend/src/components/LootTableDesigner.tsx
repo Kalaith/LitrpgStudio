@@ -17,6 +17,13 @@ interface LootTableDesignerProps {
 
 type LootDesignerTab = 'design' | 'test' | 'balance' | 'export';
 
+const lootDesignerTabs: Array<{ id: LootDesignerTab; label: string; icon: string }> = [
+  { id: 'design', label: 'Design', icon: '🎨' },
+  { id: 'test', label: 'Test & Roll', icon: '🎲' },
+  { id: 'balance', label: 'Balance Analysis', icon: '⚖️' },
+  { id: 'export', label: 'Export', icon: '📤' }
+];
+
 export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) => {
   const [activeTab, setActiveTab] = useState<LootDesignerTab>('design');
   const [lootTable, setLootTable] = useState<Partial<LootTable>>({
@@ -186,12 +193,7 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
 
         {/* Tab Navigation */}
         <div className="flex gap-2 overflow-x-auto">
-          {[
-            { id: 'design', label: 'Design', icon: '🎨' },
-            { id: 'test', label: 'Test & Roll', icon: '🎲' },
-            { id: 'balance', label: 'Balance Analysis', icon: '⚖️' },
-            { id: 'export', label: 'Export', icon: '📤' }
-          ].map((tab: { id: LootDesignerTab; label: string; icon: string }) => (
+          {lootDesignerTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}

@@ -10,6 +10,24 @@ export interface Series {
   books: Book[];
   sharedElements: SharedElements;
   metadata: SeriesMetadata;
+  // Legacy compatibility fields used by adapter-driven flows.
+  tags?: string[];
+  worldBible?: {
+    locations: string[];
+    cultures: string[];
+    magicSystems: string[];
+    timeline: string[];
+    rules: string[];
+  };
+  characterArcs?: string[];
+  overarchingPlot?: string;
+  themes?: string[];
+  consistency?: {
+    characterContinuity: string[];
+    worldStateContinuity: string[];
+    plotContinuity: string[];
+    lastCheck: Date;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +37,8 @@ export type SeriesStatus = 'planning' | 'writing' | 'published' | 'completed' | 
 export interface Book {
   id: string;
   seriesId: string;
+  // Legacy compatibility alias in some hooks/components.
+  storyId?: string;
   bookNumber: number;
   title: string;
   subtitle?: string;
@@ -367,6 +387,11 @@ export interface SeriesMetadata {
   seriesLength: number;
   estimatedCompletion?: Date;
   marketingTags: string[];
+  // Legacy compatibility analytics metadata fields.
+  totalWordCount?: number;
+  estimatedBooks?: number;
+  publishingPlan?: string;
+  marketingNotes?: string;
 }
 
 export interface SeriesAnalytics {

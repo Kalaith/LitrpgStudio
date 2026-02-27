@@ -33,6 +33,13 @@ interface CollaborationPanelProps {
 
 type CollaborationTab = 'users' | 'comments' | 'conflicts' | 'history';
 
+const collaborationTabs: Array<{ key: CollaborationTab; label: string; count: number }> = [
+  { key: 'users', label: 'Users', count: 0 },
+  { key: 'comments', label: 'Comments', count: 0 },
+  { key: 'conflicts', label: 'Conflicts', count: 0 },
+  { key: 'history', label: 'History', count: 0 }
+];
+
 export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
   isVisible,
   onToggle,
@@ -194,12 +201,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
 
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {[
-          { key: 'users', label: 'Users', count: participants.length },
-          { key: 'comments', label: 'Comments', count: comments.length },
-          { key: 'conflicts', label: 'Conflicts', count: conflicts.length },
-          { key: 'history', label: 'History', count: changes.length }
-        ].map((tab: { key: CollaborationTab; label: string; count: number }) => (
+        {collaborationTabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -210,9 +212,13 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             }`}
           >
             {tab.label}
-            {tab.count > 0 && (
+            {(tab.key === 'users' ? participants.length :
+              tab.key === 'comments' ? comments.length :
+              tab.key === 'conflicts' ? conflicts.length : changes.length) > 0 && (
               <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">
-                {tab.count}
+                {tab.key === 'users' ? participants.length :
+                  tab.key === 'comments' ? comments.length :
+                  tab.key === 'conflicts' ? conflicts.length : changes.length}
               </span>
             )}
           </button>

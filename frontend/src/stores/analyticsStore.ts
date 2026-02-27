@@ -42,7 +42,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       currentSession: null,
 
       // Session Management
-      startSession: (storyId, chapterId, wordTarget = 500) => {
+      startSession: (storyId, chapterId, wordTarget = 500, sessionType, sessionContext) => {
         const now = new Date();
         const story = useStoryStore.getState().stories.find(s => s.id === storyId);
         const initialWordCount = story?.wordCount || 0;
@@ -59,6 +59,8 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           duration: 0,
           isActive: true,
           date: getDateString(now),
+          sessionType,
+          sessionContext
         };
 
         set({

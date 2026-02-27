@@ -77,7 +77,7 @@ const DashboardView: React.FC = () => {
   const charactersApi = useCharactersWithApi();
 
   // Check if database is empty (for showing empty state)
-  const hasData = seriesApi.data?.length > 0 || charactersApi.data?.length > 0;
+  const hasData = (seriesApi.series?.length ?? 0) > 0 || (charactersApi.characters?.length ?? 0) > 0;
 
   // Grid layout calculations with responsive design
   const gridClasses = useMemo(() => {

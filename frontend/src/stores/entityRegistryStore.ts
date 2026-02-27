@@ -657,16 +657,31 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           const str = localStorage.getItem(name);
           if (!str) return null;
           try {
-            const parsed = JSON.parse(str);
+            const parsed = JSON.parse(str) as {
+              state?: {
+                registry?: {
+                  entities?: Array<[string, BaseEntity]>;
+                  relationships?: Array<[string, EntityRelationship]>;
+                  typeIndex?: Array<[string, string[]]>;
+                  tagIndex?: Array<[string, string[]]>;
+                  nameIndex?: Array<[string, string[]]>;
+                };
+                [key: string]: unknown;
+              };
+              version?: number;
+            };
+            const typeIndexEntries = parsed.state?.registry?.typeIndex || [];
+            const tagIndexEntries = parsed.state?.registry?.tagIndex || [];
+            const nameIndexEntries = parsed.state?.registry?.nameIndex || [];
             return {
               state: {
-                ...parsed.state,
+                ...(parsed.state || {}),
                 registry: {
-                  entities: new Map(parsed.state.registry?.entities || []),
-                  relationships: new Map(parsed.state.registry?.relationships || []),
-                  typeIndex: new Map((parsed.state.registry?.typeIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)])),
-                  tagIndex: new Map((parsed.state.registry?.tagIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)])),
-                  nameIndex: new Map((parsed.state.registry?.nameIndex || []).map(([k, v]: [string, string[]]) => [k, new Set(v)]))
+                  entities: new Map(parsed.state?.registry?.entities || []),
+                  relationships: new Map(parsed.state?.registry?.relationships || []),
+                  typeIndex: new Map(typeIndexEntries.map(([k, v]) => [k, new Set(v)])),
+                  tagIndex: new Map(tagIndexEntries.map(([k, v]) => [k, new Set(v)])),
+                  nameIndex: new Map(nameIndexEntries.map(([k, v]) => [k, new Set(v)]))
                 }
               },
               version: parsed.version

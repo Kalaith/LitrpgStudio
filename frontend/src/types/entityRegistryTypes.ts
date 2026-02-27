@@ -36,6 +36,9 @@ export interface EntityRelationship {
   id: string;
   fromEntity: EntityReference;
   toEntity: EntityReference;
+  // Legacy compatibility aliases.
+  sourceId?: string;
+  targetId?: string;
   relationshipType: RelationshipType;
   strength: number; // 1-10 scale
   description?: string;

@@ -26,6 +26,8 @@ export interface TimelineEvent {
   name: string;
   description: string;
   type: TimelineEventType;
+  // Legacy compatibility alias used by older analysis code.
+  eventType?: string;
   scope: TimelineScope;
 
   // Temporal Information
@@ -77,9 +79,11 @@ export interface TimelineEvent {
   icon?: string;
   tags: string[];
   notes?: string;
+  // Legacy top-level location alias used by older modules.
+  location?: string;
 
   // Relationships to other events
-  dependencies?: EventDependency[];
+  dependencies?: EventDependency[] | string[];
   conflicts?: EventConflict[];
 
   // Status and Validation

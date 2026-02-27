@@ -230,7 +230,7 @@ const SkillsView: React.FC = () => {
               // Check prerequisites
               const hasPrerequisites = node.prerequisites.every(prereqId => {
                 const prereq = tree.nodes.find(n => n.id === prereqId);
-                return prereq?.currentLevel > 0;
+                return (prereq?.currentLevel ?? 0) > 0;
               });
 
               if (hasPrerequisites && character.skillPoints >= node.cost) {

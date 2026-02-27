@@ -16,6 +16,7 @@ export interface SkillNode {
   skillType: 'active' | 'passive' | 'toggle';
   category: string;
   effects: string[];
+  children?: SkillNode[];
 }
 
 export interface SkillTree {
@@ -76,7 +77,7 @@ export default function SkillTreeVisualizer({
     // Check prerequisites
     const hasPrerequisites = skill.prerequisites.every(prereqId => {
       const prereq = skillTree.nodes.find(n => n.id === prereqId);
-      return prereq?.currentLevel > 0;
+      return (prereq?.currentLevel ?? 0) > 0;
     });
 
     return hasPrerequisites;
@@ -280,14 +281,41 @@ export default function SkillTreeVisualizer({
     return "#10B981"; // Green for partially learned
   };
 
-  const createHierarchy = (nodes: SkillNode[], _connections: SkillTree['connections']): { name: string; children: SkillNode[] } => {
+  const createHierarchy = (nodes: SkillNode[], _connections: SkillTree['connections']): SkillNode => {
     // Simple hierarchy creation - this could be enhanced
     const rootNodes = nodes.filter(n => n.prerequisites.length === 0);
 
-    if (rootNodes.length === 0) return { name: "Root", children: nodes };
+    if (rootNodes.length === 0) {
+      return {
+        id: 'skill-tree-root',
+        name: 'Root',
+        description: 'Skill tree root',
+        tier: 0,
+        maxLevel: 0,
+        currentLevel: 0,
+        prerequisites: [],
+        cost: 0,
+        unlocked: true,
+        skillType: 'passive',
+        category: 'system',
+        effects: [],
+        children: nodes
+      };
+    }
 
     return {
-      name: "Skill Tree Root",
+      id: 'skill-tree-root',
+      name: 'Skill Tree Root',
+      description: 'Skill tree root',
+      tier: 0,
+      maxLevel: 0,
+      currentLevel: 0,
+      prerequisites: [],
+      cost: 0,
+      unlocked: true,
+      skillType: 'passive',
+      category: 'system',
+      effects: [],
       children: rootNodes
     };
   };

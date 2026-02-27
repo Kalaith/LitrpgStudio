@@ -244,6 +244,13 @@ const CoreSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible, onChange }) => {
+  const defaultDice: CoreSystem['dice'] = {
+    type: 'd20',
+    description: '',
+    modifiers: [],
+    criticals: []
+  };
+
   const updateCoreSystem = (updates: Partial<CoreSystem>) => {
     onChange({
       ...systemBible,
@@ -318,7 +325,10 @@ const CoreSystemStep: React.FC<{
             <select
               value={systemBible.gameSystem?.core?.dice?.type || ''}
               onChange={(e) => updateCoreSystem({
-                dice: { ...systemBible.gameSystem?.core?.dice, type: e.target.value as CoreSystem['dice']['type'] }
+                dice: {
+                  ...(systemBible.gameSystem?.core?.dice || defaultDice),
+                  type: e.target.value as CoreSystem['dice']['type']
+                }
               })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
@@ -339,7 +349,10 @@ const CoreSystemStep: React.FC<{
               type="text"
               value={systemBible.gameSystem?.core?.dice?.description || ''}
               onChange={(e) => updateCoreSystem({
-                dice: { ...systemBible.gameSystem?.core?.dice, description: e.target.value }
+                dice: {
+                  ...(systemBible.gameSystem?.core?.dice || defaultDice),
+                  description: e.target.value
+                }
               })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="e.g., Roll 1d20 + modifier vs DC"

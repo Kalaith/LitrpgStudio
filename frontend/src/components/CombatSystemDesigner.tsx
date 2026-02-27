@@ -86,6 +86,12 @@ interface SimulationAnalysis {
 
 type CombatTab = 'actions' | 'simulator' | 'balance';
 
+const combatTabs: Array<{ key: CombatTab; label: string; icon: string }> = [
+  { key: 'actions', label: 'Combat Actions', icon: '⚔️' },
+  { key: 'simulator', label: 'Battle Simulator', icon: '🎯' },
+  { key: 'balance', label: 'Balance Analysis', icon: '⚖️' }
+];
+
 export default function CombatSystemDesigner({
   onSimulate
 }: CombatSystemDesignerProps) {
@@ -560,11 +566,7 @@ export default function CombatSystemDesigner({
 
         {/* Tab Navigation */}
         <div className="flex space-x-1 mb-6 bg-white dark:bg-gray-800 rounded-lg p-1">
-          {[
-            { key: 'actions', label: 'Combat Actions', icon: '⚔️' },
-            { key: 'simulator', label: 'Battle Simulator', icon: '🎯' },
-            { key: 'balance', label: 'Balance Analysis', icon: '⚖️' }
-          ].map(({ key, label, icon }: { key: CombatTab; label: string; icon: string }) => (
+          {combatTabs.map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}

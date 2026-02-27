@@ -545,11 +545,11 @@ export const useWorldStateStore = create<WorldStateStore>()(
               const newProperty: WorldProperty = {
                 key,
                 value,
-                type: (
-                  typeof value === 'string' ||
-                  typeof value === 'number' ||
-                  typeof value === 'boolean'
-                ) ? typeof value : 'object',
+                type:
+                  typeof value === 'string' ? 'string' :
+                  typeof value === 'number' ? 'number' :
+                  typeof value === 'boolean' ? 'boolean' :
+                  'object',
                 description: reason,
                 lastChanged: new Date(),
                 changeReason: reason
@@ -794,7 +794,10 @@ export const useWorldStateStore = create<WorldStateStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.worldStates = new Map(state.worldStates as [string, WorldState[]][]);
+          const worldStateEntries = Array.isArray(state.worldStates)
+            ? (state.worldStates as [string, WorldState[]][])
+            : Array.from(state.worldStates.entries());
+          state.worldStates = new Map(worldStateEntries);
         }
       }
     }

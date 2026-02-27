@@ -12,6 +12,14 @@ interface WorldStateMonitorProps {
 
 type MonitorTab = 'overview' | 'characters' | 'locations' | 'events' | 'consistency';
 
+const monitorTabs: Array<{ id: MonitorTab; label: string; icon: string }> = [
+  { id: 'overview', label: 'Overview', icon: '🌍' },
+  { id: 'characters', label: 'Characters', icon: '👥' },
+  { id: 'locations', label: 'Locations', icon: '📍' },
+  { id: 'events', label: 'Events', icon: '📅' },
+  { id: 'consistency', label: 'Consistency', icon: '✓' }
+];
+
 export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
   storyId,
   chapterNumber
@@ -142,13 +150,7 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
 
         {/* Tab Navigation */}
         <div className="flex gap-2 overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: '🌍' },
-            { id: 'characters', label: 'Characters', icon: '👥' },
-            { id: 'locations', label: 'Locations', icon: '📍' },
-            { id: 'events', label: 'Events', icon: '📅' },
-            { id: 'consistency', label: 'Consistency', icon: '✓' }
-          ].map((tab: { id: MonitorTab; label: string; icon: string }) => (
+          {monitorTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}

@@ -23,8 +23,13 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<WritingGoal | null>(null);
 
-  const [newGoal, setNewGoal] = useState({
-    type: 'daily' as const,
+  const [newGoal, setNewGoal] = useState<{
+    type: WritingGoal['type'];
+    target: number;
+    deadline: string;
+    storyId: string;
+  }>({
+    type: 'daily',
     target: 500,
     deadline: '',
     storyId: '',

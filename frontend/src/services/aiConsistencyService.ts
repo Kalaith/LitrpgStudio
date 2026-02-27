@@ -26,7 +26,7 @@ export interface WorldContext {
 
 export interface WorldRule {
   id: string;
-  category: 'physics' | 'magic' | 'society' | 'economy' | 'politics';
+  category: 'physics' | 'magic' | 'society' | 'economy' | 'politics' | 'logic';
   description: string;
   scope: 'global' | 'regional' | 'local';
   exceptions: string[];
@@ -181,7 +181,7 @@ export class AIConsistencyService {
       // Check for character location consistency
       const locationEvents = timeline.filter(e =>
         e.involvedEntities.some(entity => entity.id === character.id) &&
-        e.eventType === 'travel'
+        (e.eventType === 'travel' || e.type === 'story_event')
       ).sort((a, b) => (a.timestamp.storyDay || 0) - (b.timestamp.storyDay || 0));
 
       for (let i = 1; i < locationEvents.length; i++) {
@@ -235,7 +235,8 @@ export class AIConsistencyService {
 
       // Check if effects happen before causes
       if (currentEvent.dependencies && currentEvent.dependencies.length > 0) {
-        for (const depId of currentEvent.dependencies) {
+        for (const dep of currentEvent.dependencies) {
+          const depId = typeof dep === 'string' ? dep : dep.eventId;
           const dependentEvent = sortedEvents.find(e => e.id === depId);
           if (dependentEvent &&
               (dependentEvent.timestamp.storyDay || 0) > (currentEvent.timestamp.storyDay || 0)) {
@@ -523,15 +524,21 @@ export class AIConsistencyService {
 
     // Build connections between entities
     for (const relationship of worldContext.relationships) {
-      if (!this.knowledgeGraph.has(relationship.sourceId)) {
-        this.knowledgeGraph.set(relationship.sourceId, new Set());
-      }
-      if (!this.knowledgeGraph.has(relationship.targetId)) {
-        this.knowledgeGraph.set(relationship.targetId, new Set());
+      const sourceId = relationship.sourceId ?? relationship.fromEntity?.id;
+      const targetId = relationship.targetId ?? relationship.toEntity?.id;
+      if (!sourceId || !targetId) {
+        continue;
       }
 
-      this.knowledgeGraph.get(relationship.sourceId)!.add(relationship.targetId);
-      this.knowledgeGraph.get(relationship.targetId)!.add(relationship.sourceId);
+      if (!this.knowledgeGraph.has(sourceId)) {
+        this.knowledgeGraph.set(sourceId, new Set());
+      }
+      if (!this.knowledgeGraph.has(targetId)) {
+        this.knowledgeGraph.set(targetId, new Set());
+      }
+
+      this.knowledgeGraph.get(sourceId)!.add(targetId);
+      this.knowledgeGraph.get(targetId)!.add(sourceId);
     }
   }
 

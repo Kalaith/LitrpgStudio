@@ -24,6 +24,8 @@ import { ERROR_MESSAGES } from '../constants';
  */
 export class AppError extends Error {
   public readonly timestamp: Date;
+  public readonly code?: string;
+  public readonly context?: Record<string, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public readonly metadata?: Record<string, any>;
 
@@ -33,10 +35,15 @@ export class AppError extends Error {
     this.name = 'AppError';
     this.timestamp = new Date();
     this.metadata = metadata;
+    this.code = typeof metadata?.code === 'string' ? metadata.code : undefined;
+    this.context = (metadata?.context as Record<string, unknown> | undefined) ?? undefined;
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, AppError);
+    const captureStackTrace = (Error as ErrorConstructor & {
+      captureStackTrace?: (targetObject: object, constructorOpt?: Function) => void;
+    }).captureStackTrace;
+    if (captureStackTrace) {
+      captureStackTrace(this, AppError);
     }
   }
 }
@@ -80,6 +87,8 @@ export class ApiError extends AppError {
 export class ValidationError extends AppError {
   public readonly field?: string;
   public readonly validationErrors?: Record<string, string[]>;
+  // Backward-compat alias used by older hooks/components.
+  public readonly fields?: Record<string, string[]>;
 
   constructor(
     message: string,
@@ -90,6 +99,7 @@ export class ValidationError extends AppError {
     super(message, metadata);
     this.name = 'ValidationError';
     this.validationErrors = validationErrors;
+    this.fields = validationErrors;
   }
 }
 
@@ -160,6 +170,9 @@ export class UnauthorizedError extends ApiError {
     this.requiresLogin = requiresLogin;
   }
 }
+
+// Backward compatibility alias for older imports.
+export class AuthenticationError extends UnauthorizedError {}
 
 // =============================================================================
 // ERROR INFO TYPE

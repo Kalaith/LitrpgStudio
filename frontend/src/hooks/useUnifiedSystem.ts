@@ -268,7 +268,7 @@ export const useUnifiedSystem = () => {
   };
 
   const validateSystemConsistency = () => {
-    const issues = [];
+    const issues: string[] = [];
 
     // Check for orphaned relationships
     // Check for missing entity references

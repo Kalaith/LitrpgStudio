@@ -16,6 +16,14 @@ interface SeriesManagerProps {
 
 type SeriesTab = 'overview' | 'books' | 'characters' | 'worldbuilding' | 'consistency';
 
+const seriesTabs: Array<{ id: SeriesTab; label: string; icon: string }> = [
+  { id: 'overview', label: 'Overview', icon: '📊' },
+  { id: 'books', label: 'Books', icon: '📚' },
+  { id: 'characters', label: 'Characters', icon: '👥' },
+  { id: 'worldbuilding', label: 'World Building', icon: '🌍' },
+  { id: 'consistency', label: 'Consistency', icon: '✓' }
+];
+
 export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) => {
   const [activeTab, setActiveTab] = useState<SeriesTab>('overview');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -151,13 +159,7 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
 
         {/* Tab Navigation */}
         <div className="flex gap-2 overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'books', label: 'Books', icon: '📚' },
-            { id: 'characters', label: 'Characters', icon: '👥' },
-            { id: 'worldbuilding', label: 'World Building', icon: '🌍' },
-            { id: 'consistency', label: 'Consistency', icon: '✓' }
-          ].map((tab: { id: SeriesTab; label: string; icon: string }) => (
+          {seriesTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -193,8 +195,8 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
       {showCreateModal && (
         <CreateSeriesModal
           onClose={() => setShowCreateModal(false)}
-          onCreate={(seriesData) => {
-            const newSeries = createSeries(seriesData);
+          onCreate={async (seriesData) => {
+            const newSeries = await createSeries(seriesData);
             handleSeriesSelect(newSeries);
             setShowCreateModal(false);
           }}
@@ -219,7 +221,7 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
 // Create Series Modal Component
 const CreateSeriesModal: React.FC<{
   onClose: () => void;
-  onCreate: (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onCreate: (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 }> = ({ onClose, onCreate }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -237,9 +239,9 @@ const CreateSeriesModal: React.FC<{
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onCreate({
+    await onCreate({
       ...formData,
       books: [],
       sharedElements: {

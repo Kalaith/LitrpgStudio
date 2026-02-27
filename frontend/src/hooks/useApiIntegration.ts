@@ -56,7 +56,7 @@ export function useApiIntegration() {
         await seriesApi.update(series.id, series);
       } else {
         // Create new
-        const response = await seriesApi.create(series);
+        const response = await seriesApi.create(series as Omit<Series, 'id' | 'createdAt' | 'updatedAt'>);
         if (response.success && response.data) {
           return response.data;
         }
@@ -75,7 +75,7 @@ export function useApiIntegration() {
         await charactersApi.update(character.id, character);
       } else {
         // Create new
-        const response = await charactersApi.create(character);
+        const response = await charactersApi.create(character as Omit<Character, 'id' | 'createdAt' | 'updatedAt'>);
         if (response.success && response.data) {
           return response.data;
         }

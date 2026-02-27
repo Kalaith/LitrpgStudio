@@ -55,11 +55,11 @@ type CharacterStore = CharacterState & CharacterActions;
 
 const generateId = () => crypto.randomUUID();
 
-const calculateDerivedStats = (stats: Character['stats']): Character['stats'] => {
+const calculateDerivedStats = (stats: Character['stats'], characterLevel: number): Character['stats'] => {
   return {
     ...stats,
-    hitPoints: Math.max(1, stats.constitution * 10 + stats.level * 5),
-    manaPoints: Math.max(0, stats.intelligence * 8 + stats.level * 3),
+    hitPoints: Math.max(1, stats.constitution * 10 + characterLevel * 5),
+    manaPoints: Math.max(0, stats.intelligence * 8 + characterLevel * 3),
     armorClass: 10 + Math.floor((stats.dexterity - 10) / 2),
   };
 };
@@ -72,32 +72,57 @@ export const useCharacterStore = create<CharacterStore>()(
       currentCharacter: null,
       templates: [],
       crossReferences: [],
+      loading: false,
+      error: null,
+
+      setLoading: (loading) => set({ loading }),
+      setError: (error) => set({ error }),
+
+      fetchCharacters: async () => {
+        set({ loading: true, error: null });
+        set({ loading: false });
+      },
+
+      fetchCharacterById: async (id) => {
+        set({ loading: true, error: null });
+        const character = get().characters.find(c => c.id === id) || null;
+        set({ currentCharacter: character, loading: false });
+      },
 
       // Actions
-      createCharacter: (characterData) =>
+      createCharacter: async (characterData) => {
+        let createdCharacter: Character | null = null;
         set((state) => {
           const newCharacter: Character = {
             ...characterData,
             id: generateId(),
-            stats: calculateDerivedStats(characterData.stats),
+            stats: calculateDerivedStats(characterData.stats, characterData.level),
             storyReferences: characterData.storyReferences || [],
             createdAt: new Date(),
             updatedAt: new Date(),
           };
+          createdCharacter = newCharacter;
           return {
             characters: [...state.characters, newCharacter],
             currentCharacter: newCharacter,
           };
-        }),
+        });
+        if (!createdCharacter) {
+          throw new Error('Failed to create character');
+        }
+        return createdCharacter;
+      },
 
-      updateCharacter: (characterId, updates) =>
+      updateCharacter: async (characterId, updates) => {
         set((state) => {
           const updatedCharacters = state.characters.map(c =>
             c.id === characterId
               ? {
                   ...c,
                   ...updates,
-                  stats: updates.stats ? calculateDerivedStats({ ...c.stats, ...updates.stats }) : c.stats,
+                  stats: updates.stats
+                    ? calculateDerivedStats({ ...c.stats, ...updates.stats }, updates.level ?? c.level)
+                    : c.stats,
                   updatedAt: new Date(),
                 }
               : c
@@ -109,13 +134,15 @@ export const useCharacterStore = create<CharacterStore>()(
                 ? updatedCharacters.find(c => c.id === characterId) || null
                 : state.currentCharacter,
           };
-        }),
+        });
+      },
 
-      deleteCharacter: (characterId) =>
+      deleteCharacter: async (characterId) => {
         set((state) => ({
           characters: state.characters.filter(c => c.id !== characterId),
           currentCharacter: state.currentCharacter?.id === characterId ? null : state.currentCharacter,
-        })),
+        }));
+      },
 
       setCurrentCharacter: (character) => set({ currentCharacter: character }),
 
@@ -136,7 +163,7 @@ export const useCharacterStore = create<CharacterStore>()(
               constitution: character.stats.constitution + (newLevel % 4 === 1 ? 1 : 0),
               intelligence: character.stats.intelligence + (newLevel % 4 === 2 ? 1 : 0),
               dexterity: character.stats.dexterity + (newLevel % 4 === 3 ? 1 : 0),
-            }),
+            }, newLevel),
             updatedAt: new Date(),
           };
 
@@ -303,6 +330,7 @@ export const useCharacterStore = create<CharacterStore>()(
             appearance: '',
             personality: [],
             progression: [],
+            relationships: [],
             storyReferences: [],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -404,6 +432,8 @@ export const useCharacterStore = create<CharacterStore>()(
           currentCharacter: null,
           templates: [],
           crossReferences: [],
+          loading: false,
+          error: null
         }),
     }),
     {

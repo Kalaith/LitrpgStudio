@@ -11,6 +11,8 @@ export interface WritingSession {
   duration: number; // in minutes
   isActive: boolean;
   date: string; // YYYY-MM-DD format
+  sessionType?: 'new_chapter' | 'section' | 'continue';
+  sessionContext?: string;
 }
 
 export interface WritingGoal {
@@ -115,7 +117,13 @@ export interface AnalyticsState {
 
 export interface AnalyticsActions {
   // Session Management
-  startSession: (storyId: string, chapterId?: string, wordTarget?: number) => void;
+  startSession: (
+    storyId: string,
+    chapterId?: string,
+    wordTarget?: number,
+    sessionType?: 'new_chapter' | 'section' | 'continue',
+    sessionContext?: string
+  ) => void;
   endSession: () => void;
   updateSessionProgress: (currentWordCount: number) => void;
   pauseSession: () => void;

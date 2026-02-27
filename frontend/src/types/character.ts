@@ -1,6 +1,7 @@
 export interface Character {
   id: string;
   name: string;
+  description?: string;
   class: string;
   race: string;
   level: number;
@@ -8,9 +9,15 @@ export interface Character {
   stats: CharacterStats;
   skills: Skill[];
   equipment: Item[];
+  // Legacy compatibility alias used by some adapters/components.
+  inventory?: Item[];
+  location?: string;
   backstory: string;
   appearance: string;
   personality: string[];
+  goals?: string[];
+  notes?: string;
+  tags?: string[];
   progression: LevelProgression[];
   relationships: CharacterRelationship[];
   storyReferences: StoryReference[];
@@ -50,6 +57,7 @@ export interface CharacterRelationship {
 export interface CharacterStats {
   strength: number;
   dexterity: number;
+  agility?: number;
   constitution: number;
   intelligence: number;
   wisdom: number;
@@ -58,6 +66,10 @@ export interface CharacterStats {
   hitPoints: number;
   manaPoints: number;
   armorClass: number;
+  // Legacy compatibility aliases.
+  health?: number;
+  mana?: number;
+  level?: number;
 }
 
 export interface Skill {

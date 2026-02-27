@@ -31,6 +31,16 @@ interface PerformanceMonitorProps {
 
 type PerformanceTab = 'metrics' | 'strategies' | 'config';
 
+const performanceTabs: Array<{
+  key: PerformanceTab;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+}> = [
+  { key: 'metrics', label: 'Metrics', icon: BarChart3 },
+  { key: 'strategies', label: 'Optimization', icon: Zap },
+  { key: 'config', label: 'Config', icon: Settings }
+];
+
 export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   isVisible,
   onToggle,
@@ -162,11 +172,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {[
-          { key: 'metrics', label: 'Metrics', icon: BarChart3 },
-          { key: 'strategies', label: 'Optimization', icon: Zap },
-          { key: 'config', label: 'Config', icon: Settings }
-        ].map((tab: { key: PerformanceTab; label: string; icon: React.ComponentType<{ size?: number }> }) => {
+        {performanceTabs.map((tab) => {
           const TabIcon = tab.icon;
           return (
             <button

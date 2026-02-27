@@ -49,12 +49,7 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
       case 'skills':
         return <SkillsView />;
       case 'timeline':
-        return (
-          <TimelineView
-            isCreating={isCreatingEvent}
-            onCreateComplete={() => setIsCreatingEvent(false)}
-          />
-        );
+        return <TimelineView />;
       case 'editor':
         return <EditorView />;
       case 'analytics':

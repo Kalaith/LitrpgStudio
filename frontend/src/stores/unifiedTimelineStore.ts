@@ -126,6 +126,15 @@ const createEmptyMaps = () => ({
   templates: new Map<string, TimelineTemplate>()
 });
 
+const normalizeDependencies = (deps: TimelineEvent['dependencies']): EventDependency[] => {
+  if (!deps || deps.length === 0) return [];
+  return deps.map((dep) =>
+    typeof dep === 'string'
+      ? { eventId: dep, dependencyType: 'must_happen_before' as const }
+      : dep
+  );
+};
+
 export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
   persist(
     (set, get) => ({
@@ -186,8 +195,9 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           // Remove dependencies involving this event
           for (const [eventId, event] of newEvents) {
             if (event.dependencies) {
-              const newDependencies = event.dependencies.filter(dep => dep.eventId !== id);
-              if (newDependencies.length !== event.dependencies.length) {
+              const normalizedDeps = normalizeDependencies(event.dependencies);
+              const newDependencies = normalizedDeps.filter(dep => dep.eventId !== id);
+              if (newDependencies.length !== normalizedDeps.length) {
                 newEvents.set(eventId, {
                   ...event,
                   dependencies: newDependencies,
@@ -482,7 +492,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           description
         };
 
-        const newDependencies = [...(fromEvent.dependencies || []), dependency];
+        const newDependencies = [...normalizeDependencies(fromEvent.dependencies), dependency];
 
         get().updateEvent(fromEventId, {
           dependencies: newDependencies
@@ -493,7 +503,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const fromEvent = get().events.get(fromEventId);
         if (!fromEvent || !fromEvent.dependencies) return;
 
-        const newDependencies = fromEvent.dependencies.filter(dep => dep.eventId !== toEventId);
+        const newDependencies = normalizeDependencies(fromEvent.dependencies).filter(dep => dep.eventId !== toEventId);
 
         get().updateEvent(fromEventId, {
           dependencies: newDependencies
@@ -503,7 +513,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
       getDependentEvents: (eventId) => {
         const allEvents = Array.from(get().events.values());
         return allEvents.filter(event =>
-          event.dependencies?.some(dep => dep.eventId === eventId)
+          normalizeDependencies(event.dependencies).some(dep => dep.eventId === eventId)
         );
       },
 
@@ -538,7 +548,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
         // Check dependencies
         if (event.dependencies) {
-          event.dependencies.forEach(dep => {
+          normalizeDependencies(event.dependencies).forEach(dep => {
             if (!get().events.has(dep.eventId)) {
               issues.push({
                 type: 'timeline_inconsistency',

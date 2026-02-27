@@ -26,7 +26,7 @@ export abstract class BaseDataService<T> {
     }
   }
 
-  abstract create(item: Omit<T, 'id'>): Promise<T>;
+  abstract create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T>;
   abstract findById(id: string): Promise<T | null>;
   abstract findAll(): Promise<T[]>;
   abstract update(id: string, updates: Partial<T>): Promise<T | null>;

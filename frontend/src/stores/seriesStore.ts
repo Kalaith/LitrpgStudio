@@ -112,11 +112,10 @@ interface SeriesActions {
 
 interface ConsistencyIssue {
   id: string;
-  type: 'character' | 'worldbuilding' | 'plot' | 'timeline';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  books: number[];
-  suggestion?: string;
+  type: 'error' | 'warning' | 'info';
+  message: string;
+  location?: string;
+  severity: number;
 }
 
 interface ProgressionValidation {
@@ -926,11 +925,10 @@ export const useSeriesStore = create<SeriesStore>()(
             if (developments[i].startingLevel < developments[i - 1].endingLevel) {
               issues.push({
                 id: generateId(),
-                type: 'character',
-                severity: 'high',
-                description: `${character.character.name} has inconsistent level progression between books ${developments[i - 1].bookNumber} and ${developments[i].bookNumber}`,
-                books: [developments[i - 1].bookNumber, developments[i].bookNumber],
-                suggestion: 'Review character level progression and ensure consistency across books'
+                type: 'warning',
+                severity: 70,
+                message: `${character.character.name} has inconsistent level progression between books ${developments[i - 1].bookNumber} and ${developments[i].bookNumber}`,
+                location: `Books ${developments[i - 1].bookNumber}, ${developments[i].bookNumber}`
               });
             }
           }
@@ -942,11 +940,10 @@ export const useSeriesStore = create<SeriesStore>()(
           if (contradictoryRefs.length > 0 && !rule.exceptions.length) {
             issues.push({
               id: generateId(),
-              type: 'worldbuilding',
-              severity: 'high',
-              description: `World rule "${rule.name}" is broken in some books but has no documented exceptions`,
-              books: contradictoryRefs.map(ref => ref.bookNumber),
-              suggestion: 'Add exceptions to the world rule or fix the contradictions'
+              type: 'error',
+              severity: 85,
+              message: `World rule "${rule.name}" is broken in some books but has no documented exceptions`,
+              location: `Books ${contradictoryRefs.map(ref => ref.bookNumber).join(', ')}`
             });
           }
         });
@@ -1036,7 +1033,10 @@ export const useSeriesStore = create<SeriesStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Convert Array back to Map after deserialization
-          state.analytics = new Map(state.analytics as [string, SeriesAnalytics][]);
+          const analyticsEntries = Array.isArray(state.analytics)
+            ? (state.analytics as [string, SeriesAnalytics][])
+            : Array.from(state.analytics.entries());
+          state.analytics = new Map(analyticsEntries);
         }
       }
     }

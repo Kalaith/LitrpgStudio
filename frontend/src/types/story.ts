@@ -13,6 +13,14 @@ export interface Story {
   status: StoryStatus;
   wordCount: number;
   targetWordCount?: number;
+  // Legacy compatibility fields kept optional for older modules.
+  characters?: string[];
+  worldBuildingNotes?: string;
+  plotOutline?: string;
+  themes?: string[];
+  tags?: string[];
+  lastModified?: Date;
+  author?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +37,14 @@ export interface Chapter {
   wordCount: number;
   notes: string;
   characterProgression: CharacterProgressionEvent[];
+  // Legacy compatibility fields for older chapter tooling.
+  summary?: string;
+  status?: 'draft' | 'in_progress' | 'completed' | 'published' | 'archived';
+  scenes?: string[];
+  characters?: string[];
+  locations?: string[];
+  plotPoints?: string[];
+  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -6,6 +6,7 @@ export class ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+  status?: string;
 }
 
 export interface ErrorResponse {
