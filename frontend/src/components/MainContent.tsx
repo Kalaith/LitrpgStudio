@@ -23,17 +23,13 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
   const [isCreatingCharacter, setIsCreatingCharacter] = useState(false);
-  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
   const handleCreateCharacter = () => {
     // Switch to characters view and set creating flag
     setIsCreatingCharacter(true);
   };
 
-  const handleCreateEvent = () => {
-    // Switch to timeline view and set creating flag
-    setIsCreatingEvent(true);
-  };
+  const handleCreateEvent = () => undefined;
 
   const renderActiveView = () => {
     switch (activeView) {
