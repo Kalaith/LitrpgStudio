@@ -250,9 +250,9 @@ describe('withRetry utility', () => {
     const fn = vi.fn().mockRejectedValue(error);
 
     const promise = withRetry(fn, { attempts: 3, delay: 100 });
+    const assertion = expect(promise).rejects.toThrow('persistent failure');
     await vi.runAllTimersAsync();
-
-    await expect(promise).rejects.toThrow('persistent failure');
+    await assertion;
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
