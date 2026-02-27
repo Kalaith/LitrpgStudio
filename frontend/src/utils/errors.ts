@@ -118,7 +118,8 @@ export class NetworkError extends AppError {
   constructor(message: string = ERROR_MESSAGES.NETWORK_ERROR, metadata?: Record<string, any>) {
     super(message, metadata);
     this.name = 'NetworkError';
-    this.isOffline = !navigator.onLine;
+    const nav = (globalThis as { navigator?: Navigator }).navigator;
+    this.isOffline = nav ? !nav.onLine : false;
   }
 }
 
