@@ -13,14 +13,9 @@ final class UserRepository
         return User::find($id);
     }
 
-    public function findByAuth0Id(string $auth0Id): ?User
-    {
-        return User::where('auth0_id', $auth0Id)->first();
-    }
-
     public function create(User $user): User
     {
-        $user->save();
+        $user->save();webhatch_
         return $user;
     }
 

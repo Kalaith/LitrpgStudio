@@ -13,12 +13,13 @@ use App\Controllers\WorldBuildingController;
 use App\Controllers\ConsistencyController;
 use App\Controllers\AnalyticsController;
 use App\Controllers\ExportController;
-use App\Controllers\Auth0Controller;
-use App\Middleware\Auth0Middleware;
+use App\Controllers\AuthController;
 
 return function (App $app) {
     // API base path
     $app->group('/api/v1', function ($group) {
+        // Frontpage JWT session check endpoint
+        $group->get('/auth/current-user', [AuthController::class, 'currentUser']);
 
         // Series Management
         $group->get('/series', [SeriesController::class, 'getAll']);

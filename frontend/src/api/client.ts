@@ -32,6 +32,14 @@ export class ApiError extends Error {
   }
 }
 
+type TokenProvider = () => string | null | Promise<string | null>;
+
+let tokenProvider: TokenProvider | null = null;
+
+export function setTokenProvider(provider: TokenProvider | null): void {
+  tokenProvider = provider;
+}
+
 class ApiClient {
   private baseUrl: string;
   private version: string;
@@ -52,11 +60,24 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = this.getUrl(endpoint);
 
+    const headers = new Headers(options.headers);
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (tokenProvider) {
+      try {
+        const token = await tokenProvider();
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+      } catch {
+        // Ignore token provider errors and proceed without auth header.
+      }
+    }
+
     const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     };
 

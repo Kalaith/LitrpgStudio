@@ -206,6 +206,7 @@ $app->options('/{routes:.+}', function ($request, $response) {
 // Other Middleware
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
+$app->add(new \App\Middleware\JwtAuthMiddleware());
 
 // Error Middleware
 $errorMiddleware = $app->addErrorMiddleware(

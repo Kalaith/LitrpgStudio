@@ -11,8 +11,7 @@ final class User extends Model
     protected $table = 'users';
 
     protected $fillable = [
-        'auth0_id',
-        'email',
+        'webhatch_,
         'username',
         'first_name',
         'last_name',
