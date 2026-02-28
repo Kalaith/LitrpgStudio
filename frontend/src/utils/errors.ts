@@ -40,10 +40,10 @@ export class AppError extends Error {
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     const captureStackTrace = (Error as ErrorConstructor & {
-      captureStackTrace?: (targetObject: object, constructorOpt?: typeof AppError) => void;
+      captureStackTrace?: (targetObject: object) => void;
     }).captureStackTrace;
     if (captureStackTrace) {
-      captureStackTrace(this, AppError);
+      captureStackTrace(this);
     }
   }
 }
