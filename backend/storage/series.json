@@ -2,8 +2,8 @@
     {
         "id": "series-sample-1",
         "title": "The Digital Realms",
-        "description": "A LitRPG adventure in virtual worlds",
-        "genre": "LitRPG",
+        "description": "A fantasy adventure set across virtual worlds",
+        "genre": "Fantasy",
         "tags": [
             "fantasy",
             "virtual reality",
@@ -33,7 +33,7 @@
     {
         "title": "Test Series",
         "description": "A test series created via API",
-        "genre": "LitRPG",
+        "genre": "Fantasy",
         "tags": [],
         "status": "planning",
         "target_books": null,
@@ -45,8 +45,8 @@
     },
     {
         "title": "Chronicles of the Virtual Empire",
-        "description": "A epic LitRPG series following players in a massive virtual world where game mechanics blend with reality",
-        "genre": "LitRPG",
+        "description": "An epic fantasy series following players in a massive virtual world where game mechanics blend with reality",
+        "genre": "Fantasy",
         "tags": [
             "virtual reality",
             "empire building",
@@ -63,8 +63,8 @@
     },
     {
         "title": "Dungeon Architect Academy",
-        "description": "A LitRPG adventure about students learning to design and manage magical dungeons",
-        "genre": "LitRPG",
+        "description": "A fantasy adventure about students learning to design and manage magical dungeons",
+        "genre": "Fantasy",
         "tags": [
             "dungeon building",
             "academy",
@@ -81,8 +81,8 @@
     },
     {
         "title": "Spell Forge Chronicles",
-        "description": "A crafting-focused LitRPG where magical items and spells are created through complex recipes and resource management",
-        "genre": "LitRPG",
+        "description": "A crafting-focused fantasy series where magical items and spells are created through complex recipes and resource management",
+        "genre": "Fantasy",
         "tags": [
             "crafting",
             "magic",
@@ -99,8 +99,8 @@
     },
     {
         "title": "Guild Master Ascension",
-        "description": "A political and strategic LitRPG following the rise of a guild leader through complex alliance systems and large-scale battles",
-        "genre": "LitRPG",
+        "description": "A political and strategic fantasy series following the rise of a guild leader through complex alliance systems and large-scale battles",
+        "genre": "Fantasy",
         "tags": [
             "guild management",
             "politics",
@@ -118,7 +118,7 @@
     {
         "title": "Database Test Series",
         "description": "A test series to verify database functionality after initialization",
-        "genre": "LitRPG",
+        "genre": "Fantasy",
         "tags": [
             "database",
             "testing",

@@ -233,7 +233,7 @@ const CreateSeriesModal: React.FC<{
       genres: ['fantasy'],
       themes: [],
       targetAudience: 'adult',
-      marketCategory: 'litrpg',
+      marketCategory: 'general-fiction',
       seriesLength: 5,
       marketingTags: []
     }

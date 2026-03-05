@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Production Deployment Script for LitRPG Studio Backend
+# Production Deployment Script for Writers Studio Backend
 # This script optimizes the vendor directory for production deployment
 
 set -e
@@ -84,7 +84,7 @@ done
 # Step 5: Create production-ready .htaccess for Apache
 print_status "Creating production .htaccess file..."
 cat > public/.htaccess << 'EOF'
-# Production .htaccess for LitRPG Studio API
+# Production .htaccess for Writers Studio API
 
 # Enable URL rewriting
 RewriteEngine On

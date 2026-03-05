@@ -248,7 +248,7 @@ const DashboardView: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                    Welcome to LitRPG Studio!
+                    Welcome to Writers Studio!
                   </h3>
                   <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                     <p>Your database is empty. The dashboard will show meaningful data once you:</p>
@@ -256,6 +256,7 @@ const DashboardView: React.FC = () => {
                       <li>Create your first series</li>
                       <li>Add characters to your stories</li>
                       <li>Start writing chapters</li>
+                      <li>Run AI consistency checks for timeline and character-reference issues</li>
                     </ul>
                   </div>
                 </div>

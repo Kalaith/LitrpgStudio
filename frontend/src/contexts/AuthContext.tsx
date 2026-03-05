@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = useCallback(() => {
-    // LitRPG Studio must not clear shared frontpage auth storage.
+    // Writers Studio must not clear shared frontpage auth storage.
     window.location.href = FRONTPAGE_LOGIN_PATH;
   }, []);
 

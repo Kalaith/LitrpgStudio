@@ -575,7 +575,7 @@ export const useStoryStore = create<StoryStore>()(
         }),
     }),
     {
-      name: 'litrpg-story-storage',
+      name: 'writers-story-storage',
       partialize: (state) => ({
         stories: state.stories,
         templates: state.templates,

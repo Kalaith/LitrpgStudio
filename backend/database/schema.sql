@@ -1,4 +1,4 @@
--- LitRPG Studio Database Schema
+-- Writers Studio Database Schema
 
 -- Series table
 CREATE TABLE IF NOT EXISTS series (

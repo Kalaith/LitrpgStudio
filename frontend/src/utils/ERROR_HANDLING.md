@@ -2,7 +2,7 @@
 
 ## Overview
 
-LitRPG Studio uses a standardized error handling system that provides:
+Writers Studio uses a standardized error handling system that provides:
 
 - **Custom error classes** with typed metadata
 - **Standardized error parsing** for consistent error handling

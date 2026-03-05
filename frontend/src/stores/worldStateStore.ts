@@ -784,7 +784,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
         })
     }),
     {
-      name: 'litrpg-world-state-storage',
+      name: 'writers-world-state-storage',
       partialize: (state) => ({
         // Convert Map to Array for serialization
         worldStates: Array.from(state.worldStates.entries()),

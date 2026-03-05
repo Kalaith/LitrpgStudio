@@ -437,7 +437,7 @@ export const useCharacterStore = create<CharacterStore>()(
         }),
     }),
     {
-      name: 'litrpg-character-storage',
+      name: 'writers-character-storage',
       partialize: (state) => ({
         characters: state.characters,
         templates: state.templates,

@@ -1,5 +1,5 @@
 <?php
-// LitRPG Studio Backend - Based on WebHatchery standards
+// Writers Studio Backend - Based on WebHatchery standards
 
 declare(strict_types=1);
 
@@ -48,7 +48,7 @@ function buildLocalAppClassMap(string $srcPath): array
 }
 
 $autoloadCandidates = [
-    __DIR__ . '/../../../vendor/autoload.php',
+    __DIR__ . '/../../../../vendor/autoload.php',
     __DIR__ . '/../vendor/autoload.php',
 ];
 $autoloader = null;
@@ -59,10 +59,10 @@ foreach ($autoloadCandidates as $candidate) {
     }
 }
 if (!$autoloader) {
-    failConfiguration('Composer autoload.php not found for litrpg_studio backend.');
+    failConfiguration('Composer autoload.php not found for writers_studio backend.');
 }
 $loader = require $autoloader;
-$globalAutoload = __DIR__ . '/../../../vendor/autoload.php';
+$globalAutoload = __DIR__ . '/../../../../vendor/autoload.php';
 $projectSrc = realpath(__DIR__ . '/../src') ?: (__DIR__ . '/../src');
 if (is_object($loader)) {
     if (method_exists($loader, 'addPsr4')) {

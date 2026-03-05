@@ -30,7 +30,7 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">My LitRPG Novel</h1>
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">My Novel Project</h1>
               {isSaved && <span className="text-sm text-success-600 dark:text-success-400 hidden sm:inline">✓ Saved</span>}
             </div>
 

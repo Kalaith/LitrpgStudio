@@ -561,7 +561,7 @@ export default function CombatSystemDesigner({
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Combat System Designer</h1>
-          <p className="text-gray-600 dark:text-gray-400">Design and balance combat mechanics for your LitRPG world</p>
+          <p className="text-gray-600 dark:text-gray-400">Design and balance combat mechanics for your story world</p>
         </div>
 
         {/* Tab Navigation */}

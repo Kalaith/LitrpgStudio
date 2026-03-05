@@ -22,7 +22,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         <div className="max-w-lg w-full rounded-xl border border-gray-200 bg-white p-8 shadow-sm text-center">
           <h1 className="text-xl font-semibold mb-2">Sign in required</h1>
           <p className="text-sm text-gray-600 mb-6">
-            LitRPG Studio uses your Frontpage JWT session.
+            Writers Studio uses your Frontpage JWT session.
             {error ? ` (${error})` : ''}
           </p>
           <button

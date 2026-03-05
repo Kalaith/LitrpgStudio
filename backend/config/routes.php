@@ -160,7 +160,7 @@ return function (App $app) {
         $group->get('/health', function ($request, $response) {
             $response->getBody()->write(json_encode([
                 'status' => 'healthy',
-                'service' => 'LitRPG Studio API',
+                'service' => 'Writers Studio API',
                 'version' => $_ENV['API_VERSION'] ?? 'v1',
                 'timestamp' => date('c')
             ]));
@@ -195,7 +195,7 @@ return function (App $app) {
     $app->get('/health', function ($request, $response) {
         $response->getBody()->write(json_encode([
             'status' => 'healthy',
-            'service' => 'LitRPG Studio API',
+            'service' => 'Writers Studio API',
             'version' => $_ENV['API_VERSION'] ?? 'v1',
             'timestamp' => date('c')
         ]));

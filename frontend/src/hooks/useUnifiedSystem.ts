@@ -36,7 +36,7 @@ export const useUnifiedSystem = () => {
 
   // Sync existing data with entity registry
   const initializeUnifiedSystem = () => {
-    console.log('🚀 Initializing LitRPG Studio Unified System...');
+    console.log('🚀 Initializing Writers Studio Unified System...');
 
     // Sync stories to entity registry
     stories.forEach(story => {

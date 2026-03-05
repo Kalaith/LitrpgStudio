@@ -1025,7 +1025,7 @@ export const useSeriesStore = create<SeriesStore>()(
         })
     }),
     {
-      name: 'litrpg-series-storage',
+      name: 'writers-series-storage',
       partialize: (state) => ({
         series: state.series,
         analytics: Array.from(state.analytics.entries())

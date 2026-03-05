@@ -1,7 +1,7 @@
 {
-  "name": "litrpg-studio",
+  "name": "writers-studio",
   "version": "0.0.1",
-  "description": "LitRPG Writer's Studio",
+  "description": "Writers Studio",
   "private": true,
   "type": "module",
   "scripts": {

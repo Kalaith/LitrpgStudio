@@ -12,7 +12,7 @@ foreach ($autoloadCandidates as $candidate) {
     }
 }
 if (!$autoloader) {
-    throw new RuntimeException("Composer autoload.php not found for litrpg_studio migration script.");
+    throw new RuntimeException("Composer autoload.php not found for writers_studio migration script.");
 }
 $loader = require $autoloader;
 if (is_object($loader) && method_exists($loader, 'addPsr4')) {
@@ -37,7 +37,7 @@ $capsule->addConnection([
     'driver'    => $_ENV['DB_DRIVER'] ?? 'mysql',
     'host'      => $_ENV['DB_HOST'] ?? 'localhost',
     'port'      => $_ENV['DB_PORT'] ?? 3306,
-    'database'  => $_ENV['DB_DATABASE'] ?? 'litrpg_studio',
+    'database'  => $_ENV['DB_DATABASE'] ?? 'writers_studio',
     'username'  => $_ENV['DB_USERNAME'] ?? 'root',
     'password'  => $_ENV['DB_PASSWORD'] ?? '',
     'charset'   => 'utf8mb4',

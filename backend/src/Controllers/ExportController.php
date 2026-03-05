@@ -30,7 +30,7 @@ class ExportController
                 'export_metadata' => [
                     'exported_at' => date('c'),
                     'version' => '1.0.0',
-                    'format' => 'litrpg_studio_export'
+                    'format' => 'writers_studio_export'
                 ]
             ];
 

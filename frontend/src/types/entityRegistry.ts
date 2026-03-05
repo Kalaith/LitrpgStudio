@@ -1,5 +1,5 @@
 // Unified Entity Registry Types
-// This serves as the single source of truth for all entities in LitRPG Studio
+// This serves as the single source of truth for all entities in Writers Studio
 
 // Re-export all types from the dedicated types file
 export type {

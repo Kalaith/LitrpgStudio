@@ -12,7 +12,7 @@ foreach ($autoloadCandidates as $candidate) {
     }
 }
 if (!$autoloader) {
-    throw new RuntimeException("Composer autoload.php not found for litrpg_studio init script.");
+    throw new RuntimeException("Composer autoload.php not found for writers_studio init script.");
 }
 require $autoloader;
 
@@ -55,7 +55,7 @@ $dbUsername = requireEnv('DB_USERNAME');
 $dbPassword = requireEnv('DB_PASSWORD', true);
 $dbPrefix = requireEnv('DB_PREFIX', true);
 
-echo "Initializing LitRPG Studio database...\n";
+echo "Initializing Writers Studio database...\n";
 
 try {
     // For MySQL, create database first using a server-level connection.
@@ -141,8 +141,8 @@ try {
         ['id' => 'series-sample-1'],
         [
         'title' => 'The Digital Realms',
-        'description' => 'A LitRPG adventure in virtual worlds',
-        'genre' => 'LitRPG',
+        'description' => 'A fantasy adventure set across virtual worlds',
+        'genre' => 'Fantasy',
         'tags' => json_encode(['fantasy', 'virtual reality', 'adventure']),
         'status' => 'active',
         'target_books' => 5,

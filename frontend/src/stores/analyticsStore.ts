@@ -572,7 +572,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       },
     }),
     {
-      name: 'litrpg-analytics-storage',
+      name: 'writers-analytics-storage',
       partialize: (state) => ({
         sessions: state.sessions,
         goals: state.goals,

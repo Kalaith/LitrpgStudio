@@ -1,5 +1,5 @@
 /**
- * Standardized Error Handling System for LitRPG Studio
+ * Standardized Error Handling System for Writers Studio
  *
  * Provides a comprehensive error handling system with custom error classes,
  * error parsing utilities, React hooks, and retry logic.

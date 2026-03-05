@@ -1,7 +1,7 @@
 /**
  * Application Constants
  *
- * Centralized constants for LitRPG Studio.
+ * Centralized constants for Writers Studio.
  * Organized by category for easy maintenance and consistency.
  */
 

@@ -191,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                 transition={{ duration: 0.2 }}
                 className="text-lg font-semibold text-primary-600 dark:text-primary-400"
               >
-                LitRPG Studio
+                Writers Studio
               </motion.h2>
             )}
           </AnimatePresence>

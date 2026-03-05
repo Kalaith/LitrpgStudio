@@ -1,4 +1,4 @@
-// API Client for LitRPG Studio Backend
+// API Client for Writers Studio Backend
 
 // Type definitions - using class instead of interface to survive compilation
 export class ApiResponse<T = unknown> {

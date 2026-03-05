@@ -1,6 +1,6 @@
 {
-    "name": "litrpg-studio/backend",
-    "description": "Backend API for LitRPG Studio",
+    "name": "writers-studio/backend",
+    "description": "Backend API for Writers Studio",
     "type": "project",
     "require": {
         "php": "^8.1",
@@ -31,10 +31,10 @@
     },
     "scripts": {
         "start": "php -S localhost:8000 -t public/",
-        "test": "phpunit",
-        "cs-check": "phpcs --standard=PSR12 src/ tests/",
-        "cs-fix": "phpcbf --standard=PSR12 src/ tests/",
-        "production-install": "composer install --no-dev --optimize-autoloader --classmap-authoritative",
+        "test": "../../../vendor/bin/phpunit -c phpunit.xml",
+        "cs-check": "../../../vendor/bin/phpcs --standard=PSR12 src/ tests/",
+        "cs-fix": "../../../vendor/bin/phpcbf --standard=PSR12 src/ tests/",
+        "production-install": "composer install --working-dir=../../.. --no-dev --optimize-autoloader --classmap-authoritative",
         "vendor-cleanup": [
             "@php scripts/vendor-cleanup.php"
         ]
