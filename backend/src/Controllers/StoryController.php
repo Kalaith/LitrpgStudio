@@ -8,7 +8,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Story;
 use App\Models\StoryTemplate;
-use Ramsey\Uuid\Uuid;
 
 class StoryController
 {
@@ -69,7 +68,7 @@ class StoryController
             $data = $request->getParsedBody();
 
             $story = Story::create([
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'series_id' => $data['series_id'] ?? null,
                 'book_id' => $data['book_id'] ?? null,
                 'title' => $data['title'] ?? '',
@@ -187,7 +186,7 @@ class StoryController
             $storyEvents = $story->story_events;
 
             $event = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
                 'type' => $data['type'] ?? 'plot',
@@ -223,7 +222,7 @@ class StoryController
             $data = $request->getParsedBody();
 
             $session = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'story_id' => $data['story_id'] ?? '',
                 'chapter_id' => $data['chapter_id'] ?? null,
                 'start_time' => date('Y-m-d H:i:s'),
@@ -369,7 +368,7 @@ class StoryController
             $data = $request->getParsedBody();
             $templateData = $template->template_data;
             $templateData['title'] = $data['title'] ?? $templateData['title'];
-            $templateData['id'] = Uuid::uuid4()->toString();
+            $templateData['id'] = \App\Support\IdGenerator::generate();
 
             $story = Story::create($templateData);
 

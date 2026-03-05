@@ -1,5 +1,4 @@
 <?php
-// ✅ CORRECT: Repository for data access
 declare(strict_types=1);
 
 namespace App\External;
@@ -15,7 +14,7 @@ final class UserRepository
 
     public function create(User $user): User
     {
-        $user->save();webhatch_
+        $user->save();
         return $user;
     }
 

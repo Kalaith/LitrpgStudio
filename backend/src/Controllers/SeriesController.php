@@ -8,7 +8,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\External\SeriesRepository;
 use App\Models\Series;
-use Ramsey\Uuid\Uuid;
 
 class SeriesController
 {
@@ -73,7 +72,7 @@ class SeriesController
             $data = $request->getParsedBody();
 
             $seriesData = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
                 'genre' => $data['genre'] ?? '',
@@ -180,7 +179,7 @@ class SeriesController
 
             // Ensure ID is set for import
             if (!isset($seriesData['id'])) {
-                $seriesData['id'] = Uuid::uuid4()->toString();
+                $seriesData['id'] = \App\Support\IdGenerator::generate();
             }
 
             $series = $this->seriesRepository->createFromArray($seriesData);

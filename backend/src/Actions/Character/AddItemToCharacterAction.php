@@ -6,7 +6,6 @@ namespace App\Actions\Character;
 
 use App\External\CharacterRepository;
 use App\Models\Character;
-use Ramsey\Uuid\Uuid;
 
 final class AddItemToCharacterAction
 {
@@ -29,7 +28,7 @@ final class AddItemToCharacterAction
 
         // Business logic - prepare item data
         $item = [
-            'id' => Uuid::uuid4()->toString(),
+            'id' => \App\Support\IdGenerator::generate(),
             'name' => $itemData['name'],
             'type' => $itemData['type'] ?? 'misc',
             'rarity' => $itemData['rarity'] ?? 'common',

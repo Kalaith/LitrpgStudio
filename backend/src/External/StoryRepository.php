@@ -113,7 +113,7 @@ final class StoryRepository
 
         $templateData = $template->template_data ?? [];
         $storyData = array_merge($templateData, $data);
-        $storyData['id'] = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        $storyData['id'] = \App\Support\IdGenerator::generate();
 
         $story = $this->createFromArray($storyData);
 

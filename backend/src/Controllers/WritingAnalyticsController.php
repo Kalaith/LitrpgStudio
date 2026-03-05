@@ -91,7 +91,7 @@ class WritingAnalyticsController
             }
 
             $sessionData = [
-                'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'story_id' => $data['story_id'] ?? null,
                 'chapter_id' => $data['chapter_id'] ?? null,
                 'start_time' => date('Y-m-d H:i:s'),
@@ -218,7 +218,7 @@ class WritingAnalyticsController
             $data = $request->getParsedBody();
 
             $goalData = [
-                'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
                 'type' => $data['type'],
@@ -351,3 +351,4 @@ class WritingAnalyticsController
         }
     }
 }
+

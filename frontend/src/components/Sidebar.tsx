@@ -15,14 +15,6 @@ import {
   Users,
   Globe,
   LibraryBig,
-  Search,
-  Swords,
-  Zap,
-  Package,
-  Gem,
-  BookText,
-  BarChart3,
-  Timer,
   ClipboardList,
   Upload
 } from 'lucide-react';
@@ -51,7 +43,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       setExpandedSections({
         'Overview': true,
         'Story Tools': true,
-        'System Tools': true,
         'Productivity': true
       });
     }
@@ -92,25 +83,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
         { id: 'timeline', icon: Clock3, label: 'Timeline' },
         { id: 'characters', icon: Users, label: 'Characters' },
         { id: 'worldbuilding', icon: Globe, label: 'World Building' },
-        { id: 'series', icon: LibraryBig, label: 'Series Manager' },
-        { id: 'research', icon: Search, label: 'Research Database' }
-      ]
-    },
-    {
-      name: 'System Tools',
-      items: [
-        { id: 'combat', icon: Swords, label: 'Combat Designer' },
-        { id: 'skills', icon: Zap, label: 'Skills & Progression' },
-        { id: 'items', icon: Package, label: 'Item Database' },
-        { id: 'loot', icon: Gem, label: 'Loot Tables' },
-        { id: 'system_bible', icon: BookText, label: 'System Bible' }
+        { id: 'series', icon: LibraryBig, label: 'Series Manager' }
       ]
     },
     {
       name: 'Productivity',
       items: [
-        { id: 'analytics', icon: BarChart3, label: 'Writing Analytics' },
-        { id: 'focus', icon: Timer, label: 'Focus Timer' },
         { id: 'templates', icon: ClipboardList, label: 'Templates' },
         { id: 'export', icon: Upload, label: 'Export & Publish' }
       ]

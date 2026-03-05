@@ -3,6 +3,7 @@
 -- Series table
 CREATE TABLE IF NOT EXISTS series (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     title VARCHAR(500) NOT NULL,
     description TEXT,
     genre VARCHAR(100),
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS series (
 -- Books table
 CREATE TABLE IF NOT EXISTS books (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     series_id VARCHAR(255),
     title VARCHAR(500) NOT NULL,
     description TEXT,
@@ -38,6 +40,7 @@ CREATE TABLE IF NOT EXISTS books (
 -- Characters table
 CREATE TABLE IF NOT EXISTS characters (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     series_id VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     race VARCHAR(100),
@@ -65,6 +68,7 @@ CREATE TABLE IF NOT EXISTS characters (
 -- Stories table
 CREATE TABLE IF NOT EXISTS stories (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     series_id VARCHAR(255),
     book_id VARCHAR(255),
     title VARCHAR(500) NOT NULL,
@@ -154,6 +158,7 @@ CREATE TABLE IF NOT EXISTS research_sources (
 -- Chapters table
 CREATE TABLE IF NOT EXISTS chapters (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     story_id VARCHAR(255) NOT NULL,
     title VARCHAR(500) NOT NULL,
     chapter_number INT NOT NULL,
@@ -172,6 +177,7 @@ CREATE TABLE IF NOT EXISTS chapters (
 -- Character Templates table
 CREATE TABLE IF NOT EXISTS character_templates (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     character_id VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -186,6 +192,7 @@ CREATE TABLE IF NOT EXISTS character_templates (
 -- Story Templates table
 CREATE TABLE IF NOT EXISTS story_templates (
     id VARCHAR(255) PRIMARY KEY,
+    owner_user_id VARCHAR(255) NOT NULL,
     story_id VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -276,3 +283,10 @@ CREATE INDEX idx_items_type ON items(type);
 CREATE INDEX idx_items_rarity ON items(rarity);
 CREATE INDEX idx_research_sources_type ON research_sources(type);
 CREATE INDEX idx_research_sources_archived ON research_sources(archived);
+CREATE INDEX idx_series_owner_user_id ON series(owner_user_id);
+CREATE INDEX idx_books_owner_user_id ON books(owner_user_id);
+CREATE INDEX idx_characters_owner_user_id ON characters(owner_user_id);
+CREATE INDEX idx_stories_owner_user_id ON stories(owner_user_id);
+CREATE INDEX idx_chapters_owner_user_id ON chapters(owner_user_id);
+CREATE INDEX idx_character_templates_owner_user_id ON character_templates(owner_user_id);
+CREATE INDEX idx_story_templates_owner_user_id ON story_templates(owner_user_id);

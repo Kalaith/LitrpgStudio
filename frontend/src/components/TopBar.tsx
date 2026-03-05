@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { GlobalSearch } from './GlobalSearch';
+import { useAuth } from '../contexts/AuthContext';
 
 interface TopBarProps {
   onCreateCharacter?: () => void;
@@ -10,6 +11,7 @@ interface TopBarProps {
 const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => {
   const [isSaved] = useState(true);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const { user, getLinkAccountUrl } = useAuth();
 
   // Global keyboard shortcut for search (Ctrl/Cmd + K)
   useEffect(() => {
@@ -31,7 +33,15 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
               <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">My Novel Project</h1>
-              {isSaved && <span className="text-sm text-success-600 dark:text-success-400 hidden sm:inline">✓ Saved</span>}
+              {isSaved && <span className="text-sm text-success-600 dark:text-success-400 hidden sm:inline">Saved</span>}
+              {user?.is_guest && (
+                <a
+                  href={getLinkAccountUrl()}
+                  className="hidden sm:inline text-xs text-blue-600 dark:text-blue-400 underline hover:text-blue-700"
+                >
+                  Link to WebHatchery account
+                </a>
+              )}
             </div>
 
             {/* Mobile Action Buttons */}
@@ -65,7 +75,7 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
                 </span>
                 <div className="flex items-center space-x-1">
                   <kbd className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-500 rounded text-xs font-mono text-gray-500">
-                    ⌘K
+                    Ctrl+K
                   </kbd>
                 </div>
               </button>
@@ -99,7 +109,7 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
                 </span>
                 <div className="flex items-center space-x-1">
                   <kbd className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-500 rounded text-xs font-mono text-gray-500">
-                    ⌘K
+                    Ctrl+K
                   </kbd>
                 </div>
               </button>

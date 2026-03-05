@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Support\TenantContext;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
@@ -28,6 +29,8 @@ final class JwtAuthMiddleware implements MiddlewareInterface
 
     public function process(Request $request, RequestHandlerInterface $handler): Response
     {
+        TenantContext::clear();
+
         if ($this->isPublicRequest($request)) {
             return $handler->handle($request);
         }
@@ -70,8 +73,14 @@ final class JwtAuthMiddleware implements MiddlewareInterface
             ->withAttribute('user', $user)
             ->withAttribute('user_id', (string) $user['id']);
 
-        // Let downstream routing/controller errors propagate so they are not mislabeled as auth failures.
-        return $handler->handle($request);
+        TenantContext::setUserId((string) $user['id']);
+
+        try {
+            // Let downstream routing/controller errors propagate so they are not mislabeled as auth failures.
+            return $handler->handle($request);
+        } finally {
+            TenantContext::clear();
+        }
     }
 
     private function isPublicRequest(Request $request): bool
@@ -89,6 +98,7 @@ final class JwtAuthMiddleware implements MiddlewareInterface
             '/health',
             '/api/v1/health',
             '/api/v1/init-database',
+            '/api/v1/auth/guest-session',
         ];
 
         foreach ($publicSuffixes as $suffix) {
@@ -107,7 +117,9 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         $email = $this->extractClaimString($claims, 'email') ?? '';
         $username = $this->extractClaimString($claims, 'username') ?? ($email ? explode('@', $email)[0] : 'user');
         $displayName = $this->extractClaimString($claims, 'display_name') ?? $username;
-        $role = $this->normalizeRole($this->extractClaimString($claims, 'role'));
+        $authType = $this->extractClaimString($claims, 'auth_type') ?? 'frontpage';
+        $isGuest = $this->extractClaimBool($claims, 'is_guest') || $authType === 'guest';
+        $role = $this->normalizeRole($this->extractClaimString($claims, 'role'), $isGuest);
         $id = $frontpageUserId ?: $subject;
 
         if (!$id) {
@@ -120,7 +132,9 @@ final class JwtAuthMiddleware implements MiddlewareInterface
             'display_name' => $displayName,
             'username' => $username,
             'role' => $role,
-            'is_verified' => true,
+            'is_verified' => !$isGuest,
+            'is_guest' => $isGuest,
+            'auth_type' => $isGuest ? 'guest' : 'frontpage',
         ];
     }
 
@@ -139,8 +153,34 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         return null;
     }
 
-    private function normalizeRole(?string $role): string
+    private function extractClaimBool(object $claims, string $key): bool
     {
+        if (!isset($claims->{$key})) {
+            return false;
+        }
+
+        $value = $claims->{$key};
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower(trim($value)), ['1', 'true', 'yes'], true);
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value === 1;
+        }
+
+        return false;
+    }
+
+    private function normalizeRole(?string $role, bool $isGuest = false): string
+    {
+        if ($isGuest) {
+            return 'guest';
+        }
+
         if ($role === 'admin' || $role === 'dm' || $role === 'user') {
             return $role;
         }

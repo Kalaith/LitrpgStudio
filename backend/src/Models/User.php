@@ -1,5 +1,4 @@
 <?php
-// ✅ CORRECT: Typed Eloquent models
 declare(strict_types=1);
 
 namespace App\Models;
@@ -11,8 +10,9 @@ final class User extends Model
     protected $table = 'users';
 
     protected $fillable = [
-        'webhatch_,
+        'webhatchery_user_id',
         'username',
+        'email',
         'first_name',
         'last_name',
         'is_active'

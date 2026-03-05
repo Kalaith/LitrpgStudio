@@ -7,7 +7,6 @@ namespace App\Controllers;
 use App\Models\Item;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Ramsey\Uuid\Uuid;
 
 class ItemController
 {
@@ -149,7 +148,7 @@ class ItemController
         ];
 
         if ($includeDefaults) {
-            $payload['id'] = (string) ($data['id'] ?? Uuid::uuid4()->toString());
+            $payload['id'] = (string) ($data['id'] ?? \App\Support\IdGenerator::generate());
         } elseif (isset($data['id'])) {
             $payload['id'] = (string) $data['id'];
         }
@@ -169,3 +168,4 @@ class ItemController
             ->withStatus($status);
     }
 }
+

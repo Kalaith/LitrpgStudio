@@ -47,32 +47,69 @@ function buildLocalAppClassMap(string $srcPath): array
     return $classMap;
 }
 
-$autoloadCandidates = [
-    __DIR__ . '/../../../../vendor/autoload.php',
-    __DIR__ . '/../vendor/autoload.php',
-];
+function invalidateLocalOpcache(array $classMap): void
+{
+    if (!function_exists('opcache_invalidate')) {
+        return;
+    }
+
+    foreach ($classMap as $filePath) {
+        if (is_string($filePath) && file_exists($filePath)) {
+            @opcache_invalidate($filePath, true);
+        }
+    }
+}
+
+/**
+ * Locate composer autoload across different deploy layouts.
+ * We search upward from current directory for vendor/autoload.php.
+ */
 $autoloader = null;
-foreach ($autoloadCandidates as $candidate) {
+$searchDir = __DIR__;
+for ($i = 0; $i < 8; $i++) {
+    $candidate = $searchDir . '/vendor/autoload.php';
     if (file_exists($candidate)) {
         $autoloader = $candidate;
         break;
+    }
+
+    $parent = dirname($searchDir);
+    if ($parent === $searchDir) {
+        break;
+    }
+    $searchDir = $parent;
+}
+
+if (!$autoloader) {
+    $fallbackCandidates = [
+        __DIR__ . '/../vendor/autoload.php',
+        __DIR__ . '/../../vendor/autoload.php',
+        __DIR__ . '/../../../../vendor/autoload.php',
+    ];
+
+    foreach ($fallbackCandidates as $candidate) {
+        if (file_exists($candidate)) {
+            $autoloader = $candidate;
+            break;
+        }
     }
 }
 if (!$autoloader) {
     failConfiguration('Composer autoload.php not found for writers_studio backend.');
 }
 $loader = require $autoloader;
-$globalAutoload = __DIR__ . '/../../../../vendor/autoload.php';
 $projectSrc = realpath(__DIR__ . '/../src') ?: (__DIR__ . '/../src');
+$localAppClassMap = buildLocalAppClassMap($projectSrc);
 if (is_object($loader)) {
     if (method_exists($loader, 'addPsr4')) {
         // Ensure local App\ classes are preferred over any global mapping.
         $loader->addPsr4('App\\', rtrim($projectSrc, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR, true);
     }
 
-    if ($autoloader === $globalAutoload && method_exists($loader, 'addClassMap')) {
-        // Override stale global classmap entries for App\ classes.
-        $loader->addClassMap(buildLocalAppClassMap($projectSrc));
+    if (method_exists($loader, 'addClassMap')) {
+        // Always override stale classmap entries for App\ classes.
+        // Classmap lookup is checked before PSR-4, so this must not be conditional on autoloader path.
+        $loader->addClassMap($localAppClassMap);
     }
 }
 
@@ -80,6 +117,7 @@ use Slim\Factory\AppFactory;
 use DI\Container;
 use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Schema\Blueprint;
 
 // Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
@@ -113,6 +151,11 @@ if (count($allowedOrigins) === 0) {
     failConfiguration('CORS_ALLOWED_ORIGINS must contain at least one origin.');
 }
 
+// Dev-time safety: force recompile of local App\ classes to avoid stale OPcache after rapid deploy edits.
+if ($appDebug) {
+    invalidateLocalOpcache($localAppClassMap);
+}
+
 // Initialize database connection
 $capsule = new Capsule;
 $capsule->addConnection([
@@ -128,6 +171,53 @@ $capsule->addConnection([
 
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
+/**
+ * Ensure tenant ownership columns exist for core story data tables.
+ * This is a lightweight compatibility migration for existing deployments.
+ */
+$ensureTenantColumns = static function () use ($capsule): void {
+    static $alreadyEnsured = false;
+    if ($alreadyEnsured) {
+        return;
+    }
+
+    $schema = $capsule->getConnection()->getSchemaBuilder();
+    $tenantTables = [
+        'series',
+        'books',
+        'stories',
+        'chapters',
+        'characters',
+        'character_templates',
+        'story_templates',
+    ];
+
+    foreach ($tenantTables as $tableName) {
+        if (!$schema->hasTable($tableName)) {
+            continue;
+        }
+
+        if (!$schema->hasColumn($tableName, 'owner_user_id')) {
+            $schema->table($tableName, static function (Blueprint $table): void {
+                $table->string('owner_user_id', 255)->nullable();
+            });
+        }
+
+        $indexName = 'idx_' . $tableName . '_owner_user_id';
+        try {
+            $schema->table($tableName, static function (Blueprint $table) use ($indexName): void {
+                $table->index('owner_user_id', $indexName);
+            });
+        } catch (\Throwable $e) {
+            // Ignore duplicate-index and unsupported-index errors.
+        }
+    }
+
+    $alreadyEnsured = true;
+};
+
+$ensureTenantColumns();
 
 // Container setup
 $container = new Container();
@@ -258,6 +348,10 @@ $container->set(\App\Controllers\ItemController::class, function() use ($contain
 
 $container->set(\App\Controllers\ResearchController::class, function() use ($container) {
     return new \App\Controllers\ResearchController();
+});
+
+$container->set(\App\Controllers\OwnershipController::class, function() use ($container) {
+    return new \App\Controllers\OwnershipController();
 });
 
 AppFactory::setContainer($container);

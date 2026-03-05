@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\EnforcesTenantOwnership;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StoryTemplate extends Model
 {
+    use EnforcesTenantOwnership;
+
     protected $table = 'story_templates';
 
     protected $fillable = [

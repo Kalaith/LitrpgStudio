@@ -18,6 +18,7 @@ require $autoloader;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Dotenv\Dotenv;
+use Illuminate\Database\Schema\Blueprint;
 
 // Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
@@ -131,15 +132,42 @@ try {
     }
     echo "Schema executed successfully!\n";
 
+    // Compatibility: ensure tenant ownership columns for existing databases.
+    $schemaBuilder = Capsule::connection()->getSchemaBuilder();
+    $tenantTables = [
+        'series',
+        'books',
+        'stories',
+        'chapters',
+        'characters',
+        'character_templates',
+        'story_templates',
+    ];
+
+    foreach ($tenantTables as $tableName) {
+        if (!$schemaBuilder->hasTable($tableName)) {
+            continue;
+        }
+
+        if (!$schemaBuilder->hasColumn($tableName, 'owner_user_id')) {
+            $schemaBuilder->table($tableName, static function (Blueprint $table): void {
+                $table->string('owner_user_id', 255)->nullable();
+            });
+        }
+    }
+
     echo "\nDatabase initialized successfully.\n";
 
     // Insert sample data
     echo "\nInserting sample data...\n";
 
     // Sample series
+    $sampleOwnerUserId = 'sample-owner';
+
     Capsule::table('series')->updateOrInsert(
         ['id' => 'series-sample-1'],
         [
+        'owner_user_id' => $sampleOwnerUserId,
         'title' => 'The Digital Realms',
         'description' => 'A fantasy adventure set across virtual worlds',
         'genre' => 'Fantasy',
@@ -171,6 +199,7 @@ try {
     Capsule::table('characters')->updateOrInsert(
         ['id' => 'char-sample-1'],
         [
+        'owner_user_id' => $sampleOwnerUserId,
         'series_id' => 'series-sample-1',
         'name' => 'Zara Nightblade',
         'race' => 'Elf',

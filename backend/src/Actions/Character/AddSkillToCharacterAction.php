@@ -6,7 +6,6 @@ namespace App\Actions\Character;
 
 use App\External\CharacterRepository;
 use App\Models\Character;
-use Ramsey\Uuid\Uuid;
 
 final class AddSkillToCharacterAction
 {
@@ -29,7 +28,7 @@ final class AddSkillToCharacterAction
 
         // Business logic - prepare skill data
         $skill = [
-            'id' => Uuid::uuid4()->toString(),
+            'id' => \App\Support\IdGenerator::generate(),
             'name' => $skillData['name'],
             'level' => $skillData['level'] ?? 1,
             'experience' => $skillData['experience'] ?? 0,

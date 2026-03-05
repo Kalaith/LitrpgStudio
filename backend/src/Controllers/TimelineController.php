@@ -7,7 +7,6 @@ namespace App\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Series;
-use Ramsey\Uuid\Uuid;
 
 class TimelineController
 {
@@ -61,7 +60,7 @@ class TimelineController
             $sharedElements = $series->shared_elements;
 
             $event = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
                 'date' => $data['date'] ?? date('Y-m-d'),

@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import ToastContainer from './components/Toast.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import MainContent from './components/MainContent.tsx';
-import { CollaborationPanel } from './components/CollaborationPanel';
-import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { useAnalyticsIntegration, useGoalTracking } from './hooks/useAnalyticsIntegration';
 import { useUnifiedSystemAutoInit } from './hooks/useUnifiedSystem';
 import { useApiIntegration } from './hooks/useApiIntegration';
@@ -13,8 +11,6 @@ import './App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [showCollaboration, setShowCollaboration] = useState(false);
-  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
 
   // Enable analytics integration
   useAnalyticsIntegration();
@@ -58,18 +54,6 @@ function App() {
         </div>
       </div>
       <ToastContainer />
-
-      {/* Collaboration Panel */}
-      <CollaborationPanel
-        isVisible={showCollaboration}
-        onToggle={() => setShowCollaboration(!showCollaboration)}
-      />
-
-      {/* Performance Monitor */}
-      <PerformanceMonitor
-        isVisible={showPerformanceMonitor}
-        onToggle={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
-      />
     </>
   )
 }

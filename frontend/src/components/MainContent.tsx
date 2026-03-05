@@ -2,20 +2,12 @@ import { useState } from 'react';
 import TopBar from './TopBar';
 import DashboardView from '../pages/DashboardView';
 import CharacterManager from '../pages/CharacterManager';
-import SkillsView from '../pages/SkillsView';
 import TimelineView from '../pages/TimelineView';
 import EditorView from '../pages/EditorView';
 import TemplatesView from '../pages/TemplatesView';
 import ExportView from '../pages/ExportView';
 import WorldBuildingView from '../pages/WorldBuildingView';
-import { WritingAnalytics } from './WritingAnalytics';
-import CombatSystemDesigner from './CombatSystemDesigner';
-import ItemDatabase from './ItemDatabase';
-import FocusTimer from './FocusTimer';
 import { SeriesManager } from './SeriesManager';
-import { SystemBibleGenerator } from './SystemBibleGenerator';
-import { LootTableDesigner } from './LootTableDesigner';
-import { ResearchDatabase } from './ResearchDatabase';
 
 interface MainContentProps {
   activeView: string;
@@ -23,6 +15,17 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
   const [isCreatingCharacter, setIsCreatingCharacter] = useState(false);
+  const blockedViews = new Set([
+    'skills',
+    'analytics',
+    'combat',
+    'items',
+    'focus',
+    'research',
+    'loot',
+    'system_bible'
+  ]);
+  const resolvedView = blockedViews.has(activeView) ? 'dashboard' : activeView;
 
   const handleCreateCharacter = () => {
     // Switch to characters view and set creating flag
@@ -32,7 +35,7 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
   const handleCreateEvent = () => undefined;
 
   const renderActiveView = () => {
-    switch (activeView) {
+    switch (resolvedView) {
       case 'dashboard':
         return <DashboardView />;
       case 'characters':
@@ -42,30 +45,14 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
             onCreateComplete={() => setIsCreatingCharacter(false)}
           />
         );
-      case 'skills':
-        return <SkillsView />;
       case 'timeline':
         return <TimelineView />;
       case 'editor':
         return <EditorView />;
-      case 'analytics':
-        return <WritingAnalytics />;
       case 'worldbuilding':
         return <WorldBuildingView />;
-      case 'combat':
-        return <CombatSystemDesigner />;
-      case 'items':
-        return <ItemDatabase />;
-      case 'focus':
-        return <FocusTimer />;
       case 'series':
         return <SeriesManager />;
-      case 'research':
-        return <ResearchDatabase />;
-      case 'loot':
-        return <LootTableDesigner />;
-      case 'system_bible':
-        return <SystemBibleGenerator />;
       case 'templates':
         return <TemplatesView />;
       case 'export':

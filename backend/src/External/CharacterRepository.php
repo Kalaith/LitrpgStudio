@@ -69,11 +69,13 @@ final class CharacterRepository
 
     public function findTemplates(?string $characterId = null): array
     {
-        $query = CharacterTemplate::where('is_public', true);
-
-        if ($characterId) {
-            $query->orWhere('character_id', $characterId);
-        }
+        $query = CharacterTemplate::query()
+            ->where(function ($builder) use ($characterId): void {
+                $builder->where('is_public', true);
+                if ($characterId) {
+                    $builder->orWhere('character_id', $characterId);
+                }
+            });
 
         return $query->get()->toArray();
     }
@@ -100,7 +102,7 @@ final class CharacterRepository
 
         $templateData = $template->template_data ?? [];
         $templateData['name'] = $name ?: ($templateData['name'] ?? '');
-        $templateData['id'] = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        $templateData['id'] = \App\Support\IdGenerator::generate();
 
         $character = $this->createFromArray($templateData);
 
@@ -110,3 +112,4 @@ final class CharacterRepository
         return $character;
     }
 }
+

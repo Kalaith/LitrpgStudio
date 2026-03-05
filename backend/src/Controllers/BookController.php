@@ -8,7 +8,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Book;
 use App\Models\Series;
-use Ramsey\Uuid\Uuid;
 
 class BookController
 {
@@ -84,7 +83,7 @@ class BookController
             $nextBookNumber = Book::where('series_id', $args['seriesId'])->max('book_number') + 1;
 
             $book = Book::create([
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'series_id' => $args['seriesId'],
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
@@ -260,7 +259,7 @@ class BookController
             $plotThreads = $book->plot_threads;
 
             $plotThread = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',
                 'status' => $data['status'] ?? 'open',
@@ -423,7 +422,7 @@ class BookController
             $characterArcs = $book->character_arcs;
 
             $characterArc = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'character_id' => $data['character_id'] ?? '',
                 'title' => $data['title'] ?? '',
                 'description' => $data['description'] ?? '',

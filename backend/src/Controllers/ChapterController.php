@@ -7,7 +7,6 @@ namespace App\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Chapter;
-use Ramsey\Uuid\Uuid;
 
 class ChapterController
 {
@@ -72,7 +71,7 @@ class ChapterController
             $nextChapterNumber = Chapter::where('story_id', $args['storyId'])->max('chapter_number') + 1;
 
             $chapter = Chapter::create([
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'story_id' => $args['storyId'],
                 'title' => $data['title'] ?? '',
                 'chapter_number' => $data['chapter_number'] ?? $nextChapterNumber,
@@ -216,7 +215,7 @@ class ChapterController
             $progression = $chapter->character_progression;
 
             $progressionEvent = [
-                'id' => Uuid::uuid4()->toString(),
+                'id' => \App\Support\IdGenerator::generate(),
                 'character_id' => $data['character_id'] ?? '',
                 'type' => $data['type'] ?? 'level_up',
                 'description' => $data['description'] ?? '',

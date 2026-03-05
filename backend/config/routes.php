@@ -17,12 +17,16 @@ use App\Controllers\AuthController;
 use App\Controllers\AppStateController;
 use App\Controllers\ItemController;
 use App\Controllers\ResearchController;
+use App\Controllers\OwnershipController;
 
 return function (App $app) {
     // API base path
     $app->group('/api/v1', function ($group) {
         // Frontpage JWT session check endpoint
         $group->get('/auth/current-user', [AuthController::class, 'currentUser']);
+        $group->post('/auth/guest-session', [AuthController::class, 'createGuestSession']);
+        $group->post('/auth/link-guest', [AuthController::class, 'linkGuestAccount']);
+        $group->post('/admin/ownership/transfer', [OwnershipController::class, 'transfer']);
         $group->get('/app-state', [AppStateController::class, 'getState']);
         $group->put('/app-state', [AppStateController::class, 'saveState']);
 
@@ -49,20 +53,22 @@ return function (App $app) {
         $group->get('/characters/{id}', [CharacterController::class, 'getById']);
         $group->put('/characters/{id}', [CharacterController::class, 'update']);
         $group->delete('/characters/{id}', [CharacterController::class, 'delete']);
-        $group->post('/characters/{id}/level-up', [CharacterController::class, 'levelUp']);
-        $group->post('/characters/{id}/skills', [CharacterController::class, 'addSkill']);
-        $group->put('/characters/{characterId}/skills/{skillId}', [CharacterController::class, 'updateSkill']);
-        $group->post('/characters/{id}/items', [CharacterController::class, 'addItem']);
-        $group->delete('/characters/{characterId}/items/{itemId}', [CharacterController::class, 'removeItem']);
-        $group->post('/characters/{characterId}/items/{itemId}/equip', [CharacterController::class, 'equipItem']);
-        $group->post('/characters/{characterId}/items/{itemId}/unequip', [CharacterController::class, 'unequipItem']);
 
-        // Item Database
-        $group->get('/items', [ItemController::class, 'getAll']);
-        $group->post('/items', [ItemController::class, 'create']);
-        $group->get('/items/{id}', [ItemController::class, 'getById']);
-        $group->put('/items/{id}', [ItemController::class, 'update']);
-        $group->delete('/items/{id}', [ItemController::class, 'delete']);
+        // Deferred (out of scope now): RPG progression and itemization routes
+        // $group->post('/characters/{id}/level-up', [CharacterController::class, 'levelUp']);
+        // $group->post('/characters/{id}/skills', [CharacterController::class, 'addSkill']);
+        // $group->put('/characters/{characterId}/skills/{skillId}', [CharacterController::class, 'updateSkill']);
+        // $group->post('/characters/{id}/items', [CharacterController::class, 'addItem']);
+        // $group->delete('/characters/{characterId}/items/{itemId}', [CharacterController::class, 'removeItem']);
+        // $group->post('/characters/{characterId}/items/{itemId}/equip', [CharacterController::class, 'equipItem']);
+        // $group->post('/characters/{characterId}/items/{itemId}/unequip', [CharacterController::class, 'unequipItem']);
+
+        // Deferred (out of scope now): Item database routes
+        // $group->get('/items', [ItemController::class, 'getAll']);
+        // $group->post('/items', [ItemController::class, 'create']);
+        // $group->get('/items/{id}', [ItemController::class, 'getById']);
+        // $group->put('/items/{id}', [ItemController::class, 'update']);
+        // $group->delete('/items/{id}', [ItemController::class, 'delete']);
 
         // Series-Character Integration
         $group->post('/series/{seriesId}/characters/{characterId}', [SeriesController::class, 'addCharacterToSeries']);
@@ -85,7 +91,9 @@ return function (App $app) {
         $group->put('/chapters/{id}', [ChapterController::class, 'update']);
         $group->delete('/chapters/{id}', [ChapterController::class, 'delete']);
         $group->put('/stories/{storyId}/chapters/reorder', [ChapterController::class, 'reorder']);
-        $group->post('/chapters/{id}/progression', [ChapterController::class, 'addCharacterProgression']);
+
+        // Deferred (out of scope now): chapter progression mechanics
+        // $group->post('/chapters/{id}/progression', [ChapterController::class, 'addCharacterProgression']);
 
         // Timeline Management
         $group->get('/series/{seriesId}/timeline', [TimelineController::class, 'getTimeline']);
@@ -123,9 +131,9 @@ return function (App $app) {
         $group->get('/series/{seriesId}/consistency-check', [ConsistencyController::class, 'checkConsistency']);
         $group->get('/series/{seriesId}/characters/{characterId}/progression-validation', [ConsistencyController::class, 'validateCharacterProgression']);
 
-        // Analytics
-        $group->get('/series/{seriesId}/analytics', [AnalyticsController::class, 'getSeriesAnalytics']);
-        $group->post('/series/{seriesId}/analytics/generate', [AnalyticsController::class, 'generateAnalytics']);
+        // Deferred (out of scope now): advanced analytics
+        // $group->get('/series/{seriesId}/analytics', [AnalyticsController::class, 'getSeriesAnalytics']);
+        // $group->post('/series/{seriesId}/analytics/generate', [AnalyticsController::class, 'generateAnalytics']);
 
         // Plot Threads and Character Arcs
         $group->get('/books/{bookId}/plot-threads', [BookController::class, 'getPlotThreads']);
@@ -138,10 +146,10 @@ return function (App $app) {
         $group->put('/character-arcs/{arcId}', [BookController::class, 'updateCharacterArc']);
         $group->delete('/character-arcs/{arcId}', [BookController::class, 'deleteCharacterArc']);
 
-        // Writing Sessions
-        $group->post('/writing-sessions/start', [StoryController::class, 'startWritingSession']);
-        $group->post('/writing-sessions/end', [StoryController::class, 'endWritingSession']);
-        $group->put('/writing-sessions/progress', [StoryController::class, 'updateSessionProgress']);
+        // Deferred (out of scope now): writing session gamification
+        // $group->post('/writing-sessions/start', [StoryController::class, 'startWritingSession']);
+        // $group->post('/writing-sessions/end', [StoryController::class, 'endWritingSession']);
+        // $group->put('/writing-sessions/progress', [StoryController::class, 'updateSessionProgress']);
 
         // Templates
         $group->get('/templates/characters', [CharacterController::class, 'getTemplates']);
@@ -152,9 +160,9 @@ return function (App $app) {
         $group->post('/templates/stories', [StoryController::class, 'saveAsTemplate']);
         $group->post('/templates/stories/{templateId}/create', [StoryController::class, 'createFromTemplate']);
 
-        // Research
-        $group->get('/research/sources', [ResearchController::class, 'getSources']);
-        $group->get('/research/collections', [ResearchController::class, 'getCollections']);
+        // Deferred (out of scope now): research management platform
+        // $group->get('/research/sources', [ResearchController::class, 'getSources']);
+        // $group->get('/research/collections', [ResearchController::class, 'getCollections']);
 
         // Health check
         $group->get('/health', function ($request, $response) {
