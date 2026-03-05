@@ -32,6 +32,7 @@ interface ContinuityCheckerProps {
   chapterId?: string;
   storyId?: string;
   isEnabled?: boolean;
+  embedded?: boolean;
   onIssueClick?: (issue: ContinuityIssue) => void;
   className?: string;
 }
@@ -41,6 +42,7 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
   chapterId,
   storyId,
   isEnabled = true,
+  embedded = false,
   onIssueClick,
   className = ''
 }) => {
@@ -260,7 +262,11 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
     }
   };
 
-  if (!isVisible || !isEnabled) {
+  if (!isEnabled) {
+    return null;
+  }
+
+  if (!embedded && !isVisible) {
     return (
       <button
         onClick={() => setIsVisible(true)}
@@ -273,10 +279,13 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 300 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 300 }}
-      className={`fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 ${className}`}
+      initial={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 300 }}
+      animate={embedded ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+      exit={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 300 }}
+      className={embedded
+        ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
+        : `fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 ${className}`
+      }
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -297,12 +306,14 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
           >
             <Settings size={14} />
           </button>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            <X size={14} />
-          </button>
+          {!embedded && (
+            <button
+              onClick={() => setIsVisible(false)}
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -342,7 +353,7 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
       </AnimatePresence>
 
       {/* Issues List */}
-      <div className="max-h-64 overflow-y-auto p-2">
+      <div className={embedded ? 'flex-1 overflow-y-auto p-2' : 'max-h-64 overflow-y-auto p-2'}>
         {continuityIssues.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <CheckCircle size={32} className="mx-auto mb-2 opacity-50" />

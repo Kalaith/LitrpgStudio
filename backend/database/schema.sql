@@ -87,6 +87,70 @@ CREATE TABLE IF NOT EXISTS stories (
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE SET NULL
 );
 
+-- Items table
+CREATE TABLE IF NOT EXISTS items (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    type VARCHAR(50) NOT NULL,
+    sub_type VARCHAR(100),
+    rarity VARCHAR(50) DEFAULT 'common',
+    level INT DEFAULT 1,
+    value INT DEFAULT 0,
+    weight DECIMAL(10,2),
+    durability JSON,
+    stats JSON,
+    effects JSON,
+    requirements JSON,
+    set_bonus JSON,
+    enchantments JSON,
+    stackable BOOLEAN DEFAULT 0,
+    max_stack INT,
+    sellable BOOLEAN DEFAULT 1,
+    tradeable BOOLEAN DEFAULT 1,
+    icon VARCHAR(255),
+    image TEXT,
+    lore TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Research Collections table
+CREATE TABLE IF NOT EXISTS research_collections (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(100) DEFAULT 'general',
+    sources JSON,
+    tags JSON,
+    color VARCHAR(20) DEFAULT '#3B82F6',
+    icon VARCHAR(255),
+    visibility VARCHAR(20) DEFAULT 'private',
+    collaborators JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Research Sources table
+CREATE TABLE IF NOT EXISTS research_sources (
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    type VARCHAR(50) DEFAULT 'article',
+    content JSON,
+    metadata JSON,
+    annotations JSON,
+    links JSON,
+    citations JSON,
+    attachments JSON,
+    tags JSON,
+    collections JSON,
+    favorited BOOLEAN DEFAULT 0,
+    archived BOOLEAN DEFAULT 0,
+    last_accessed DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Chapters table
 CREATE TABLE IF NOT EXISTS chapters (
     id VARCHAR(255) PRIMARY KEY,
@@ -208,3 +272,7 @@ CREATE INDEX idx_stories_book_id ON stories(book_id);
 CREATE INDEX idx_chapters_story_id ON chapters(story_id);
 CREATE INDEX idx_chapters_number ON chapters(story_id, chapter_number);
 CREATE INDEX idx_analytics_series_id ON series_analytics(series_id);
+CREATE INDEX idx_items_type ON items(type);
+CREATE INDEX idx_items_rarity ON items(rarity);
+CREATE INDEX idx_research_sources_type ON research_sources(type);
+CREATE INDEX idx_research_sources_archived ON research_sources(archived);

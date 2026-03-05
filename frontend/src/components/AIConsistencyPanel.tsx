@@ -36,6 +36,7 @@ interface AIConsistencyPanelProps {
   chapterId?: string;
   storyId?: string;
   isEnabled?: boolean;
+  embedded?: boolean;
   className?: string;
 }
 
@@ -43,11 +44,12 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   content,
   chapterId,
   isEnabled = true,
+  embedded = false,
   className = ''
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [autoAnalysis, setAutoAnalysis] = useState(true);
+  const [autoAnalysis, setAutoAnalysis] = useState(!embedded);
   const [issues, setIssues] = useState<AIConsistencyIssue[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(
     new Set(['critical', 'major', 'minor', 'suggestion'])
@@ -195,7 +197,11 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
     }
   }, [runAnalysis]);
 
-  if (!isVisible || !isEnabled) {
+  if (!isEnabled) {
+    return null;
+  }
+
+  if (!embedded && !isVisible) {
     return (
       <button
         onClick={() => setIsVisible(true)}
@@ -208,17 +214,20 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 400 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 400 }}
-      className={`fixed right-4 top-1/2 transform -translate-y-1/2 w-96 max-h-[80vh] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 flex flex-col ${className}`}
+      initial={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 400 }}
+      animate={embedded ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
+      exit={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 400 }}
+      className={embedded
+        ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
+        : `fixed right-4 top-1/2 transform -translate-y-1/2 w-96 max-h-[80vh] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 flex flex-col ${className}`
+      }
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2">
           <Brain size={16} className="text-purple-600 dark:text-purple-400" />
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            AI Consistency Analysis
+            Consistency Analysis
           </h3>
           {isAnalyzing && (
             <div className="animate-spin">
@@ -247,12 +256,14 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
           >
             <Settings size={14} />
           </button>
-          <button
-            onClick={() => setIsVisible(false)}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            <X size={14} />
-          </button>
+          {!embedded && (
+            <button
+              onClick={() => setIsVisible(false)}
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -442,7 +453,7 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
       {/* Footer */}
       <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>🤖 AI-Powered Analysis</span>
+          <span>Consistency Analysis</span>
           <span>{issues.length} total issues found</span>
         </div>
       </div>

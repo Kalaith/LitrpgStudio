@@ -14,15 +14,16 @@ interface ContinuityIssueSummary {
   title: string;
 }
 
+type ChapterTab = 'write' | 'continuity' | 'ai';
+
 const EditorView = () => {
   const [chapterTitle, setChapterTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [focusMode, setFocusMode] = useState(false);
   const [editorMode, setEditorMode] = useState<'markdown' | 'rich' | 'plain'>('markdown');
   const [spellCheck, setSpellCheck] = useState(true);
+  const [activeTab, setActiveTab] = useState<ChapterTab>('write');
   const [showContextSidebar, setShowContextSidebar] = useState(true);
-  const [showContinuityChecker, setShowContinuityChecker] = useState(true);
-  const [showAIAnalysis, setShowAIAnalysis] = useState(true);
   const [currentChapterId, setCurrentChapterId] = useState<string | undefined>();
   const [cursorPosition, setCursorPosition] = useState(0);
 
@@ -58,16 +59,6 @@ const EditorView = () => {
   const toggleContextSidebar = useCallback(() => {
     setShowContextSidebar(!showContextSidebar);
   }, [showContextSidebar]);
-
-  // Toggle continuity checker
-  const toggleContinuityChecker = useCallback(() => {
-    setShowContinuityChecker(!showContinuityChecker);
-  }, [showContinuityChecker]);
-
-  // Toggle AI analysis
-  const toggleAIAnalysis = useCallback(() => {
-    setShowAIAnalysis(!showAIAnalysis);
-  }, [showAIAnalysis]);
 
   // Handle continuity issue clicks
   const handleContinuityIssueClick = useCallback((issue: ContinuityIssueSummary) => {
@@ -140,40 +131,56 @@ const EditorView = () => {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => setSpellCheck(!spellCheck)}
-                  className={`btn-secondary text-sm py-1 px-3 ${spellCheck ? 'bg-green-500 text-white' : ''}`}
+                  onClick={() => setActiveTab('write')}
+                  className={`btn-secondary text-sm py-1 px-3 ${activeTab === 'write' ? 'bg-blue-500 text-white' : ''}`}
                 >
-                  Spell
+                  Write
                 </button>
                 <button
-                  onClick={() => setFocusMode(!focusMode)}
-                  className={`btn-secondary text-sm py-1 px-3 ${focusMode ? 'bg-purple-500 text-white' : ''}`}
-                >
-                  Focus
-                </button>
-                <button
-                  onClick={toggleContinuityChecker}
-                  className={`btn-secondary text-sm py-1 px-3 ${showContinuityChecker ? 'bg-amber-500 text-white' : ''}`}
+                  onClick={() => setActiveTab('continuity')}
+                  className={`btn-secondary text-sm py-1 px-3 ${activeTab === 'continuity' ? 'bg-amber-500 text-white' : ''}`}
                 >
                   Continuity
                 </button>
                 <button
-                  onClick={toggleAIAnalysis}
-                  className={`btn-secondary text-sm py-1 px-3 ${showAIAnalysis ? 'bg-purple-500 text-white' : ''}`}
+                  onClick={() => setActiveTab('ai')}
+                  className={`btn-secondary text-sm py-1 px-3 ${activeTab === 'ai' ? 'bg-purple-500 text-white' : ''}`}
                 >
-                  AI Check
+                  Consistency Analysis
                 </button>
               </div>
+
+              {activeTab === 'write' && (
+                <>
+                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSpellCheck(!spellCheck)}
+                      className={`btn-secondary text-sm py-1 px-3 ${spellCheck ? 'bg-green-500 text-white' : ''}`}
+                    >
+                      Spell
+                    </button>
+                    <button
+                      onClick={() => setFocusMode(!focusMode)}
+                      className={`btn-secondary text-sm py-1 px-3 ${focusMode ? 'bg-purple-500 text-white' : ''}`}
+                    >
+                      Focus
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Right Side Controls */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleContextSidebar}
-                className={`btn-secondary text-sm py-1 px-3 ${showContextSidebar ? 'bg-blue-500 text-white' : ''}`}
-              >
-                Context
-              </button>
+              {activeTab === 'write' && (
+                <button
+                  onClick={toggleContextSidebar}
+                  className={`btn-secondary text-sm py-1 px-3 ${showContextSidebar ? 'bg-blue-500 text-white' : ''}`}
+                >
+                  Context
+                </button>
+              )}
             </div>
           </div>
 
@@ -191,21 +198,52 @@ const EditorView = () => {
                 />
               </div>
 
-              <div className="flex-1 p-6 overflow-auto">
-                <AdvancedTextEditor
-                  content={content}
-                  onChange={handleContentChange}
-                  mode={editorMode}
-                  showPreview={false}
-                  theme="light"
-                  spellCheck={spellCheck}
-                  focusMode={focusMode}
-                />
+              <div className={activeTab === 'write' ? 'flex-1 p-6 overflow-auto' : 'flex-1 overflow-hidden'}>
+                {activeTab === 'write' && (
+                  <AdvancedTextEditor
+                    content={content}
+                    onChange={handleContentChange}
+                    mode={editorMode}
+                    showPreview={false}
+                    theme="dark"
+                    spellCheck={spellCheck}
+                    focusMode={focusMode}
+                  />
+                )}
+
+                {activeTab === 'continuity' && (
+                  <div className="h-full p-6">
+                    <ContinuityChecker
+                      content={content}
+                      currentPosition={cursorPosition}
+                      chapterId={currentChapterId}
+                      storyId={currentStory?.id}
+                      isEnabled
+                      embedded
+                      onIssueClick={handleContinuityIssueClick}
+                      className="h-full"
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'ai' && (
+                  <div className="h-full p-6">
+                    <AIConsistencyPanel
+                      content={content}
+                      currentPosition={cursorPosition}
+                      chapterId={currentChapterId}
+                      storyId={currentStory?.id}
+                      isEnabled
+                      embedded
+                      className="h-full"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Context Sidebar - Right Side */}
-            {showContextSidebar && (
+            {activeTab === 'write' && showContextSidebar && (
               <ContextSidebar
                 currentStoryId={currentStory?.id}
                 currentChapterId={currentChapterId}
@@ -218,26 +256,6 @@ const EditorView = () => {
           </div>
         </div>
       </div>
-
-      {/* Continuity Checker - Floating Panel */}
-      <ContinuityChecker
-        content={content}
-        currentPosition={cursorPosition}
-        chapterId={currentChapterId}
-        storyId={currentStory?.id}
-        isEnabled={showContinuityChecker}
-        onIssueClick={handleContinuityIssueClick}
-      />
-
-      {/* AI Consistency Panel - Floating Panel */}
-      <AIConsistencyPanel
-        content={content}
-        currentPosition={cursorPosition}
-        chapterId={currentChapterId}
-        storyId={currentStory?.id}
-        isEnabled={showAIAnalysis}
-        className="right-[25rem]" // Position to the left of context sidebar
-      />
     </div>
   );
 };

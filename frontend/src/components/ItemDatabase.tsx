@@ -1,64 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-export interface ItemStat {
-  name: string;
-  value: number;
-  type: 'flat' | 'percentage';
-}
-
-export interface ItemEffect {
-  id: string;
-  name: string;
-  description: string;
-  type: 'passive' | 'active' | 'proc';
-  trigger?: string;
-  cooldown?: number;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  description: string;
-  type: 'weapon' | 'armor' | 'accessory' | 'consumable' | 'material' | 'quest';
-  subType: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
-  level: number;
-  value: number;
-  weight?: number;
-  durability?: {
-    current: number;
-    max: number;
-  };
-  stats: ItemStat[];
-  effects: ItemEffect[];
-  requirements: {
-    level?: number;
-    class?: string[];
-    stats?: Record<string, number>;
-  };
-  setBonus?: {
-    setName: string;
-    pieces: number;
-    bonuses: Record<number, string[]>;
-  };
-  enchantments: {
-    slots: number;
-    used: number;
-    enchants: Array<{
-      name: string;
-      effect: string;
-      power: number;
-    }>;
-  };
-  stackable: boolean;
-  maxStack?: number;
-  sellable: boolean;
-  tradeable: boolean;
-  icon?: string;
-  image?: string;
-  lore?: string;
-}
+import { itemsApi } from '../api/items';
+import type { Item } from '../types/itemDatabase';
 
 interface ItemDatabaseProps {
   onItemSelect?: (item: Item) => void;
@@ -76,6 +19,8 @@ export default function ItemDatabase({
 }: ItemDatabaseProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Filters and sorting
   const [searchTerm, setSearchTerm] = useState('');
@@ -102,107 +47,44 @@ export default function ItemDatabase({
     quest: ['key', 'document', 'artifact', 'trophy']
   };
 
-  useEffect(() => {
-    // Initialize with sample items
-    const sampleItems: Item[] = [
-      {
-        id: 'iron-sword',
-        name: 'Iron Sword',
-        description: 'A sturdy iron blade, reliable in combat.',
-        type: 'weapon',
-        subType: 'sword',
-        rarity: 'common',
-        level: 5,
-        value: 50,
-        weight: 3.5,
-        durability: { current: 100, max: 100 },
-        stats: [
-          { name: 'Attack', value: 25, type: 'flat' },
-          { name: 'Critical Rate', value: 5, type: 'percentage' }
-        ],
-        effects: [],
-        requirements: { level: 5 },
-        enchantments: { slots: 1, used: 0, enchants: [] },
-        stackable: false,
-        sellable: true,
-        tradeable: true,
-        icon: '⚔️',
-        lore: 'Forged by the village blacksmith with care and precision.'
-      },
-      {
-        id: 'health-potion',
-        name: 'Health Potion',
-        description: 'Restores 100 HP when consumed.',
-        type: 'consumable',
-        subType: 'potion',
-        rarity: 'common',
-        level: 1,
-        value: 25,
-        weight: 0.5,
-        stats: [],
-        effects: [
-          {
-            id: 'heal',
-            name: 'Instant Heal',
-            description: 'Restores 100 HP immediately',
-            type: 'active'
-          }
-        ],
-        requirements: {},
-        enchantments: { slots: 0, used: 0, enchants: [] },
-        stackable: true,
-        maxStack: 50,
-        sellable: true,
-        tradeable: true,
-        icon: '🧪'
-      },
-      {
-        id: 'dragonscale-armor',
-        name: 'Dragonscale Armor',
-        description: 'Armor crafted from ancient dragon scales.',
-        type: 'armor',
-        subType: 'chest',
-        rarity: 'legendary',
-        level: 50,
-        value: 5000,
-        weight: 15,
-        durability: { current: 500, max: 500 },
-        stats: [
-          { name: 'Defense', value: 120, type: 'flat' },
-          { name: 'Fire Resistance', value: 75, type: 'percentage' },
-          { name: 'Magic Defense', value: 80, type: 'flat' }
-        ],
-        effects: [
-          {
-            id: 'dragon-might',
-            name: 'Dragon\'s Might',
-            description: 'Increases all stats by 10% when health is below 25%',
-            type: 'passive'
-          }
-        ],
-        requirements: { level: 50, stats: { strength: 40 } },
-        setBonus: {
-          setName: 'Dragonslayer Set',
-          pieces: 5,
-          bonuses: {
-            2: ['Fire immunity for 5 seconds after taking fire damage'],
-            4: ['+50% experience from dragon-type enemies'],
-            5: ['Grants the ability to breathe fire once per day']
-          }
-        },
-        enchantments: { slots: 3, used: 1, enchants: [
-          { name: 'Fortification', effect: '+20 Defense', power: 2 }
-        ]},
-        stackable: false,
-        sellable: true,
-        tradeable: true,
-        icon: '🛡️',
-        lore: 'Forged from the scales of Pyraxis, the Crimson Terror. Each scale tells a story of ancient battles.'
-      }
-    ];
+  const loadItems = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    setItems(sampleItems);
+      const response = await itemsApi.getAll();
+      if (!response.success) {
+        throw new Error(response.error ?? response.message ?? 'Failed to load items');
+      }
+
+      setItems(response.data ?? []);
+    } catch (loadError) {
+      console.error('Failed to load items:', loadError);
+      setError(loadError instanceof Error ? loadError.message : 'Failed to load items');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadItems();
+  }, [loadItems]);
+
+  useEffect(() => {
+    if (!selectedItem) {
+      return;
+    }
+
+    const updatedSelection = items.find((item) => item.id === selectedItem.id);
+    if (!updatedSelection) {
+      setSelectedItem(null);
+      return;
+    }
+
+    if (updatedSelection !== selectedItem) {
+      setSelectedItem(updatedSelection);
+    }
+  }, [items, selectedItem]);
 
   // Filter and sort items
   const processedItems = useMemo(() => {
@@ -245,17 +127,18 @@ export default function ItemDatabase({
 
       if (sortDirection === 'asc') {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
       }
+
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
     });
 
     return result;
   }, [items, searchTerm, filterType, filterRarity, sortField, sortDirection]);
 
-  const handleCreateItem = () => {
-    const newItem: Item = {
-      id: crypto.randomUUID(),
+  const handleCreateItem = async () => {
+    setError(null);
+
+    const newItem: Partial<Item> = {
       name: 'New Item',
       description: 'A newly created item',
       type: 'weapon',
@@ -272,11 +155,38 @@ export default function ItemDatabase({
       tradeable: true
     };
 
-    setItems(prev => [newItem, ...prev]);
-    setSelectedItem(newItem);
-    onItemSave?.(newItem);
+    try {
+      const response = await itemsApi.create(newItem);
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? response.message ?? 'Failed to create item');
+      }
+
+      setItems(prev => [response.data!, ...prev]);
+      setSelectedItem(response.data);
+      onItemSave?.(response.data);
+    } catch (createError) {
+      console.error('Failed to create item:', createError);
+      setError(createError instanceof Error ? createError.message : 'Failed to create item');
+    }
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    setError(null);
+
+    try {
+      const response = await itemsApi.delete(itemId);
+      if (!response.success) {
+        throw new Error(response.error ?? response.message ?? 'Failed to delete item');
+      }
+
+      onItemDelete?.(itemId);
+      setItems(currentItems => currentItems.filter(item => item.id !== itemId));
+      setSelectedItem(null);
+    } catch (deleteError) {
+      console.error('Failed to delete item:', deleteError);
+      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete item');
+    }
+  };
 
   const getRarityStyle = (rarity: string) => {
     return rarityColors[rarity as keyof typeof rarityColors] || rarityColors.common;
@@ -295,7 +205,9 @@ export default function ItemDatabase({
       `}
       onClick={() => {
         setSelectedItem(item);
-        if (onItemSelect) onItemSelect(item);
+        if (onItemSelect) {
+          onItemSelect(item);
+        }
       }}
     >
       <div className="flex items-start justify-between mb-2">
@@ -362,10 +274,11 @@ export default function ItemDatabase({
             <p className="text-gray-600 dark:text-gray-400">Manage items, equipment, and consumables</p>
           </div>
           <button
-            onClick={handleCreateItem}
+            onClick={() => void handleCreateItem()}
+            disabled={isLoading}
             className="btn-primary flex items-center space-x-2"
           >
-            <span>✨</span>
+            <span>*</span>
             <span>Create Item</span>
           </button>
         </div>
@@ -435,11 +348,21 @@ export default function ItemDatabase({
       <div className="flex-1 flex overflow-hidden">
         {/* Items Grid */}
         <div className="flex-1 p-6 overflow-auto">
+          {error && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           <div className="mb-4 flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">
               Showing {processedItems.length} of {items.length} items
             </span>
           </div>
+
+          {isLoading && (
+            <div className="text-sm text-gray-500 mb-4">Loading items...</div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
@@ -447,9 +370,9 @@ export default function ItemDatabase({
             </AnimatePresence>
           </div>
 
-          {processedItems.length === 0 && (
+          {processedItems.length === 0 && !isLoading && (
             <div className="text-center py-12 text-gray-500">
-              <div className="text-6xl mb-4">📦</div>
+              <div className="text-6xl mb-4">[]</div>
               <h3 className="text-xl font-semibold mb-2">No items found</h3>
               <p className="text-gray-400">
                 {searchTerm || filterType || filterRarity
@@ -487,7 +410,7 @@ export default function ItemDatabase({
                 onClick={() => setSelectedItem(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                ✕
+                X
               </button>
             </div>
 
@@ -546,7 +469,7 @@ export default function ItemDatabase({
                         </div>
                         <div className="text-xs text-blue-600 capitalize">
                           {effect.type}
-                          {effect.cooldown && ` • ${effect.cooldown}s cooldown`}
+                          {effect.cooldown && ` | ${effect.cooldown}s cooldown`}
                         </div>
                       </div>
                     ))}
@@ -574,11 +497,7 @@ export default function ItemDatabase({
                     Edit
                   </button>
                   <button
-                    onClick={() => {
-                      if (onItemDelete) onItemDelete(selectedItem.id);
-                      setItems(items.filter(i => i.id !== selectedItem.id));
-                      setSelectedItem(null);
-                    }}
+                    onClick={() => void handleDeleteItem(selectedItem.id)}
                     className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
                   >
                     Delete
@@ -592,3 +511,4 @@ export default function ItemDatabase({
     </div>
   );
 }
+

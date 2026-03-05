@@ -14,12 +14,17 @@ use App\Controllers\ConsistencyController;
 use App\Controllers\AnalyticsController;
 use App\Controllers\ExportController;
 use App\Controllers\AuthController;
+use App\Controllers\AppStateController;
+use App\Controllers\ItemController;
+use App\Controllers\ResearchController;
 
 return function (App $app) {
     // API base path
     $app->group('/api/v1', function ($group) {
         // Frontpage JWT session check endpoint
         $group->get('/auth/current-user', [AuthController::class, 'currentUser']);
+        $group->get('/app-state', [AppStateController::class, 'getState']);
+        $group->put('/app-state', [AppStateController::class, 'saveState']);
 
         // Series Management
         $group->get('/series', [SeriesController::class, 'getAll']);
@@ -51,6 +56,13 @@ return function (App $app) {
         $group->delete('/characters/{characterId}/items/{itemId}', [CharacterController::class, 'removeItem']);
         $group->post('/characters/{characterId}/items/{itemId}/equip', [CharacterController::class, 'equipItem']);
         $group->post('/characters/{characterId}/items/{itemId}/unequip', [CharacterController::class, 'unequipItem']);
+
+        // Item Database
+        $group->get('/items', [ItemController::class, 'getAll']);
+        $group->post('/items', [ItemController::class, 'create']);
+        $group->get('/items/{id}', [ItemController::class, 'getById']);
+        $group->put('/items/{id}', [ItemController::class, 'update']);
+        $group->delete('/items/{id}', [ItemController::class, 'delete']);
 
         // Series-Character Integration
         $group->post('/series/{seriesId}/characters/{characterId}', [SeriesController::class, 'addCharacterToSeries']);
@@ -139,6 +151,10 @@ return function (App $app) {
         $group->get('/templates/stories', [StoryController::class, 'getTemplates']);
         $group->post('/templates/stories', [StoryController::class, 'saveAsTemplate']);
         $group->post('/templates/stories/{templateId}/create', [StoryController::class, 'createFromTemplate']);
+
+        // Research
+        $group->get('/research/sources', [ResearchController::class, 'getSources']);
+        $group->get('/research/collections', [ResearchController::class, 'getCollections']);
 
         // Health check
         $group->get('/health', function ($request, $response) {

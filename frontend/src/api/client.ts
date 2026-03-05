@@ -40,6 +40,28 @@ export function setTokenProvider(provider: TokenProvider | null): void {
   tokenProvider = provider;
 }
 
+export function resolveApiRootUrl(baseUrl: string, version: string): string {
+  const cleanBase = baseUrl.replace(/\/+$/, '');
+  const cleanVersion = version.replace(/^\/+|\/+$/g, '');
+  const versionedSuffix = `/api/${cleanVersion}`;
+
+  if (cleanBase.endsWith(versionedSuffix)) {
+    return cleanBase;
+  }
+
+  if (cleanBase.endsWith('/api')) {
+    return `${cleanBase}/${cleanVersion}`;
+  }
+
+  return `${cleanBase}${versionedSuffix}`;
+}
+
+export function buildApiUrl(baseUrl: string, version: string, endpoint: string): string {
+  const root = resolveApiRootUrl(baseUrl, version);
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  return `${root}/${cleanEndpoint}`;
+}
+
 class ApiClient {
   private baseUrl: string;
   private version: string;
@@ -50,8 +72,7 @@ class ApiClient {
   }
 
   private getUrl(endpoint: string): string {
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    return `${this.baseUrl}/api/${this.version}/${cleanEndpoint}`;
+    return buildApiUrl(this.baseUrl, this.version, endpoint);
   }
 
   private async request<T = unknown>(

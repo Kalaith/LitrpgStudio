@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { setTokenProvider } from '../api/client';
+import { buildApiUrl as buildApiEndpointUrl, setTokenProvider } from '../api/client';
 
 interface User {
   id: string;
@@ -84,11 +84,10 @@ const readFrontpageUser = (): FrontpageStoredUser | null => {
   }
 };
 
-const buildApiUrl = (): string => {
+const buildCurrentUserUrl = (): string => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
   const version = import.meta.env.VITE_API_VERSION || 'v1';
-  const cleanBase = baseUrl.replace(/\/+$/, '');
-  return `${cleanBase}/api/${version}/auth/current-user`;
+  return buildApiEndpointUrl(baseUrl, version, '/auth/current-user');
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -138,7 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
 
     try {
-      const response = await fetch(buildApiUrl(), {
+      const response = await fetch(buildCurrentUserUrl(), {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

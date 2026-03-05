@@ -7,6 +7,9 @@ import { storiesApi } from '../api/stories';
 import type { Series } from '../types/series';
 import type { Character } from '../types/character';
 
+let initialDataSyncInFlight: Promise<void> | null = null;
+let hasSyncedInitialData = false;
+
 // Hook to manage API integration and sync with stores
 export function useApiIntegration() {
   const seriesStore = useSeriesStore();
@@ -15,37 +18,44 @@ export function useApiIntegration() {
 
   // Load initial data
   const loadInitialData = async () => {
-    try {
-      // Check if backend is available
-      const isHealthy = await seriesApi.getAll().then(() => true).catch(() => false);
-
-      if (!isHealthy) {
-        console.warn('Backend API is not available, using local storage only');
-        return;
-      }
-
-      // Load series data
-      const seriesResponse = await seriesApi.getAll();
-      if (seriesResponse.success && seriesResponse.data) {
-        // Merge with local data, preferring backend data
-        seriesStore.series = seriesResponse.data;
-      }
-
-      // Load characters data
-      const charactersResponse = await charactersApi.getAll();
-      if (charactersResponse.success && charactersResponse.data) {
-        characterStore.characters = charactersResponse.data;
-      }
-
-      // Load stories data
-      const storiesResponse = await storiesApi.getAll();
-      if (storiesResponse.success && storiesResponse.data) {
-        storyStore.stories = storiesResponse.data;
-      }
-
-    } catch (error) {
-      console.warn('Failed to sync with backend, using local storage:', error);
+    if (hasSyncedInitialData) {
+      return;
     }
+
+    if (initialDataSyncInFlight) {
+      return initialDataSyncInFlight;
+    }
+
+    initialDataSyncInFlight = (async () => {
+      try {
+        // Load series data
+        const seriesResponse = await seriesApi.getAll();
+        if (seriesResponse.success && seriesResponse.data) {
+          // Merge with local data, preferring backend data
+          seriesStore.series = seriesResponse.data;
+        }
+
+        // Load characters data
+        const charactersResponse = await charactersApi.getAll();
+        if (charactersResponse.success && charactersResponse.data) {
+          characterStore.characters = charactersResponse.data;
+        }
+
+        // Load stories data
+        const storiesResponse = await storiesApi.getAll();
+        if (storiesResponse.success && storiesResponse.data) {
+          storyStore.stories = storiesResponse.data;
+        }
+
+        hasSyncedInitialData = true;
+      } catch (error) {
+        console.warn('Failed to sync with backend, using local storage:', error);
+      } finally {
+        initialDataSyncInFlight = null;
+      }
+    })();
+
+    return initialDataSyncInFlight;
   };
 
   // Sync series to backend

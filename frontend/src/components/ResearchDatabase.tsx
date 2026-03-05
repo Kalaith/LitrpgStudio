@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -33,6 +33,7 @@ import type {
   ResearchCollection,
   SourceType
 } from '../types/research';
+import { researchApi } from '../api/research';
 
 interface ResearchDatabaseProps {
   className?: string;
@@ -47,128 +48,75 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
   const [showFilters, setShowFilters] = useState(false);
   const [, setShowAddSource] = useState(false);
   const [, setShowAddCollection] = useState(false);
+  const [sources, setSources] = useState<ResearchSource[]>([]);
+  const [collections, setCollections] = useState<ResearchCollection[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data for demonstration
-  const mockSources = useMemo<ResearchSource[]>(() => [
-    {
-      id: '1',
-      title: 'Medieval Combat Techniques',
-      type: 'book',
-      content: {
-        summary: 'Comprehensive guide to historical medieval combat techniques and weapons.',
-        keyPoints: ['Sword fighting techniques', 'Armor types', 'Battle formations'],
-        excerpts: [],
-        media: [],
-        structure: { headings: [], sections: [], references: [], figures: [], tables: [] },
-        readingTime: 45,
-        wordCount: 15000,
-        language: 'en',
-        quality: {
-          credibility: 9,
-          accuracy: 8,
-          relevance: 10,
-          completeness: 8,
-          freshness: 6,
-          overallScore: 8.2,
-          issues: []
-        }
-      },
-      metadata: {
-        author: ['John Smith'],
-        publishDate: new Date('2020-01-15'),
-        pages: { start: 1, end: 300, total: 300 },
-        accessDate: new Date(),
-        format: 'PDF'
-      },
-      annotations: [],
-      links: [],
-      citations: [],
-      attachments: [],
-      tags: ['combat', 'medieval', 'weapons'],
-      collections: ['worldbuilding'],
-      favorited: true,
-      archived: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastAccessed: new Date()
-    },
-    {
-      id: '2',
-      title: 'Magic System Design Principles',
-      type: 'article',
-      content: {
-        summary: 'Analysis of effective magic system design in fantasy literature.',
-        keyPoints: ['Consistency rules', 'Cost mechanics', 'Power scaling'],
-        excerpts: [],
-        media: [],
-        structure: { headings: [], sections: [], references: [], figures: [], tables: [] },
-        readingTime: 15,
-        wordCount: 5000,
-        language: 'en',
-        quality: {
-          credibility: 8,
-          accuracy: 9,
-          relevance: 10,
-          completeness: 7,
-          freshness: 9,
-          overallScore: 8.6,
-          issues: []
-        }
-      },
-      metadata: {
-        author: ['Jane Doe'],
-        publishDate: new Date('2023-06-20'),
-        url: 'https://example.com/magic-systems',
-        accessDate: new Date(),
-        format: 'HTML'
-      },
-      annotations: [],
-      links: [],
-      citations: [],
-      attachments: [],
-      tags: ['magic', 'design', 'fantasy'],
-      collections: ['magic_systems'],
-      favorited: false,
-      archived: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastAccessed: new Date()
-    }
-  ], []);
+  useEffect(() => {
+    let isMounted = true;
 
-  const mockCollections = useMemo<ResearchCollection[]>(() => [
-    {
-      id: 'worldbuilding',
-      name: 'World Building',
-      description: 'Resources for creating fictional worlds',
-      category: 'worldbuilding',
-      sources: ['1'],
-      tags: ['world', 'setting', 'environment'],
-      color: '#3B82F6',
-      icon: '🌍',
-      visibility: 'private',
-      collaborators: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: 'magic_systems',
-      name: 'Magic Systems',
-      description: 'Research on magical systems and their implementation',
-      category: 'magic_systems',
-      sources: ['2'],
-      tags: ['magic', 'rules', 'mechanics'],
-      color: '#8B5CF6',
-      icon: '✨',
-      visibility: 'private',
-      collaborators: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+    const loadResearchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [sourcesResponse, collectionsResponse] = await Promise.all([
+          researchApi.getSources(),
+          researchApi.getCollections()
+        ]);
+
+        if (!sourcesResponse.success) {
+          throw new Error(sourcesResponse.error ?? sourcesResponse.message ?? 'Failed to load research sources');
+        }
+        if (!collectionsResponse.success) {
+          throw new Error(collectionsResponse.error ?? collectionsResponse.message ?? 'Failed to load research collections');
+        }
+
+        if (!isMounted) {
+          return;
+        }
+
+        setSources(sourcesResponse.data ?? []);
+        setCollections(collectionsResponse.data ?? []);
+      } catch (loadError) {
+        console.error('Failed to load research database:', loadError);
+        if (!isMounted) {
+          return;
+        }
+        setError(loadError instanceof Error ? loadError.message : 'Failed to load research database');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadResearchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSource) {
+      return;
     }
-  ], []);
+
+    const nextSelected = sources.find((source) => source.id === selectedSource.id) ?? null;
+    if (!nextSelected) {
+      setSelectedSource(null);
+      return;
+    }
+
+    if (nextSelected !== selectedSource) {
+      setSelectedSource(nextSelected);
+    }
+  }, [selectedSource, sources]);
 
   const filteredSources = useMemo(() => {
-    return mockSources.filter(source => {
+    return sources.filter(source => {
       const matchesSearch = searchQuery === '' ||
         source.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         source.content.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -179,7 +127,12 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
 
       return matchesSearch && matchesCollection;
     });
-  }, [mockSources, searchQuery, selectedCollection]);
+  }, [sources, searchQuery, selectedCollection]);
+
+  const linksCount = useMemo(
+    () => sources.reduce((total, source) => total + source.links.length, 0),
+    [sources]
+  );
 
   const getSourceIcon = (type: SourceType) => {
     switch (type) {
@@ -378,9 +331,9 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
       <div className="flex-none border-b border-gray-200 bg-white px-6">
         <div className="flex space-x-8">
           {[
-            { id: 'sources', label: 'Sources', count: mockSources.length },
-            { id: 'collections', label: 'Collections', count: mockCollections.length },
-            { id: 'links', label: 'Links', count: 12 },
+            { id: 'sources', label: 'Sources', count: sources.length },
+            { id: 'collections', label: 'Collections', count: collections.length },
+            { id: 'links', label: 'Links', count: linksCount },
             { id: 'analytics', label: 'Analytics', count: null }
           ].map((tab) => (
             <button
@@ -405,6 +358,12 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
 
       {/* Content Area */}
       <div className="flex-1 flex overflow-hidden">
+        {error && (
+          <div className="m-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Sidebar */}
         <div className="flex-none w-64 border-r border-gray-200 bg-gray-50 p-4">
           {/* Search */}
@@ -430,9 +389,9 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
                     selectedCollection === null ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  All Sources ({mockSources.length})
+                  All Sources ({sources.length})
                 </button>
-                {mockCollections.map((collection) => (
+                {collections.map((collection) => (
                   <button
                     key={collection.id}
                     onClick={() => setSelectedCollection(collection.id)}
@@ -467,6 +426,10 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
+          {isLoading && (
+            <div className="px-6 py-3 text-sm text-gray-500">Loading research database...</div>
+          )}
+
           {activeTab === 'sources' && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -474,7 +437,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
                   <span className="text-sm text-gray-600">
                     {filteredSources.length} sources
                     {selectedCollection && (
-                      <span> in {mockCollections.find(c => c.id === selectedCollection)?.name}</span>
+                      <span> in {collections.find(c => c.id === selectedCollection)?.name}</span>
                     )}
                   </span>
                 </div>
@@ -532,7 +495,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
           {activeTab === 'collections' && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <span className="text-sm text-gray-600">{mockCollections.length} collections</span>
+                <span className="text-sm text-gray-600">{collections.length} collections</span>
                 <button
                   onClick={() => setShowAddCollection(true)}
                   className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
@@ -542,7 +505,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockCollections.map((collection) => (
+                {collections.map((collection) => (
                   <CollectionCard key={collection.id} collection={collection} />
                 ))}
               </div>
@@ -593,7 +556,7 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
                   onClick={() => setSelectedSource(null)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  ×
+                  X
                 </button>
               </div>
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
@@ -650,3 +613,4 @@ export const ResearchDatabase: React.FC<ResearchDatabaseProps> = ({ className = 
     </div>
   );
 };
+

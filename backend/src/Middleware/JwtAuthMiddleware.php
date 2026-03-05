@@ -44,18 +44,6 @@ final class JwtAuthMiddleware implements MiddlewareInterface
 
         try {
             $claims = JWT::decode($token, new Key($this->jwtSecret, 'HS256'));
-
-            $user = $this->buildUserFromClaims($claims);
-            if (!$user || empty($user['id'])) {
-                return $this->createUnauthorizedResponse('User not found for token');
-            }
-
-            $request = $request
-                ->withAttribute('jwt_claims', $claims)
-                ->withAttribute('user', $user)
-                ->withAttribute('user_id', (string) $user['id']);
-
-            return $handler->handle($request);
         } catch (ExpiredException $e) {
             return $this->createUnauthorizedResponse('Token has expired');
         } catch (SignatureInvalidException $e) {
@@ -71,6 +59,19 @@ final class JwtAuthMiddleware implements MiddlewareInterface
             }
             return $this->createUnauthorizedResponse($message);
         }
+
+        $user = $this->buildUserFromClaims($claims);
+        if (!$user || empty($user['id'])) {
+            return $this->createUnauthorizedResponse('User not found for token');
+        }
+
+        $request = $request
+            ->withAttribute('jwt_claims', $claims)
+            ->withAttribute('user', $user)
+            ->withAttribute('user_id', (string) $user['id']);
+
+        // Let downstream routing/controller errors propagate so they are not mislabeled as auth failures.
+        return $handler->handle($request);
     }
 
     private function isPublicRequest(Request $request): bool

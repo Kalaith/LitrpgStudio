@@ -8,6 +8,7 @@ import { useAnalyticsIntegration, useGoalTracking } from './hooks/useAnalyticsIn
 import { useUnifiedSystemAutoInit } from './hooks/useUnifiedSystem';
 import { useApiIntegration } from './hooks/useApiIntegration';
 import { useApiStatus } from './hooks/useApiStatus';
+import { useBackendStateSync } from './hooks/useBackendStateSync';
 import './App.css';
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
   // Enable analytics integration
   useAnalyticsIntegration();
   useGoalTracking();
+
+  // Keep local sidebar-feature state synced with backend
+  useBackendStateSync();
 
   // Initialize unified system
   useUnifiedSystemAutoInit();
