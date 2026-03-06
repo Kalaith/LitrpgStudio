@@ -72,7 +72,11 @@ class Series extends Model
             'magicSystems' => [],
             'locations' => [],
             'factions' => [],
-            'terminology' => []
+            'terminology' => [],
+            'canon_vault' => [
+                'entries' => [],
+                'custom_entry_types' => []
+            ]
         ];
     }
 

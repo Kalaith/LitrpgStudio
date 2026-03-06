@@ -243,6 +243,14 @@ $container->set(\App\External\SeriesRepository::class, function() {
     return new \App\External\SeriesRepository();
 });
 
+$container->set(\App\Support\CanonVaultManager::class, function() {
+    return new \App\Support\CanonVaultManager();
+});
+
+$container->set(\App\Support\DraftImportParser::class, function() {
+    return new \App\Support\DraftImportParser();
+});
+
 // Register Character Actions
 $container->set(\App\Actions\Character\CreateCharacterAction::class, function() use ($container) {
     return new \App\Actions\Character\CreateCharacterAction(
@@ -323,7 +331,9 @@ $container->set(\App\Controllers\TimelineController::class, function() use ($con
 });
 
 $container->set(\App\Controllers\WorldBuildingController::class, function() use ($container) {
-    return new \App\Controllers\WorldBuildingController();
+    return new \App\Controllers\WorldBuildingController(
+        $container->get(\App\Support\CanonVaultManager::class)
+    );
 });
 
 $container->set(\App\Controllers\ConsistencyController::class, function() use ($container) {
@@ -352,6 +362,18 @@ $container->set(\App\Controllers\ResearchController::class, function() use ($con
 
 $container->set(\App\Controllers\OwnershipController::class, function() use ($container) {
     return new \App\Controllers\OwnershipController();
+});
+
+$container->set(\App\Controllers\CanonVaultController::class, function() use ($container) {
+    return new \App\Controllers\CanonVaultController(
+        $container->get(\App\Support\CanonVaultManager::class)
+    );
+});
+
+$container->set(\App\Controllers\DraftImportController::class, function() use ($container) {
+    return new \App\Controllers\DraftImportController(
+        $container->get(\App\Support\DraftImportParser::class)
+    );
 });
 
 AppFactory::setContainer($container);

@@ -18,6 +18,8 @@ use App\Controllers\AppStateController;
 use App\Controllers\ItemController;
 use App\Controllers\ResearchController;
 use App\Controllers\OwnershipController;
+use App\Controllers\CanonVaultController;
+use App\Controllers\DraftImportController;
 
 return function (App $app) {
     // API base path
@@ -126,6 +128,16 @@ return function (App $app) {
         $group->post('/series/{seriesId}/terminology', [WorldBuildingController::class, 'addTerm']);
         $group->put('/terminology/{termId}', [WorldBuildingController::class, 'updateTerm']);
         $group->delete('/terminology/{termId}', [WorldBuildingController::class, 'deleteTerm']);
+
+        // Milestone A: Canon Vault + Imports
+        $group->get('/series/{seriesId}/canon-vault/entries', [CanonVaultController::class, 'getEntries']);
+        $group->post('/series/{seriesId}/canon-vault/entries', [CanonVaultController::class, 'createEntry']);
+        $group->put('/series/{seriesId}/canon-vault/entries/{entryId}', [CanonVaultController::class, 'updateEntry']);
+        $group->delete('/series/{seriesId}/canon-vault/entries/{entryId}', [CanonVaultController::class, 'deleteEntry']);
+        $group->get('/series/{seriesId}/canon-vault/custom-types', [CanonVaultController::class, 'getCustomEntryTypes']);
+        $group->post('/series/{seriesId}/canon-vault/custom-types', [CanonVaultController::class, 'createCustomEntryType']);
+
+        $group->post('/series/{seriesId}/imports/draft', [DraftImportController::class, 'importDraft']);
 
         // Consistency Checking
         $group->get('/series/{seriesId}/consistency-check', [ConsistencyController::class, 'checkConsistency']);

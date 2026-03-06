@@ -15,7 +15,11 @@ class Book extends Model
 
     protected $table = 'books';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id',
         'series_id',
         'title',
         'description',

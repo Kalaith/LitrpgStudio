@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import AdvancedTextEditor from '../components/AdvancedTextEditor';
@@ -7,6 +7,8 @@ import { ContinuityChecker } from '../components/ContinuityChecker';
 import { AIConsistencyPanel } from '../components/AIConsistencyPanel';
 import type { BaseEntity } from '../types/entityRegistry';
 import type { TimelineEvent } from '../types/unifiedTimeline';
+import type { Chapter } from '../types/story';
+import type { AppNavigationDetail, EditorNavigationPayload } from '../utils/appNavigation';
 
 interface ContinuityIssueSummary {
   id: string;
@@ -16,7 +18,21 @@ interface ContinuityIssueSummary {
 
 type ChapterTab = 'write' | 'continuity' | 'ai';
 
-const EditorView = () => {
+interface EditorViewProps {
+  navigationState?: AppNavigationDetail | null;
+}
+
+const getChapterOrder = (chapter: Chapter): number => {
+  const chapterRecord = chapter as Chapter & { chapter_number?: number };
+  return chapterRecord.order ?? chapterRecord.chapter_number ?? 0;
+};
+
+const getChapterWordCount = (chapter: Chapter): number => {
+  const chapterRecord = chapter as Chapter & { word_count?: number };
+  return chapterRecord.wordCount ?? chapterRecord.word_count ?? 0;
+};
+
+const EditorView: React.FC<EditorViewProps> = ({ navigationState }) => {
   const [chapterTitle, setChapterTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [focusMode, setFocusMode] = useState(false);
@@ -27,8 +43,85 @@ const EditorView = () => {
   const [currentChapterId, setCurrentChapterId] = useState<string | undefined>();
   const [cursorPosition, setCursorPosition] = useState(0);
 
-  const { currentStory } = useStoryStore();
+  const { stories, currentStory, setCurrentStory, fetchStoryById } = useStoryStore();
   const { addToRecentEntities } = useEntityRegistryStore();
+
+  const orderedChapters = useMemo(() => {
+    const chapters = currentStory?.chapters || [];
+    return [...chapters].sort((left, right) => getChapterOrder(left) - getChapterOrder(right));
+  }, [currentStory?.chapters]);
+
+  useEffect(() => {
+    if (orderedChapters.length === 0) {
+      setCurrentChapterId(undefined);
+      setChapterTitle('');
+      setContent('');
+      return;
+    }
+
+    const selectedChapter =
+      orderedChapters.find((chapter) => chapter.id === currentChapterId) ?? orderedChapters[0];
+
+    if (selectedChapter.id !== currentChapterId) {
+      setCurrentChapterId(selectedChapter.id);
+    }
+
+    setChapterTitle(selectedChapter.title || '');
+    setContent(selectedChapter.content || '');
+  }, [currentChapterId, orderedChapters]);
+
+  useEffect(() => {
+    const isEditorNavigation = navigationState?.view === 'editor';
+    if (!isEditorNavigation) {
+      return;
+    }
+
+    const payload = (navigationState?.payload || {}) as EditorNavigationPayload;
+    const hasStoryTarget = typeof payload.storyId === 'string' && payload.storyId.trim() !== '';
+    const hasChapterTarget = typeof payload.chapterId === 'string' && payload.chapterId.trim() !== '';
+
+    if (!hasStoryTarget && !hasChapterTarget) {
+      return;
+    }
+
+    let cancelled = false;
+    const hydrateTarget = async () => {
+      const targetStoryId = hasStoryTarget ? (payload.storyId as string) : currentStory?.id;
+      let targetStory = targetStoryId
+        ? stories.find((story) => story.id === targetStoryId) || null
+        : currentStory;
+
+      if (!targetStory && targetStoryId) {
+        await fetchStoryById(targetStoryId);
+        const latestState = useStoryStore.getState();
+        targetStory =
+          latestState.stories.find((story) => story.id === targetStoryId) ||
+          latestState.currentStory ||
+          null;
+      }
+
+      if (cancelled) {
+        return;
+      }
+
+      if (targetStory) {
+        setCurrentStory(targetStory);
+      }
+
+      if (hasChapterTarget) {
+        setCurrentChapterId(payload.chapterId as string);
+      }
+
+      setActiveTab('write');
+      setShowContextSidebar(true);
+    };
+
+    hydrateTarget().catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigationState?.token]);
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
@@ -77,7 +170,7 @@ const EditorView = () => {
               <button className="btn-secondary text-sm">+ Add</button>
             </div>
             <div className="space-y-2">
-              {currentStory?.chapters?.map((chapter) => (
+              {orderedChapters.length > 0 ? orderedChapters.map((chapter) => (
                 <button
                   key={chapter.id}
                   onClick={() => setCurrentChapterId(chapter.id)}
@@ -89,10 +182,10 @@ const EditorView = () => {
                 >
                   <div className="font-medium text-sm">{chapter.title}</div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {chapter.wordCount || 0} words
+                    {getChapterWordCount(chapter)} words
                   </div>
                 </button>
-              )) || (
+              )) : (
                 <div className="text-sm text-gray-500 italic py-4 text-center">
                   No chapters yet
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ToastContainer from './components/Toast.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import MainContent from './components/MainContent.tsx';
@@ -7,10 +7,12 @@ import { useUnifiedSystemAutoInit } from './hooks/useUnifiedSystem';
 import { useApiIntegration } from './hooks/useApiIntegration';
 import { useApiStatus } from './hooks/useApiStatus';
 import { useBackendStateSync } from './hooks/useBackendStateSync';
+import { APP_NAVIGATE_EVENT, type AppNavigationDetail } from './utils/appNavigation';
 import './App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
+  const [navigationState, setNavigationState] = useState<AppNavigationDetail | null>(null);
 
   // Enable analytics integration
   useAnalyticsIntegration();
@@ -33,6 +35,34 @@ function App() {
     }
   }, [isOnline, loadInitialData]);
 
+  const handleViewChange = useCallback((view: string) => {
+    setActiveView(view);
+    setNavigationState({
+      view,
+      token: Date.now(),
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleNavigate = (event: Event) => {
+      const customEvent = event as CustomEvent<AppNavigationDetail>;
+      const detail = customEvent.detail;
+      if (!detail || typeof detail.view !== 'string' || detail.view.trim() === '') {
+        return;
+      }
+
+      setActiveView(detail.view);
+      setNavigationState({
+        view: detail.view,
+        payload: detail.payload,
+        token: detail.token || Date.now(),
+      });
+    };
+
+    window.addEventListener(APP_NAVIGATE_EVENT, handleNavigate as EventListener);
+    return () => window.removeEventListener(APP_NAVIGATE_EVENT, handleNavigate as EventListener);
+  }, []);
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -47,9 +77,9 @@ function App() {
         )}
 
         <div className="flex h-screen overflow-hidden relative">
-          <Sidebar activeView={activeView} onViewChange={setActiveView} />
+          <Sidebar activeView={activeView} onViewChange={handleViewChange} />
           <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
-            <MainContent activeView={activeView} />
+            <MainContent activeView={activeView} navigationState={navigationState} />
           </div>
         </div>
       </div>

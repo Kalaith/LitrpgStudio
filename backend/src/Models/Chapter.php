@@ -14,7 +14,11 @@ class Chapter extends Model
 
     protected $table = 'chapters';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id',
         'story_id',
         'title',
         'chapter_number',

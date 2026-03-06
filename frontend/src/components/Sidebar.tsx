@@ -10,6 +10,8 @@ import {
   Menu,
   X,
   LayoutDashboard,
+  FileInput,
+  BookOpenText,
   SquarePen,
   Clock3,
   Users,
@@ -29,6 +31,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [pinnedItems, setPinnedItems] = useState<string[]>([]);
+  const defaultExpandedSections: Record<string, boolean> = {
+    'Overview': true,
+    'Core Workflow': true,
+    'Publishing': true
+  };
 
   // Initialize expanded sections and pinned items from localStorage
   useEffect(() => {
@@ -37,14 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
     const savedCollapsed = localStorage.getItem('sidebar-collapsed');
 
     if (savedExpanded) {
-      setExpandedSections(JSON.parse(savedExpanded));
-    } else {
-      // Default to all sections expanded
+      const parsed = JSON.parse(savedExpanded);
       setExpandedSections({
-        'Overview': true,
-        'Story Tools': true,
-        'Productivity': true
+        ...defaultExpandedSections,
+        ...parsed
       });
+    } else {
+      setExpandedSections(defaultExpandedSections);
     }
 
     if (savedPinned) {
@@ -77,8 +83,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       ]
     },
     {
-      name: 'Story Tools',
+      name: 'Core Workflow',
       items: [
+        { id: 'import', icon: FileInput, label: 'Import' },
+        { id: 'canon_vault', icon: BookOpenText, label: 'Canon Vault' },
         { id: 'editor', icon: SquarePen, label: 'Editor' },
         { id: 'timeline', icon: Clock3, label: 'Timeline' },
         { id: 'characters', icon: Users, label: 'Characters' },
@@ -87,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       ]
     },
     {
-      name: 'Productivity',
+      name: 'Publishing',
       items: [
         { id: 'templates', icon: ClipboardList, label: 'Templates' },
         { id: 'export', icon: Upload, label: 'Export & Publish' }
@@ -212,7 +220,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                     <button
                       className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
                         ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
-                      onClick={() => onViewChange(id)}
+                      onClick={() => {
+                        onViewChange(id);
+                        setIsMobileOpen(false);
+                      }}
                       title={isCollapsed ? label : undefined}
                     >
                       <span className="flex-shrink-0">
@@ -294,7 +305,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                           <button
                             className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
                               ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
-                            onClick={() => onViewChange(id)}
+                            onClick={() => {
+                              onViewChange(id);
+                              setIsMobileOpen(false);
+                            }}
                             title={isCollapsed ? label : undefined}
                           >
                             <span className="flex-shrink-0">

@@ -8,12 +8,16 @@ import TemplatesView from '../pages/TemplatesView';
 import ExportView from '../pages/ExportView';
 import WorldBuildingView from '../pages/WorldBuildingView';
 import { SeriesManager } from './SeriesManager';
+import ImportView from '../pages/ImportView';
+import CanonVaultView from '../pages/CanonVaultView';
+import type { AppNavigationDetail } from '../utils/appNavigation';
 
 interface MainContentProps {
   activeView: string;
+  navigationState?: AppNavigationDetail | null;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
+const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }) => {
   const [isCreatingCharacter, setIsCreatingCharacter] = useState(false);
   const blockedViews = new Set([
     'skills',
@@ -25,7 +29,19 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
     'loot',
     'system_bible'
   ]);
-  const resolvedView = blockedViews.has(activeView) ? 'dashboard' : activeView;
+  const supportedViews = new Set([
+    'dashboard',
+    'import',
+    'canon_vault',
+    'editor',
+    'timeline',
+    'characters',
+    'worldbuilding',
+    'series',
+    'templates',
+    'export'
+  ]);
+  const resolvedView = blockedViews.has(activeView) || !supportedViews.has(activeView) ? 'dashboard' : activeView;
 
   const handleCreateCharacter = () => {
     // Switch to characters view and set creating flag
@@ -38,6 +54,10 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
     switch (resolvedView) {
       case 'dashboard':
         return <DashboardView />;
+      case 'import':
+        return <ImportView />;
+      case 'canon_vault':
+        return <CanonVaultView />;
       case 'characters':
         return (
           <CharacterManager
@@ -48,7 +68,7 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
       case 'timeline':
         return <TimelineView />;
       case 'editor':
-        return <EditorView />;
+        return <EditorView navigationState={navigationState} />;
       case 'worldbuilding':
         return <WorldBuildingView />;
       case 'series':

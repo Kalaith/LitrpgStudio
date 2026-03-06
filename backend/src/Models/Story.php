@@ -15,7 +15,11 @@ class Story extends Model
 
     protected $table = 'stories';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id',
         'series_id',
         'book_id',
         'title',
