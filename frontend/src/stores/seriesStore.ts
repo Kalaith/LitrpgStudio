@@ -20,6 +20,13 @@ import type {
 import type { Character } from '../types/character';
 import { seriesApi } from '../api/series';
 
+// Normalize series data from API: backend uses 'title', frontend type uses 'name'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalizeSeries = (s: any): Series => ({
+  ...s,
+  name: s.name ?? s.title ?? '',
+});
+
 interface SeriesState {
   series: Series[];
   currentSeries: Series | null;
@@ -150,7 +157,7 @@ export const useSeriesStore = create<SeriesStore>()(
         try {
           const response = await seriesApi.getAll();
           if (response.success && response.data) {
-            set({ series: response.data });
+            set({ series: (response.data as unknown[]).map(normalizeSeries) });
           } else {
             set({ error: response.error || 'Failed to fetch series' });
           }
@@ -166,7 +173,7 @@ export const useSeriesStore = create<SeriesStore>()(
         try {
           const response = await seriesApi.getById(id);
           if (response.success && response.data) {
-            set({ currentSeries: response.data });
+            set({ currentSeries: normalizeSeries(response.data) });
           } else {
             set({ error: response.error || 'Failed to fetch series' });
           }
@@ -183,7 +190,7 @@ export const useSeriesStore = create<SeriesStore>()(
         try {
           const response = await seriesApi.create(seriesData);
           if (response.success && response.data) {
-            const newSeries = response.data;
+            const newSeries = normalizeSeries(response.data);
             set((state) => ({
               series: [...state.series, newSeries],
               currentSeries: newSeries,
@@ -206,7 +213,7 @@ export const useSeriesStore = create<SeriesStore>()(
         try {
           const response = await seriesApi.update(seriesId, updates);
           if (response.success && response.data) {
-            const updatedSeries = response.data;
+            const updatedSeries = normalizeSeries(response.data);
             set((state) => ({
               series: state.series.map(s => s.id === seriesId ? updatedSeries : s),
               currentSeries: state.currentSeries?.id === seriesId ? updatedSeries : state.currentSeries,

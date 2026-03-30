@@ -396,7 +396,7 @@ export class SeriesAdapter implements EntityAdapter<Series> {
   toEntity(series: Series): BaseEntity {
     return {
       id: series.id,
-      name: series.name,
+      name: series.name ?? (series as unknown as { title?: string }).title ?? '',
       type: 'series' as EntityType,
       description: series.description,
       tags: series.tags || [],

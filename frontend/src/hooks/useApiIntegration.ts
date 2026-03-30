@@ -3,18 +3,21 @@ import { useCharacterStore } from '../stores/characterStore';
 import { useStoryStore } from '../stores/storyStore';
 import { seriesApi } from '../api/series';
 import { charactersApi } from '../api/characters';
-import { storiesApi } from '../api/stories';
+import { apiClient } from '../api/client';
 import type { Series } from '../types/series';
 import type { Character } from '../types/character';
 
 let initialDataSyncInFlight: Promise<void> | null = null;
 let hasSyncedInitialData = false;
 
+export function resetInitialDataSync(): void {
+  hasSyncedInitialData = false;
+  initialDataSyncInFlight = null;
+}
+
 // Hook to manage API integration and sync with stores
 export function useApiIntegration() {
-  const seriesStore = useSeriesStore();
-  const characterStore = useCharacterStore();
-  const storyStore = useStoryStore();
+
 
   // Load initial data
   const loadInitialData = async () => {
@@ -28,24 +31,29 @@ export function useApiIntegration() {
 
     initialDataSyncInFlight = (async () => {
       try {
-        // Load series data
-        const seriesResponse = await seriesApi.getAll();
-        if (seriesResponse.success && seriesResponse.data) {
-          // Merge with local data, preferring backend data
-          seriesStore.series = seriesResponse.data;
+        // Load series data — use the store's own action so set() fires reactively
+        await useSeriesStore.getState().fetchSeries();
+
+        // If series is still empty, there may be orphaned rows with no owner_user_id
+        // (data imported before tenant isolation was added). Claim them for the current user
+        // then retry the fetch.
+        if (useSeriesStore.getState().series.length === 0) {
+          try {
+            await apiClient.post('/data/claim-unowned', {});
+            await useSeriesStore.getState().fetchSeries();
+          } catch {
+            // Not authenticated yet or nothing to claim — silently ignore.
+          }
         }
 
         // Load characters data
         const charactersResponse = await charactersApi.getAll();
         if (charactersResponse.success && charactersResponse.data) {
-          characterStore.characters = charactersResponse.data;
+          useCharacterStore.setState({ characters: charactersResponse.data as unknown as Character[] });
         }
 
-        // Load stories data
-        const storiesResponse = await storiesApi.getAll();
-        if (storiesResponse.success && storiesResponse.data) {
-          storyStore.stories = storiesResponse.data;
-        }
+        // Load stories data — use the store's own action so set() fires reactively
+        await useStoryStore.getState().fetchStories();
 
         hasSyncedInitialData = true;
       } catch (error) {

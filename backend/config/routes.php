@@ -29,6 +29,7 @@ return function (App $app) {
         $group->post('/auth/guest-session', [AuthController::class, 'createGuestSession']);
         $group->post('/auth/link-guest', [AuthController::class, 'linkGuestAccount']);
         $group->post('/admin/ownership/transfer', [OwnershipController::class, 'transfer']);
+        $group->post('/data/claim-unowned', [OwnershipController::class, 'claimUnowned']);
         $group->get('/app-state', [AppStateController::class, 'getState']);
         $group->put('/app-state', [AppStateController::class, 'saveState']);
 

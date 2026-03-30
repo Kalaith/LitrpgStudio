@@ -223,9 +223,9 @@ const getStoredAuth = (): { token: string | null; mode: AuthMode; guestUser: Use
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [authMode, setAuthMode] = useState<AuthMode>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(() => getStoredAuth().token);
+  const [authMode, setAuthMode] = useState<AuthMode>(() => getStoredAuth().mode);
+  const [user, setUser] = useState<User | null>(() => getStoredAuth().guestUser);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedGuestLinkRef = useRef(false);

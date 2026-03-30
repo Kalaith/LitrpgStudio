@@ -80,7 +80,17 @@ export const useCharacterStore = create<CharacterStore>()(
 
       fetchCharacters: async () => {
         set({ loading: true, error: null });
-        set({ loading: false });
+        try {
+          const { charactersApi } = await import('../api/characters');
+          const response = await charactersApi.getAll();
+          if (response.success && Array.isArray(response.data)) {
+            set({ characters: response.data as unknown as Character[], loading: false });
+          } else {
+            set({ loading: false });
+          }
+        } catch (err) {
+          set({ loading: false, error: err instanceof Error ? err.message : 'Failed to load characters' });
+        }
       },
 
       fetchCharacterById: async (id) => {

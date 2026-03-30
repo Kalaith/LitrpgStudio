@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { GlobalSearch } from './GlobalSearch';
 import { useAuth } from '../contexts/AuthContext';
+import { useSeriesStore } from '../stores/seriesStore';
 
 interface TopBarProps {
   onCreateCharacter?: () => void;
@@ -11,7 +12,9 @@ interface TopBarProps {
 const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => {
   const [isSaved] = useState(true);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [showSeriesDropdown, setShowSeriesDropdown] = useState(false);
   const { user, getLinkAccountUrl } = useAuth();
+  const { series, currentSeries, setCurrentSeries } = useSeriesStore();
 
   // Global keyboard shortcut for search (Ctrl/Cmd + K)
   useEffect(() => {
@@ -32,7 +35,44 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">My Novel Project</h1>
+              {series.length > 0 ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSeriesDropdown(v => !v)}
+                    className="flex items-center gap-1.5 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors max-w-[220px] sm:max-w-xs"
+                  >
+                    <span className="truncate">
+                      {currentSeries ? (currentSeries.name ?? currentSeries.title) : (series[0].name ?? series[0].title)}
+                    </span>
+                    <ChevronDown size={16} className="shrink-0 opacity-60" />
+                  </button>
+                  {showSeriesDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowSeriesDropdown(false)} />
+                      <div className="absolute left-0 top-full mt-1 z-20 min-w-[200px] rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg py-1 overflow-hidden">
+                        {series.map(s => {
+                          const isActive = currentSeries ? String(s.id) === String(currentSeries.id) : String(s.id) === String(series[0].id);
+                          return (
+                            <button
+                              key={s.id}
+                              onClick={() => { setCurrentSeries(s); setShowSeriesDropdown(false); }}
+                              className={`w-full text-left px-4 py-2 text-sm truncate transition-colors
+                                ${isActive
+                                  ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium'
+                                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                              {s.name ?? s.title}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">Writers Studio</h1>
+              )}
               {isSaved && <span className="text-sm text-success-600 dark:text-success-400 hidden sm:inline">Saved</span>}
               {user?.is_guest && (
                 <a
@@ -44,7 +84,7 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
               )}
             </div>
 
-            {/* Mobile Action Buttons */}
+            {/* Mobile Search */}
             <div className="flex gap-2 sm:hidden">
               <button
                 onClick={() => setShowGlobalSearch(true)}
@@ -52,12 +92,6 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
                 aria-label="Search"
               >
                 <Search size={16} className="text-gray-400" />
-              </button>
-              <button
-                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors touch-manipulation"
-                onClick={onCreateCharacter}
-              >
-                + Char
               </button>
             </div>
           </div>
@@ -81,21 +115,6 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
               </button>
             </div>
 
-            {/* Desktop Action Buttons */}
-            <div className="hidden sm:flex gap-2">
-              <button
-                className="px-4 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors touch-manipulation"
-                onClick={onCreateCharacter}
-              >
-                + Character
-              </button>
-              <button
-                className="px-4 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors touch-manipulation"
-                onClick={onCreateEvent}
-              >
-                + Event
-              </button>
-            </div>
 
             {/* Mobile Search Bar (Full Width Below) */}
             <div className="sm:hidden w-full mt-2">

@@ -1,64 +1,84 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { importsApi, type DraftImportResponse } from '../api/imports';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { importsApi } from '../api/imports';
 import { useSeriesStore } from '../stores/seriesStore';
+import { navigateToView } from '../utils/appNavigation';
+import { resetInitialDataSync } from '../hooks/useApiIntegration';
+import { useAuth } from '../contexts/AuthContext';
 
-type DraftFormat = 'markdown' | 'txt' | 'scrivener';
-
-const formatNumber = (value: number): string => new Intl.NumberFormat().format(value);
+const NEW_SERIES_VALUE = '__new__';
 
 export default function ImportView() {
-  const { series, currentSeries, fetchSeries } = useSeriesStore();
-  const [selectedSeriesId, setSelectedSeriesId] = useState(currentSeries?.id ?? '');
-  const [format, setFormat] = useState<DraftFormat>('markdown');
+  const { series, fetchSeries } = useSeriesStore();
+  const { isAuthenticated, continueAsGuest } = useAuth();
+  const [selectedSeriesId, setSelectedSeriesId] = useState(NEW_SERIES_VALUE);
+  const [newSeriesName, setNewSeriesName] = useState('');
   const [bookTitle, setBookTitle] = useState('');
-  const [storyTitle, setStoryTitle] = useState('');
   const [content, setContent] = useState('');
+  const [inputMode, setInputMode] = useState<'paste' | 'upload'>('paste');
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [importResult, setImportResult] = useState<DraftImportResponse | null>(null);
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => setContent(e.target?.result as string ?? '');
+    reader.readAsText(file);
+  };
   useEffect(() => {
     if (series.length === 0) {
       fetchSeries().catch(() => undefined);
     }
   }, [series.length, fetchSeries]);
 
-  useEffect(() => {
-    if (!selectedSeriesId && currentSeries?.id) {
-      setSelectedSeriesId(currentSeries.id);
-    }
-  }, [selectedSeriesId, currentSeries?.id]);
-
   const canImport = useMemo(
-    () => selectedSeriesId.trim() !== '' && content.trim() !== '' && !isImporting,
-    [selectedSeriesId, content, isImporting]
+    () => content.trim() !== '' && !isImporting,
+    [content, isImporting]
   );
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setErrorMessage(null);
-    setImportResult(null);
 
     if (!canImport) {
-      setErrorMessage('Select a series and provide draft content before importing.');
+      setErrorMessage('Paste your draft content before importing.');
       return;
     }
 
     setIsImporting(true);
     try {
-      const response = await importsApi.importDraft(selectedSeriesId, {
+      // Ensure a guest session exists before writing to the DB so that
+      // owner_user_id is always set correctly on new rows.
+      if (!isAuthenticated) {
+        await continueAsGuest();
+      }
+
+      const isNew = selectedSeriesId === NEW_SERIES_VALUE;
+      const seriesId = isNew ? 'new' : selectedSeriesId;
+      const name = newSeriesName.trim() || bookTitle.trim() || 'New Series';
+
+      // Auto-detect Scrivener by its compile separator; default to markdown
+      const detectedFormat = /^={3,}\s*$/m.test(content) ? 'scrivener' : 'markdown';
+
+      const response = await importsApi.importDraft(seriesId, {
         content,
-        format,
+        format: detectedFormat,
         bookTitle: bookTitle.trim() || undefined,
-        storyTitle: storyTitle.trim() || undefined,
+        ...(isNew ? { seriesName: name } : {}),
       });
 
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Draft import failed.');
       }
 
-      setImportResult(response.data);
+      // Reset the initialData flag so loadInitialData re-runs after navigating
+      // to the dashboard and the new series appears immediately.
+      resetInitialDataSync();
       fetchSeries().catch(() => undefined);
+      navigateToView('import_result', { importResult: response.data });
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Draft import failed.');
     } finally {
@@ -84,16 +104,15 @@ export default function ImportView() {
           onSubmit={handleSubmit}
           className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
               Series
               <select
                 value={selectedSeriesId}
                 onChange={(event) => setSelectedSeriesId(event.target.value)}
                 className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                required
               >
-                <option value="">Select a series</option>
+                <option value={NEW_SERIES_VALUE}>New Series</option>
                 {series.map((seriesItem) => (
                   <option key={seriesItem.id} value={seriesItem.id}>
                     {seriesItem.name}
@@ -102,54 +121,94 @@ export default function ImportView() {
               </select>
             </label>
 
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Source Format
-              <select
-                value={format}
-                onChange={(event) => setFormat(event.target.value as DraftFormat)}
-                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="markdown">Markdown</option>
-                <option value="txt">Text (.txt)</option>
-                <option value="scrivener">Scrivener export text</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Book Title (optional)
+            {selectedSeriesId === NEW_SERIES_VALUE && (
               <input
                 type="text"
-                value={bookTitle}
-                onChange={(event) => setBookTitle(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="Imported Book 1"
+                value={newSeriesName}
+                onChange={(event) => setNewSeriesName(event.target.value)}
+                placeholder="Series name (optional)"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-            </label>
-
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Story Title (optional)
-              <input
-                type="text"
-                value={storyTitle}
-                onChange={(event) => setStoryTitle(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="Book 1 Draft"
-              />
-            </label>
+            )}
           </div>
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-            Draft Content
-            <textarea
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              rows={16}
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Book Title (optional)
+            <input
+              type="text"
+              value={bookTitle}
+              onChange={(event) => setBookTitle(event.target.value)}
               className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              placeholder="Paste your draft export here..."
+              placeholder="Imported Book 1"
             />
           </label>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Draft Content</span>
+              <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => setInputMode('paste')}
+                  className={`px-3 py-1.5 transition-colors ${
+                    inputMode === 'paste'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Paste
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('upload')}
+                  className={`px-3 py-1.5 transition-colors ${
+                    inputMode === 'upload'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Upload File
+                </button>
+              </div>
+            </div>
+
+            {inputMode === 'paste' ? (
+              <textarea
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                rows={16}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                placeholder="Paste your draft here..."
+              />
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center w-full h-48 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 transition-colors"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.md,.markdown"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                {fileName ? (
+                  <>
+                    <svg className="w-8 h-8 text-green-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{fileName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{content.length.toLocaleString()} characters loaded</p>
+                    <p className="text-xs text-primary-600 dark:text-primary-400 mt-2">Click to change file</p>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Click to choose a file</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">.txt, .md, .markdown</p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
 
           {errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
@@ -168,52 +227,7 @@ export default function ImportView() {
           </div>
         </form>
 
-        {importResult && (
-          <section className="rounded-xl border border-green-200 bg-green-50 p-6 shadow-sm dark:border-green-900 dark:bg-green-900/20">
-            <h3 className="text-lg font-semibold text-green-900 dark:text-green-200">Import Complete</h3>
-            <div className="mt-3 grid gap-3 md:grid-cols-4">
-              <div className="rounded-lg bg-white px-3 py-2 text-sm dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Book</p>
-                <p className="font-medium text-gray-900 dark:text-white">{importResult.book.title}</p>
-              </div>
-              <div className="rounded-lg bg-white px-3 py-2 text-sm dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Story</p>
-                <p className="font-medium text-gray-900 dark:text-white">{importResult.story.title}</p>
-              </div>
-              <div className="rounded-lg bg-white px-3 py-2 text-sm dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Chapters</p>
-                <p className="font-medium text-gray-900 dark:text-white">{importResult.summary.chapter_count}</p>
-              </div>
-              <div className="rounded-lg bg-white px-3 py-2 text-sm dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Words</p>
-                <p className="font-medium text-gray-900 dark:text-white">{formatNumber(importResult.summary.word_count)}</p>
-              </div>
-            </div>
 
-            <div className="mt-4 overflow-x-auto rounded-lg border border-green-100 bg-white dark:border-gray-700 dark:bg-gray-800">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-sm dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900/30">
-                  <tr>
-                    <th className="px-4 py-2 font-medium text-gray-700 dark:text-gray-300">Chapter</th>
-                    <th className="px-4 py-2 font-medium text-gray-700 dark:text-gray-300">Scenes</th>
-                    <th className="px-4 py-2 font-medium text-gray-700 dark:text-gray-300">Words</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {importResult.chapters.map((chapter) => (
-                    <tr key={chapter.id}>
-                      <td className="px-4 py-2 text-gray-900 dark:text-white">
-                        {chapter.chapter_number}. {chapter.title}
-                      </td>
-                      <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{chapter.scene_count}</td>
-                      <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{formatNumber(chapter.word_count)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );

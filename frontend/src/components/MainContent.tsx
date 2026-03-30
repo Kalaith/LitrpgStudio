@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import TopBar from './TopBar';
 import DashboardView from '../pages/DashboardView';
-import CharacterManager from '../pages/CharacterManager';
+import CharactersView from '../pages/CharactersView';
 import TimelineView from '../pages/TimelineView';
 import EditorView from '../pages/EditorView';
 import TemplatesView from '../pages/TemplatesView';
@@ -9,6 +8,7 @@ import ExportView from '../pages/ExportView';
 import WorldBuildingView from '../pages/WorldBuildingView';
 import { SeriesManager } from './SeriesManager';
 import ImportView from '../pages/ImportView';
+import ImportResultView from '../pages/ImportResultView';
 import CanonVaultView from '../pages/CanonVaultView';
 import type { AppNavigationDetail } from '../utils/appNavigation';
 
@@ -18,7 +18,6 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }) => {
-  const [isCreatingCharacter, setIsCreatingCharacter] = useState(false);
   const blockedViews = new Set([
     'skills',
     'analytics',
@@ -32,6 +31,7 @@ const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }
   const supportedViews = new Set([
     'dashboard',
     'import',
+    'import_result',
     'canon_vault',
     'editor',
     'timeline',
@@ -43,11 +43,6 @@ const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }
   ]);
   const resolvedView = blockedViews.has(activeView) || !supportedViews.has(activeView) ? 'dashboard' : activeView;
 
-  const handleCreateCharacter = () => {
-    // Switch to characters view and set creating flag
-    setIsCreatingCharacter(true);
-  };
-
   const handleCreateEvent = () => undefined;
 
   const renderActiveView = () => {
@@ -56,15 +51,12 @@ const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }
         return <DashboardView />;
       case 'import':
         return <ImportView />;
+      case 'import_result':
+        return <ImportResultView navigationState={navigationState} />;
       case 'canon_vault':
         return <CanonVaultView />;
       case 'characters':
-        return (
-          <CharacterManager
-            isCreating={isCreatingCharacter}
-            onCreateComplete={() => setIsCreatingCharacter(false)}
-          />
-        );
+        return <CharactersView />;
       case 'timeline':
         return <TimelineView />;
       case 'editor':
@@ -85,7 +77,7 @@ const MainContent: React.FC<MainContentProps> = ({ activeView, navigationState }
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
       <TopBar
-        onCreateCharacter={handleCreateCharacter}
+        onCreateCharacter={() => undefined}
         onCreateEvent={handleCreateEvent}
       />
       {renderActiveView()}

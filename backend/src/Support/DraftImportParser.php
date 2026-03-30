@@ -23,6 +23,17 @@ final class DraftImportParser
         foreach ($lines as $line) {
             if ($this->isChapterHeading($line)) {
                 if ($current !== null) {
+                    // If the current chapter has no meaningful content yet, it's a
+                    // structural/binder heading (e.g. Scrivener compile). Absorb the
+                    // new heading into the same chapter slot rather than creating an
+                    // empty duplicate.
+                    $bodyWords = str_word_count(strip_tags(trim(implode("\n", $current['lines']))));
+                    if ($bodyWords < 5) {
+                        $current['raw_heading'] = $line;
+                        $current['lines'] = [];
+                        continue;
+                    }
+
                     $chapters[] = $this->finalizeChapter($current, count($chapters) + 1);
                 }
 
@@ -34,8 +45,15 @@ final class DraftImportParser
             }
 
             if ($current === null) {
+                // Skip preamble lines that are structural (headings, blank lines) but
+                // haven't matched a chapter heading — e.g. "# PART 1".
+                $trimmed = trim($line);
+                if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+                    continue;
+                }
+
                 $current = [
-                    'raw_heading' => 'Chapter 1',
+                    'raw_heading' => 'Prologue',
                     'lines' => [],
                 ];
             }

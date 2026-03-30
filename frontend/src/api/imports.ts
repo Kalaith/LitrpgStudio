@@ -5,6 +5,7 @@ export interface DraftImportRequest {
   format: 'markdown' | 'txt' | 'scrivener';
   bookTitle?: string;
   storyTitle?: string;
+  seriesName?: string;
 }
 
 export interface DraftImportChapterSummary {
@@ -16,6 +17,10 @@ export interface DraftImportChapterSummary {
 }
 
 export interface DraftImportResponse {
+  series?: {
+    id: string;
+    title: string;
+  };
   book: {
     id: string;
     title: string;

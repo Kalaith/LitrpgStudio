@@ -16,18 +16,14 @@ const APP_STATE_KEYS = [
   'sidebar-expanded-sections',
   'sidebar-pinned-items',
   'sidebar-collapsed',
-  'characters',
-  'skills',
-  'writers-series-storage',
-  'writers-story-storage',
-  'writers-character-storage',
+  // NOTE: writers-series-storage, writers-story-storage, writers-character-storage are intentionally
+  // excluded here. Those stores are always loaded fresh from the backend API on startup.
+  // Including them caused a race condition: the stale localStorage snapshot would overwrite the
+  // freshly-fetched API data when rehydratePersistedStores() ran after fetchSeries().
   'writers-analytics-storage',
   'unified-timeline-store',
   'entity-registry-store',
   'writers-world-state-storage',
-  'characterData',
-  'storyData',
-  'items',
   'userPreferences',
   'recentFiles',
   'analyticsData',

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Grid, RotateCcw, Wifi, WifiOff } from 'lucide-react';
+import { Plus, Grid, RotateCcw, Wifi, WifiOff, Upload } from 'lucide-react';
+import { navigateToView } from '../utils/appNavigation';
 import { DashboardWidget } from '../components/DashboardWidget';
 import type { WidgetConfig, WidgetType } from '../components/DashboardWidget';
 import { useStoryStore } from '../stores/storyStore';
@@ -157,33 +158,6 @@ const DashboardView: React.FC = () => {
 
         {/* Dashboard Controls */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          {/* Grid Size Selector */}
-          <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-            {['compact', 'comfortable', 'spacious'].map((size) => (
-              <button
-                key={size}
-                onClick={() => setGridSize(size as typeof gridSize)}
-                className={`px-2 sm:px-3 py-1.5 sm:py-1 text-xs rounded transition-colors touch-manipulation ${
-                  gridSize === size
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <span className="hidden md:inline">{size.charAt(0).toUpperCase() + size.slice(1)}</span>
-                <span className="md:hidden">{size.charAt(0).toUpperCase()}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Reset Button */}
-          <button
-            onClick={resetToDefault}
-            className="flex items-center space-x-1 lg:space-x-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors touch-manipulation"
-          >
-            <RotateCcw size={16} />
-            <span className="hidden md:inline">Reset</span>
-          </button>
-
           {/* Add Widget Button */}
           <div className="relative">
             <button
@@ -223,6 +197,32 @@ const DashboardView: React.FC = () => {
                       </button>
                     ))}
                   </div>
+                  {/* Layout settings */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 p-2">
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-1">Layout</div>
+                    <div className="flex items-center gap-1 px-2 pb-1">
+                      {(['compact', 'comfortable', 'spacious'] as const).map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setGridSize(size)}
+                          className={`flex-1 py-1.5 text-xs rounded transition-colors ${
+                            gridSize === size
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          {size.charAt(0).toUpperCase() + size.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={resetToDefault}
+                      className="w-full flex items-center space-x-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                    >
+                      <RotateCcw size={12} />
+                      <span>Reset to default layout</span>
+                    </button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -232,80 +232,76 @@ const DashboardView: React.FC = () => {
 
       {/* Dashboard Grid */}
       <div className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          {/* Empty Database State */}
-          {isOnline && !hasData && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6"
-            >
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                    Welcome to Writers Studio!
-                  </h3>
-                  <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                    <p>Your database is empty. The dashboard will show meaningful data once you:</p>
-                    <ul className="mt-2 ml-4 list-disc space-y-1">
-                      <li>Create your first series</li>
-                      <li>Add characters to your stories</li>
-                      <li>Start writing chapters</li>
-                      <li>Run AI consistency checks for timeline and character-reference issues</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
+        {!hasData ? (
+          /* First-run onboarding: no data yet */
           <motion.div
-            layout
-            className={`grid ${gridClasses} auto-rows-min`}
-          >
-            <AnimatePresence>
-              {widgets.map((widget) => (
-                <DashboardWidget
-                  key={widget.id}
-                  config={widget}
-                  onUpdate={handleWidgetUpdate}
-                  onRemove={handleWidgetRemove}
-                  isDragging={isDragging === widget.id}
-                  dragHandleProps={getDragHandleProps(widget.id)}
-                  className="transition-all duration-200"
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* Empty State */}
-        {widgets.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center h-96 text-center"
+            transition={{ duration: 0.35 }}
+            className="flex flex-col items-center justify-center min-h-full py-20 text-center"
           >
-            <Grid size={64} className="text-gray-300 dark:text-gray-600 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No Widgets Added
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md">
-              Add widgets to customize your author dashboard. Track your progress, monitor your writing goals, and keep tabs on your story elements.
+            <div className="mb-6 flex items-center justify-center w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-900/30">
+              <Upload size={36} className="text-primary-600 dark:text-primary-400" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              Import your story to get started
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-8 text-base">
+              Upload an existing draft and Writers Studio will organise your characters, timeline, and chapters automatically.
             </p>
             <button
-              onClick={() => setShowAddWidget(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              onClick={() => navigateToView('import')}
+              className="flex items-center space-x-2 px-6 py-3 bg-primary-600 text-white text-base font-medium rounded-lg hover:bg-primary-700 active:scale-95 transition-all shadow-sm"
             >
-              <Plus size={16} />
-              <span>Add Your First Widget</span>
+              <Upload size={18} />
+              <span>Import Your Story</span>
             </button>
           </motion.div>
+        ) : (
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              layout
+              className={`grid ${gridClasses} auto-rows-min`}
+            >
+              <AnimatePresence>
+                {widgets.map((widget) => (
+                  <DashboardWidget
+                    key={widget.id}
+                    config={widget}
+                    onUpdate={handleWidgetUpdate}
+                    onRemove={handleWidgetRemove}
+                    isDragging={isDragging === widget.id}
+                    dragHandleProps={getDragHandleProps(widget.id)}
+                    className="transition-all duration-200"
+                  />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* No-widgets state (user removed all widgets) */}
+            {widgets.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center h-96 text-center"
+              >
+                <Grid size={64} className="text-gray-300 dark:text-gray-600 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No Widgets Added
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md">
+                  Add widgets to customise your author dashboard.
+                </p>
+                <button
+                  onClick={() => setShowAddWidget(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  <Plus size={16} />
+                  <span>Add Your First Widget</span>
+                </button>
+              </motion.div>
+            )}
+          </div>
         )}
       </div>
     </div>

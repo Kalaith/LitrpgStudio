@@ -23,14 +23,6 @@ final class DraftImportController
     public function importDraft(Request $request, Response $response, array $args): Response
     {
         try {
-            $series = Series::find($args['seriesId']);
-            if (!$series) {
-                return $this->json($response, [
-                    'success' => false,
-                    'error' => 'Series not found',
-                ], 404);
-            }
-
             $payload = $request->getParsedBody();
             if (!is_array($payload)) {
                 return $this->json($response, [
@@ -54,15 +46,41 @@ final class DraftImportController
                 $format = 'markdown';
             }
 
+            // Resolve (or create) the target series.
+            $isNewSeries = ($args['seriesId'] === 'new');
+            if ($isNewSeries) {
+                $seriesName = trim((string)($payload['seriesName'] ?? ''));
+                if ($seriesName === '') {
+                    $seriesName = $bookTitle !== '' ? $bookTitle : 'New Series';
+                }
+                $series = Series::create([
+                    'id'          => IdGenerator::generate(),
+                    'title'       => $seriesName,
+                    'description' => '',
+                    'genre'       => '',
+                    'status'      => 'writing',
+                    'tags'        => [],
+                    'shared_elements' => [],
+                ]);
+            } else {
+                $series = Series::find($args['seriesId']);
+                if (!$series) {
+                    return $this->json($response, [
+                        'success' => false,
+                        'error'   => 'Series not found',
+                    ], 404);
+                }
+            }
+
             $parsedChapters = $this->parser->parse($content);
             if (count($parsedChapters) === 0) {
                 return $this->json($response, [
                     'success' => false,
-                    'error' => 'No chapter content could be parsed',
+                    'error' => 'No chapter content could be parsed from your draft. Make sure chapters are separated by headings like "Chapter 1: Title".',
                 ], 400);
             }
 
-            $result = Capsule::connection()->transaction(function () use ($series, $bookTitle, $storyTitle, $format, $parsedChapters): array {
+            $result = Capsule::connection()->transaction(function () use ($series, $isNewSeries, $bookTitle, $storyTitle, $format, $parsedChapters): array {
                 $nextBookNumber = (int)Book::where('series_id', $series->id)->max('book_number') + 1;
                 $resolvedBookTitle = $bookTitle !== '' ? $bookTitle : sprintf('Imported Book %d', $nextBookNumber);
                 $resolvedStoryTitle = $storyTitle !== '' ? $storyTitle : $resolvedBookTitle . ' Draft';
@@ -143,6 +161,10 @@ final class DraftImportController
                 $book->save();
 
                 return [
+                    'series' => [
+                        'id'    => $series->id,
+                        'title' => $series->title,
+                    ],
                     'book' => [
                         'id' => $book->id,
                         'title' => $book->title,

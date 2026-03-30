@@ -7,6 +7,8 @@ import { useUnifiedSystemAutoInit } from './hooks/useUnifiedSystem';
 import { useApiIntegration } from './hooks/useApiIntegration';
 import { useApiStatus } from './hooks/useApiStatus';
 import { useBackendStateSync } from './hooks/useBackendStateSync';
+import { useSeriesStore } from './stores/seriesStore';
+import { useCharacterStore } from './stores/characterStore';
 import { APP_NAVIGATE_EVENT, type AppNavigationDetail } from './utils/appNavigation';
 import './App.css';
 
@@ -31,9 +33,20 @@ function App() {
   // Load initial data from backend on app start
   useEffect(() => {
     if (isOnline) {
-      loadInitialData().catch(console.warn);
+      loadInitialData()
+        .then(() => {
+          // If nothing loaded yet, drop straight to import
+          const hasSeries = useSeriesStore.getState().series.length > 0;
+          const hasChars = useCharacterStore.getState().characters.length > 0;
+          if (!hasSeries && !hasChars) {
+            setActiveView('import');
+            setNavigationState({ view: 'import', token: Date.now() });
+          }
+        })
+        .catch(console.warn);
     }
-  }, [isOnline, loadInitialData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline]);
 
   const handleViewChange = useCallback((view: string) => {
     setActiveView(view);

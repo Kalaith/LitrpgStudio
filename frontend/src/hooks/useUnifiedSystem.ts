@@ -96,12 +96,12 @@ export const useUnifiedSystem = () => {
         seriesItem.books?.forEach(book => {
           if (book.storyId) {
             addRelationship({
-              fromEntity: { id: seriesItem.id, type: 'series', name: seriesItem.name },
+              fromEntity: { id: seriesItem.id, type: 'series', name: seriesItem.name ?? '' },
               toEntity: { id: book.storyId, type: 'story', name: book.title },
               relationshipType: 'parent_of',
               strength: 10,
               bidirectional: false,
-              description: `Book is part of series "${seriesItem.name}"`
+              description: `Book is part of series "${seriesItem.name ?? ''}"`
             });
           }
         });
