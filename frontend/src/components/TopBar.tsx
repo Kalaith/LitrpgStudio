@@ -16,6 +16,13 @@ const TopBar: React.FC<TopBarProps> = ({ onCreateCharacter, onCreateEvent }) => 
   const { user, getLinkAccountUrl } = useAuth();
   const { series, currentSeries, setCurrentSeries } = useSeriesStore();
 
+  // Auto-select the first series when none is current
+  useEffect(() => {
+    if (!currentSeries && series.length > 0) {
+      setCurrentSeries(series[0]);
+    }
+  }, [currentSeries, series, setCurrentSeries]);
+
   // Global keyboard shortcut for search (Ctrl/Cmd + K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

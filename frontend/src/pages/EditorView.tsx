@@ -43,8 +43,27 @@ const EditorView: React.FC<EditorViewProps> = ({ navigationState }) => {
   const [currentChapterId, setCurrentChapterId] = useState<string | undefined>();
   const [cursorPosition, setCursorPosition] = useState(0);
 
-  const { stories, currentStory, setCurrentStory, fetchStoryById } = useStoryStore();
+  const { stories, currentStory, setCurrentStory, fetchStories, fetchStoryById } = useStoryStore();
   const { addToRecentEntities } = useEntityRegistryStore();
+
+  // Ensure stories are loaded
+  useEffect(() => { fetchStories(); }, []);
+
+  // Auto-select first story if nothing is current
+  useEffect(() => {
+    if (!currentStory && stories.length > 0) {
+      setCurrentStory(stories[0]);
+    }
+  }, [currentStory, stories]);
+
+  const handleStoryChange = (storyId: string) => {
+    if (!storyId) return;
+    const story = stories.find(s => s.id === storyId);
+    if (story) {
+      setCurrentStory(story);
+      fetchStoryById(storyId);
+    }
+  };
 
   const orderedChapters = useMemo(() => {
     const chapters = currentStory?.chapters || [];
@@ -87,22 +106,23 @@ const EditorView: React.FC<EditorViewProps> = ({ navigationState }) => {
     let cancelled = false;
     const hydrateTarget = async () => {
       const targetStoryId = hasStoryTarget ? (payload.storyId as string) : currentStory?.id;
-      let targetStory = targetStoryId
-        ? stories.find((story) => story.id === targetStoryId) || null
-        : currentStory;
 
-      if (!targetStory && targetStoryId) {
+      // Always fetch full story (with chapter content) from the API.
+      // The stories list intentionally omits chapter content to keep initial load fast.
+      if (targetStoryId) {
         await fetchStoryById(targetStoryId);
-        const latestState = useStoryStore.getState();
-        targetStory =
-          latestState.stories.find((story) => story.id === targetStoryId) ||
-          latestState.currentStory ||
-          null;
       }
 
       if (cancelled) {
         return;
       }
+
+      const latestState = useStoryStore.getState();
+      const targetStory = targetStoryId
+        ? latestState.stories.find((story) => story.id === targetStoryId) ||
+          latestState.currentStory ||
+          null
+        : currentStory;
 
       if (targetStory) {
         setCurrentStory(targetStory);
@@ -164,6 +184,18 @@ const EditorView: React.FC<EditorViewProps> = ({ navigationState }) => {
       <div className="flex h-full">
         {/* Chapter Navigation - Left Sidebar */}
         <div className="w-64 flex flex-col gap-6 p-6 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+          {/* Story Picker */}
+          <select
+            value={currentStory?.id ?? ''}
+            onChange={e => handleStoryChange(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
+            <option value="">Select a story…</option>
+            {stories.map(s => (
+              <option key={s.id} value={s.id}>{s.title}</option>
+            ))}
+          </select>
+
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex justify-between items-center mb-4">
               <h4 className="font-semibold">Chapters</h4>

@@ -25,6 +25,7 @@ $capsule->addConnection([
 ]);
 
 $capsule->setAsGlobal();
+$capsule->setEventDispatcher(new \Illuminate\Events\Dispatcher());
 $capsule->bootEloquent();
 
 return $capsule;

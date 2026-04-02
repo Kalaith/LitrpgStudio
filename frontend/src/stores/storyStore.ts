@@ -87,7 +87,17 @@ export const useStoryStore = create<StoryStore>()(
         try {
           const response = await storiesApi.getAll();
           if (response.success && response.data) {
-            set({ stories: response.data });
+            const fetched = response.data;
+            const current = get().currentStory;
+            // Auto-select: if nothing is current, pick the first story;
+            // if the persisted currentStory no longer exists, clear it.
+            let nextCurrent = current;
+            if (current && !fetched.some(s => s.id === current.id)) {
+              nextCurrent = fetched.length > 0 ? fetched[0] : null;
+            } else if (!current && fetched.length > 0) {
+              nextCurrent = fetched[0];
+            }
+            set({ stories: fetched, currentStory: nextCurrent });
           } else {
             set({ error: response.error || 'Failed to fetch stories' });
           }
@@ -103,7 +113,11 @@ export const useStoryStore = create<StoryStore>()(
         try {
           const response = await storiesApi.getById(id);
           if (response.success && response.data) {
-            set({ currentStory: response.data });
+            const full = response.data;
+            // Update both currentStory and the matching entry in the stories array
+            // so subsequent accesses from the array also have full chapter content.
+            const stories = get().stories.map(s => s.id === id ? full : s);
+            set({ currentStory: full, stories });
           } else {
             set({ error: response.error || 'Failed to fetch story' });
           }
@@ -578,8 +592,18 @@ export const useStoryStore = create<StoryStore>()(
       name: 'writers-story-storage',
       partialize: (state) => ({
         stories: state.stories,
+        currentStory: state.currentStory,
         templates: state.templates,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // If the persisted currentStory no longer exists in stories, clear or pick first
+        if (state.currentStory && !state.stories.some(s => s.id === state.currentStory!.id)) {
+          state.currentStory = state.stories.length > 0 ? state.stories[0] : null;
+        } else if (!state.currentStory && state.stories.length > 0) {
+          state.currentStory = state.stories[0];
+        }
+      },
     }
   )
 );

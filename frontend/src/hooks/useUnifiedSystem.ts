@@ -1,10 +1,89 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useEntityRegistryStore } from '../stores/entityRegistryStore';
 import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
 import { useStoryStore } from '../stores/storyStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useSeriesStore } from '../stores/seriesStore';
 import { adapterRegistry } from '../services/entityAdapters';
+import type { BaseEntity, EntityRelationship } from '../types/entityRegistry';
+
+/**
+ * Batch-build the entity registry from legacy stores.
+ * Collects all entities and relationships first, then applies them
+ * in a single Zustand set() call to avoid thousands of re-renders
+ * and localStorage persist cycles.
+ */
+function buildRegistryBatch(
+  stories: ReturnType<typeof useStoryStore.getState>['stories'],
+  characters: ReturnType<typeof useCharacterStore.getState>['characters'],
+  series: ReturnType<typeof useSeriesStore.getState>['series'],
+) {
+  const entities: BaseEntity[] = [];
+  const relationships: Omit<EntityRelationship, 'id' | 'createdAt'>[] = [];
+
+  // Stories + chapters
+  for (const story of stories) {
+    const entity = adapterRegistry.toEntity(story, 'story');
+    if (entity) entities.push(entity);
+
+    for (const chapter of story.chapters ?? []) {
+      const chapterEntity = adapterRegistry.toEntity(chapter, 'chapter');
+      if (chapterEntity) {
+        entities.push(chapterEntity);
+        relationships.push({
+          fromEntity: { id: story.id, type: 'story', name: story.title },
+          toEntity: { id: chapter.id, type: 'chapter', name: chapter.title },
+          relationshipType: 'part_of',
+          strength: 10,
+          bidirectional: false,
+          description: `Chapter belongs to story "${story.title}"`,
+        });
+      }
+    }
+  }
+
+  // Characters + story participation
+  for (const character of characters) {
+    const entity = adapterRegistry.toEntity(character, 'character');
+    if (entity) {
+      entities.push(entity);
+      for (const story of stories) {
+        if (story.characters?.includes(character.id)) {
+          relationships.push({
+            fromEntity: { id: character.id, type: 'character', name: character.name },
+            toEntity: { id: story.id, type: 'story', name: story.title },
+            relationshipType: 'participates',
+            strength: 8,
+            bidirectional: false,
+            description: `Character appears in story "${story.title}"`,
+          });
+        }
+      }
+    }
+  }
+
+  // Series + books
+  for (const seriesItem of series) {
+    const entity = adapterRegistry.toEntity(seriesItem, 'series');
+    if (entity) {
+      entities.push(entity);
+      for (const book of seriesItem.books ?? []) {
+        if (book.storyId) {
+          relationships.push({
+            fromEntity: { id: seriesItem.id, type: 'series', name: seriesItem.name ?? '' },
+            toEntity: { id: book.storyId, type: 'story', name: book.title },
+            relationshipType: 'parent_of',
+            strength: 10,
+            bidirectional: false,
+            description: `Book is part of series "${seriesItem.name ?? ''}"`,
+          });
+        }
+      }
+    }
+  }
+
+  return { entities, relationships };
+}
 
 /**
  * Hook to initialize and maintain the unified system
@@ -15,7 +94,8 @@ export const useUnifiedSystem = () => {
     addEntity,
     getEntity,
     addRelationship,
-    searchEntities
+    searchEntities,
+    bulkImport
   } = useEntityRegistryStore();
 
   const {
@@ -29,84 +109,12 @@ export const useUnifiedSystem = () => {
   const { characters } = useCharacterStore();
   const { series } = useSeriesStore();
 
-  // Initialize the unified system on mount
-  useEffect(() => {
-    initializeUnifiedSystem();
-  }, []);
-
-  // Sync existing data with entity registry
+  // Sync existing data with entity registry — batched for performance
   const initializeUnifiedSystem = () => {
     console.log('🚀 Initializing Writers Studio Unified System...');
 
-    // Sync stories to entity registry
-    stories.forEach(story => {
-      const entity = adapterRegistry.toEntity(story, 'story');
-      if (entity) {
-        addEntity(entity);
-      }
-
-      // Add story chapters as entities
-      story.chapters?.forEach(chapter => {
-        const chapterEntity = adapterRegistry.toEntity(chapter, 'chapter');
-        if (chapterEntity) {
-          addEntity(chapterEntity);
-
-          // Create relationship between story and chapter
-          addRelationship({
-            fromEntity: { id: story.id, type: 'story', name: story.title },
-            toEntity: { id: chapter.id, type: 'chapter', name: chapter.title },
-            relationshipType: 'part_of',
-            strength: 10,
-            bidirectional: false,
-            description: `Chapter belongs to story "${story.title}"`
-          });
-        }
-      });
-    });
-
-    // Sync characters to entity registry
-    characters.forEach(character => {
-      const entity = adapterRegistry.toEntity(character, 'character');
-      if (entity) {
-        addEntity(entity);
-
-        // Create relationships between characters and stories they appear in
-        stories.forEach(story => {
-          if (story.characters?.includes(character.id)) {
-            addRelationship({
-              fromEntity: { id: character.id, type: 'character', name: character.name },
-              toEntity: { id: story.id, type: 'story', name: story.title },
-              relationshipType: 'participates',
-              strength: 8,
-              bidirectional: false,
-              description: `Character appears in story "${story.title}"`
-            });
-          }
-        });
-      }
-    });
-
-    // Sync series to entity registry
-    series.forEach(seriesItem => {
-      const entity = adapterRegistry.toEntity(seriesItem, 'series');
-      if (entity) {
-        addEntity(entity);
-
-        // Create relationships between series and books
-        seriesItem.books?.forEach(book => {
-          if (book.storyId) {
-            addRelationship({
-              fromEntity: { id: seriesItem.id, type: 'series', name: seriesItem.name ?? '' },
-              toEntity: { id: book.storyId, type: 'story', name: book.title },
-              relationshipType: 'parent_of',
-              strength: 10,
-              bidirectional: false,
-              description: `Book is part of series "${seriesItem.name ?? ''}"`
-            });
-          }
-        });
-      }
-    });
+    const { entities, relationships } = buildRegistryBatch(stories, characters, series);
+    bulkImport(entities, relationships);
 
     // Create default timeline views
     createDefaultTimelineViews();
@@ -309,14 +317,18 @@ export const useUnifiedSystem = () => {
 };
 
 /**
- * Auto-initialization hook - use this in App.tsx to ensure system starts up
+ * Auto-initialization hook - use this in App.tsx to ensure system starts up.
+ * Guards against double-init via a ref.
  */
 export const useUnifiedSystemAutoInit = () => {
   const unifiedSystem = useUnifiedSystem();
+  const hasInit = useRef(false);
 
-  // Auto-initialize when the app starts
   useEffect(() => {
-    unifiedSystem.initializeUnifiedSystem();
+    if (!hasInit.current) {
+      hasInit.current = true;
+      unifiedSystem.initializeUnifiedSystem();
+    }
   }, []);
 
   return unifiedSystem;

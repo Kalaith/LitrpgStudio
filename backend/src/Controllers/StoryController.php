@@ -14,7 +14,16 @@ class StoryController
     public function getAll(Request $request, Response $response): Response
     {
         try {
-            $stories = Story::with(['series', 'book', 'chapters'])->get();
+            // Load chapters without the heavy content field to keep the listing fast.
+            // Full chapter content is fetched via GET /stories/{id} when needed.
+            $stories = Story::with(['series', 'book', 'chapters' => function ($query) {
+                $query->select([
+                    'id', 'story_id', 'title', 'chapter_number',
+                    'word_count', 'status', 'summary', 'notes',
+                    'character_progression', 'story_events',
+                    'created_at', 'updated_at'
+                ]);
+            }])->get();
 
             $response->getBody()->write(json_encode([
                 'success' => true,

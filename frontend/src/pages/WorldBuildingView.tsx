@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import WorldBuildingTools from '../components/WorldBuildingTools';
 import { motion } from 'framer-motion';
@@ -21,8 +21,27 @@ interface ConsistencyReport {
 }
 
 export default function WorldBuildingView() {
-  const { currentStory, updateStory } = useStoryStore();
+  const { stories, currentStory, setCurrentStory, fetchStories, fetchStoryById, updateStory } = useStoryStore();
   const [consistencyReport, setConsistencyReport] = useState<ConsistencyReport | null>(null);
+
+  // Ensure stories are loaded
+  useEffect(() => { fetchStories(); }, []);
+
+  // Auto-select first story if nothing is current
+  useEffect(() => {
+    if (!currentStory && stories.length > 0) {
+      setCurrentStory(stories[0]);
+    }
+  }, [currentStory, stories]);
+
+  const handleStoryChange = (storyId: string) => {
+    if (!storyId) return;
+    const story = stories.find(s => s.id === storyId);
+    if (story) {
+      setCurrentStory(story);
+      fetchStoryById(storyId);
+    }
+  };
 
   const handleWorldUpdate = (updates: Partial<WorldDetails>) => {
     if (!currentStory) return;
@@ -50,7 +69,7 @@ export default function WorldBuildingView() {
     if (!world.magicSystem) issues.push({ type: 'info', message: 'Magic system not documented' });
 
     // Check character consistency
-    const allCharacters = [currentStory.mainCharacter, ...currentStory.supportingCharacters];
+    const allCharacters = [currentStory.mainCharacter, ...(currentStory.supportingCharacters || [])];
     allCharacters.forEach(character => {
       if (character && character.backstory.includes('unknown land')) {
         issues.push({
@@ -101,14 +120,25 @@ export default function WorldBuildingView() {
       <div className="flex-1 p-6">
         <div className="text-center py-12">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No story selected
+            {stories.length === 0 ? 'No stories available' : 'No story selected'}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Please select or create a story to build its world
+            {stories.length === 0
+              ? 'Create a story first to build its world'
+              : 'Select a story to build its world'}
           </p>
-          <button className="btn-primary">
-            Create New Story
-          </button>
+          {stories.length > 0 && (
+            <select
+              value=""
+              onChange={e => handleStoryChange(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+            >
+              <option value="">Select a story…</option>
+              {stories.map(s => (
+                <option key={s.id} value={s.id}>{s.title}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
     );
@@ -117,7 +147,7 @@ export default function WorldBuildingView() {
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center flex-wrap gap-4">
           <div>
             <h2 className="text-2xl font-bold mb-2">World Building</h2>
             <p className="text-gray-600 dark:text-gray-400">
@@ -125,7 +155,16 @@ export default function WorldBuildingView() {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center flex-wrap">
+            <select
+              value={currentStory?.id ?? ''}
+              onChange={e => handleStoryChange(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+            >
+              {stories.map(s => (
+                <option key={s.id} value={s.id}>{s.title}</option>
+              ))}
+            </select>
             <button
               onClick={runConsistencyCheck}
               className="btn-secondary"

@@ -46,6 +46,7 @@ interface EntityRegistryState {
 
   // Bulk Operations
   importEntities: (entities: BaseEntity[]) => void;
+  bulkImport: (entities: BaseEntity[], relationships: Omit<EntityRelationship, 'id' | 'createdAt'>[]) => void;
   exportEntities: (filter?: EntityFilter) => BaseEntity[];
   mergeEntities: (sourceId: string, targetId: string) => void;
 
@@ -559,6 +560,40 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
       // Bulk Operations
       importEntities: (entities: BaseEntity[]) => {
         entities.forEach(entity => get().addEntity(entity));
+      },
+
+      /**
+       * Bulk-import entities and relationships in a single state update.
+       * Much faster than calling addEntity/addRelationship individually.
+       */
+      bulkImport: (entities: BaseEntity[], relationships: Omit<EntityRelationship, 'id' | 'createdAt'>[]) => {
+        set((state) => {
+          const newRegistry = { ...state.registry };
+
+          for (const entity of entities) {
+            newRegistry.entities.set(entity.id, entity);
+            if (!newRegistry.typeIndex.has(entity.type)) newRegistry.typeIndex.set(entity.type, new Set());
+            newRegistry.typeIndex.get(entity.type)!.add(entity.id);
+            for (const tag of entity.tags) {
+              if (!newRegistry.tagIndex.has(tag)) newRegistry.tagIndex.set(tag, new Set());
+              newRegistry.tagIndex.get(tag)!.add(entity.id);
+            }
+            const nameLower = entity.name.toLowerCase();
+            if (!newRegistry.nameIndex.has(nameLower)) newRegistry.nameIndex.set(nameLower, new Set());
+            newRegistry.nameIndex.get(nameLower)!.add(entity.id);
+          }
+
+          for (const relData of relationships) {
+            const rel: EntityRelationship = {
+              ...relData,
+              id: `rel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              createdAt: new Date(),
+            };
+            newRegistry.relationships.set(rel.id, rel);
+          }
+
+          return { registry: newRegistry };
+        });
       },
 
       exportEntities: (filter?: EntityFilter) => {

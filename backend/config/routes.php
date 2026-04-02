@@ -188,6 +188,71 @@ return function (App $app) {
             return $response->withHeader('Content-Type', 'application/json');
         });
 
+        // LLM proxy — forwards requests to a local LM Studio instance to avoid CORS
+        $group->get('/llm/models', function ($request, $response) {
+            $llmBase = $_ENV['LLM_BASE_URL'] ?? 'http://127.0.0.1:1234';
+            try {
+                $ch = curl_init("{$llmBase}/v1/models");
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => 5,
+                    CURLOPT_HTTPHEADER => ['Accept: application/json'],
+                ]);
+                $body = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $err = curl_error($ch);
+                curl_close($ch);
+
+                if ($body === false || $httpCode < 200 || $httpCode >= 300) {
+                    throw new \RuntimeException($err ?: "LLM returned HTTP {$httpCode}");
+                }
+
+                $response->getBody()->write($body);
+                return $response->withHeader('Content-Type', 'application/json');
+            } catch (\Throwable $e) {
+                $response->getBody()->write(json_encode([
+                    'success' => false,
+                    'error' => 'LLM not available: ' . $e->getMessage(),
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(502);
+            }
+        });
+
+        $group->post('/llm/chat', function ($request, $response) {
+            $llmBase = $_ENV['LLM_BASE_URL'] ?? 'http://127.0.0.1:1234';
+            $body = $request->getBody()->getContents();
+            try {
+                $ch = curl_init("{$llmBase}/v1/chat/completions");
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => $body,
+                    CURLOPT_TIMEOUT => 120,
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Accept: application/json',
+                    ],
+                ]);
+                $result = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $err = curl_error($ch);
+                curl_close($ch);
+
+                if ($result === false || $httpCode < 200 || $httpCode >= 300) {
+                    throw new \RuntimeException($err ?: "LLM returned HTTP {$httpCode}");
+                }
+
+                $response->getBody()->write($result);
+                return $response->withHeader('Content-Type', 'application/json');
+            } catch (\Throwable $e) {
+                $response->getBody()->write(json_encode([
+                    'success' => false,
+                    'error' => 'LLM request failed: ' . $e->getMessage(),
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(502);
+            }
+        });
+
         // Database initialization endpoint
         $group->post('/init-database', function ($request, $response) {
             try {

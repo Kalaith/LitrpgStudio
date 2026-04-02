@@ -24,8 +24,8 @@ export function useApiStatus() {
     // Initial check
     checkApiStatus();
 
-    // Periodic checks every 30 seconds
-    const interval = setInterval(checkApiStatus, 30000);
+    // Periodic checks every 60 seconds
+    const interval = setInterval(checkApiStatus, 60000);
 
     return () => clearInterval(interval);
   }, []);

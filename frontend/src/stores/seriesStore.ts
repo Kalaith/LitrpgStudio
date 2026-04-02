@@ -21,10 +21,38 @@ import type { Character } from '../types/character';
 import { seriesApi } from '../api/series';
 
 // Normalize series data from API: backend uses 'title', frontend type uses 'name'
+// Also ensure nested structures always exist so UI components never crash on undefined access
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeSeries = (s: any): Series => ({
   ...s,
   name: s.name ?? s.title ?? '',
+  books: Array.isArray(s.books) ? s.books : [],
+  sharedElements: {
+    characters: [],
+    plotThreads: [],
+    magicSystems: [],
+    locations: [],
+    factions: [],
+    terminology: [],
+    worldBuilding: {
+      timeline: [],
+      worldRules: [],
+      ...(s.sharedElements?.worldBuilding ?? {}),
+    },
+    ...(s.sharedElements ?? {}),
+    // Re-apply worldBuilding after spread to keep the merged version
+    ...( s.sharedElements ? { worldBuilding: {
+      timeline: [],
+      worldRules: [],
+      ...(s.sharedElements.worldBuilding ?? {}),
+    }} : {}),
+  },
+  metadata: {
+    estimatedBooks: 0,
+    targetAudience: '',
+    seriesArcs: [],
+    ...(s.metadata ?? {}),
+  },
 });
 
 interface SeriesState {
@@ -1035,6 +1063,8 @@ export const useSeriesStore = create<SeriesStore>()(
       name: 'writers-series-storage',
       partialize: (state) => ({
         series: state.series,
+        currentSeries: state.currentSeries,
+        currentBook: state.currentBook,
         analytics: Array.from(state.analytics.entries())
       }),
       onRehydrateStorage: () => (state) => {
@@ -1044,6 +1074,15 @@ export const useSeriesStore = create<SeriesStore>()(
             ? (state.analytics as [string, SeriesAnalytics][])
             : Array.from(state.analytics.entries());
           state.analytics = new Map(analyticsEntries);
+
+          // Re-normalize currentSeries to ensure nested structures exist
+          if (state.currentSeries) {
+            state.currentSeries = normalizeSeries(state.currentSeries);
+          }
+          // Re-normalize series array
+          if (Array.isArray(state.series)) {
+            state.series = state.series.map(normalizeSeries);
+          }
         }
       }
     }

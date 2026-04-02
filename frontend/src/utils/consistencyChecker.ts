@@ -48,7 +48,7 @@ export class ConsistencyChecker {
 
   private static checkCharacterConsistency(story: Story): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
-    const allCharacters = [story.mainCharacter, ...story.supportingCharacters].filter(Boolean);
+    const allCharacters = [story.mainCharacter, ...(story.supportingCharacters || [])].filter(Boolean);
 
     // Check for duplicate character names
     const nameMap = new Map<string, Character[]>();

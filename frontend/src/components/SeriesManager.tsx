@@ -44,8 +44,8 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
     onSeriesSelect?.(selectedSeries);
   };
 
-  const consistencyIssues = currentSeries ? checkConsistency(currentSeries.id) : [];
-  const analytics = currentSeries ? generateSeriesAnalytics(currentSeries.id) : null;
+  const consistencyIssues = currentSeries ? (() => { try { return checkConsistency(currentSeries.id); } catch { return []; } })() : [];
+  const analytics = currentSeries ? (() => { try { return generateSeriesAnalytics(currentSeries.id); } catch { return null; } })() : null;
 
   const renderTabContent = () => {
     if (!currentSeries) {
@@ -100,7 +100,7 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
             </h2>
             {currentSeries && (
               <p className="text-gray-600 dark:text-gray-300">
-                {currentSeries.name} • {currentSeries.books.length} books
+                {currentSeries.name} • {currentSeries.books?.length ?? 0} books
               </p>
             )}
           </div>

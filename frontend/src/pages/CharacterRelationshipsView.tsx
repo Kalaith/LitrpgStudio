@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStoryStore } from '../stores/storyStore';
 import { useCharacterStore } from '../stores/characterStore';
 import CharacterRelationshipMap from '../components/CharacterRelationshipMap';
@@ -6,16 +6,35 @@ import type { Character, CharacterRelationship } from '../types/character';
 import { motion } from 'framer-motion';
 
 export default function CharacterRelationshipsView() {
-  const { currentStory } = useStoryStore();
+  const { stories, currentStory, setCurrentStory, fetchStories, fetchStoryById } = useStoryStore();
   const { characters } = useCharacterStore();
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [showAddRelationship, setShowAddRelationship] = useState(false);
+
+  // Ensure stories are loaded
+  useEffect(() => { fetchStories(); }, []);
+
+  // Auto-select first story if nothing is current
+  useEffect(() => {
+    if (!currentStory && stories.length > 0) {
+      setCurrentStory(stories[0]);
+    }
+  }, [currentStory, stories]);
+
+  const handleStoryChange = (storyId: string) => {
+    if (!storyId) return;
+    const story = stories.find(s => s.id === storyId);
+    if (story) {
+      setCurrentStory(story);
+      fetchStoryById(storyId);
+    }
+  };
 
   const getAllCharacters = () => {
     if (!currentStory) return characters;
 
     // Combine story characters with global characters
-    const storyCharacters = [currentStory.mainCharacter, ...currentStory.supportingCharacters];
+    const storyCharacters = [currentStory.mainCharacter, ...(currentStory.supportingCharacters || [])];
     const uniqueCharacters = new Map<string, Character>();
 
     [...storyCharacters, ...characters].forEach(char => {
@@ -69,10 +88,24 @@ export default function CharacterRelationshipsView() {
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Character Relationships</h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Visualize and manage character connections in your story
-        </p>
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Character Relationships</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Visualize and manage character connections in your story
+            </p>
+          </div>
+          <select
+            value={currentStory?.id ?? ''}
+            onChange={e => handleStoryChange(e.target.value)}
+            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
+            <option value="">All characters</option>
+            {stories.map(s => (
+              <option key={s.id} value={s.id}>{s.title}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
