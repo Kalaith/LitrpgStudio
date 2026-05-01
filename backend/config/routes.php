@@ -20,6 +20,7 @@ use App\Controllers\ResearchController;
 use App\Controllers\OwnershipController;
 use App\Controllers\CanonVaultController;
 use App\Controllers\DraftImportController;
+use App\Services\AiChatService;
 
 return function (App $app) {
     // API base path
@@ -29,7 +30,6 @@ return function (App $app) {
         $group->post('/auth/guest-session', [AuthController::class, 'createGuestSession']);
         $group->post('/auth/link-guest', [AuthController::class, 'linkGuestAccount']);
         $group->post('/admin/ownership/transfer', [OwnershipController::class, 'transfer']);
-        $group->post('/data/claim-unowned', [OwnershipController::class, 'claimUnowned']);
         $group->get('/app-state', [AppStateController::class, 'getState']);
         $group->put('/app-state', [AppStateController::class, 'saveState']);
 
@@ -188,93 +188,38 @@ return function (App $app) {
             return $response->withHeader('Content-Type', 'application/json');
         });
 
-        // LLM proxy — forwards requests to a local LM Studio instance to avoid CORS
+        // AI proxy — uses configured server-side API keys so secrets never reach the browser.
         $group->get('/llm/models', function ($request, $response) {
-            $llmBase = $_ENV['LLM_BASE_URL'] ?? 'http://127.0.0.1:1234';
             try {
-                $ch = curl_init("{$llmBase}/v1/models");
-                curl_setopt_array($ch, [
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT => 5,
-                    CURLOPT_HTTPHEADER => ['Accept: application/json'],
-                ]);
-                $body = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $err = curl_error($ch);
-                curl_close($ch);
-
-                if ($body === false || $httpCode < 200 || $httpCode >= 300) {
-                    throw new \RuntimeException($err ?: "LLM returned HTTP {$httpCode}");
-                }
-
-                $response->getBody()->write($body);
+                $response->getBody()->write(json_encode((new AiChatService())->models()));
                 return $response->withHeader('Content-Type', 'application/json');
             } catch (\Throwable $e) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
-                    'error' => 'LLM not available: ' . $e->getMessage(),
+                    'error' => 'AI not available: ' . $e->getMessage(),
                 ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(502);
             }
         });
 
         $group->post('/llm/chat', function ($request, $response) {
-            $llmBase = $_ENV['LLM_BASE_URL'] ?? 'http://127.0.0.1:1234';
-            $body = $request->getBody()->getContents();
             try {
-                $ch = curl_init("{$llmBase}/v1/chat/completions");
-                curl_setopt_array($ch, [
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POST => true,
-                    CURLOPT_POSTFIELDS => $body,
-                    CURLOPT_TIMEOUT => 120,
-                    CURLOPT_HTTPHEADER => [
-                        'Content-Type: application/json',
-                        'Accept: application/json',
-                    ],
-                ]);
-                $result = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $err = curl_error($ch);
-                curl_close($ch);
-
-                if ($result === false || $httpCode < 200 || $httpCode >= 300) {
-                    throw new \RuntimeException($err ?: "LLM returned HTTP {$httpCode}");
+                $payload = json_decode($request->getBody()->getContents(), true);
+                if (!is_array($payload)) {
+                    throw new \InvalidArgumentException('Invalid AI request payload.');
                 }
 
-                $response->getBody()->write($result);
+                $response->getBody()->write(json_encode((new AiChatService())->chat($payload)));
                 return $response->withHeader('Content-Type', 'application/json');
             } catch (\Throwable $e) {
                 $response->getBody()->write(json_encode([
                     'success' => false,
-                    'error' => 'LLM request failed: ' . $e->getMessage(),
+                    'error' => 'AI request failed: ' . $e->getMessage(),
                 ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(502);
             }
         });
 
-        // Database initialization endpoint
-        $group->post('/init-database', function ($request, $response) {
-            try {
-                // Execute the init-db.php script
-                ob_start();
-                $result = include __DIR__ . '/../scripts/init-db.php';
-                $output = ob_get_clean();
-
-                $response->getBody()->write(json_encode([
-                    'success' => true,
-                    'message' => 'Database initialized successfully',
-                    'output' => $output
-                ]));
-                return $response->withHeader('Content-Type', 'application/json');
-            } catch (Exception $e) {
-                $response->getBody()->write(json_encode([
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ]));
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-            }
-        });
     });
 
     // Health check (direct access)

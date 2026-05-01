@@ -115,48 +115,6 @@ final class OwnershipController
         ]);
     }
 
-    /**
-     * Claim all rows with no owner_user_id for the currently-authenticated user.
-     * Safe to call multiple times (idempotent — only unowned rows are touched).
-     */
-    public function claimUnowned(Request $request, Response $response): Response
-    {
-        $user = $request->getAttribute('user');
-        if (!is_array($user) || empty($user['id'])) {
-            return $this->json($response, ['success' => false, 'error' => 'Unauthorized'], 401);
-        }
-
-        $userId = (string) $user['id'];
-
-        $tables = [
-            'series', 'books', 'stories', 'chapters',
-            'characters', 'character_templates', 'story_templates',
-        ];
-
-        $claimedByTable = [];
-        $total = 0;
-
-        foreach ($tables as $table) {
-            $claimed = Capsule::table($table)
-                ->where(static function ($q): void {
-                    $q->whereNull('owner_user_id')->orWhere('owner_user_id', '');
-                })
-                ->update(['owner_user_id' => $userId]);
-
-            $claimedByTable[$table] = $claimed;
-            $total += $claimed;
-        }
-
-        return $this->json($response, [
-            'success' => true,
-            'data' => [
-                'user_id' => $userId,
-                'claimed_by_table' => $claimedByTable,
-                'total_claimed' => $total,
-            ],
-        ]);
-    }
-
     private function isAdmin(Request $request): bool
     {
         $user = $request->getAttribute('user');

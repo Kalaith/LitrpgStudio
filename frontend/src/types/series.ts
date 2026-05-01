@@ -1,5 +1,5 @@
-import type { Character } from './character';
-import type { Story } from './story';
+import type { Character } from "./character";
+import type { Story } from "./story";
 
 export interface Series {
   id: string;
@@ -32,7 +32,12 @@ export interface Series {
   updatedAt: Date;
 }
 
-export type SeriesStatus = 'planning' | 'writing' | 'published' | 'completed' | 'on_hold';
+export type SeriesStatus =
+  | "planning"
+  | "writing"
+  | "published"
+  | "completed"
+  | "on_hold";
 
 export interface Book {
   id: string;
@@ -54,7 +59,12 @@ export interface Book {
   updatedAt: Date;
 }
 
-export type BookStatus = 'planning' | 'outlining' | 'writing' | 'editing' | 'published';
+export type BookStatus =
+  | "planning"
+  | "outlining"
+  | "writing"
+  | "editing"
+  | "published";
 
 export interface SharedElements {
   characters: SharedCharacter[];
@@ -76,9 +86,9 @@ export interface SharedCharacter {
 export interface BookAppearance {
   bookId: string;
   bookNumber: number;
-  role: 'main' | 'supporting' | 'minor' | 'cameo';
+  role: "main" | "supporting" | "minor" | "cameo";
   chapters: number[];
-  significance: 'critical' | 'important' | 'moderate' | 'minor';
+  significance: "critical" | "important" | "moderate" | "minor";
 }
 
 export interface CharacterDevelopment {
@@ -120,8 +130,8 @@ export interface SeriesTimelineEvent {
   description: string;
   date: string;
   bookNumber?: number;
-  importance: 'legendary' | 'major' | 'moderate' | 'minor';
-  type: 'historical' | 'political' | 'magical' | 'natural' | 'cultural';
+  importance: "legendary" | "major" | "moderate" | "minor";
+  type: "historical" | "political" | "magical" | "natural" | "cultural";
   consequences: string[];
   references: TimelineReference[];
 }
@@ -134,7 +144,7 @@ export interface TimelineReference {
 
 export interface WorldRule {
   id: string;
-  category: 'magic' | 'physics' | 'social' | 'economic' | 'political';
+  category: "magic" | "physics" | "social" | "economic" | "political";
   name: string;
   description: string;
   exceptions: string[];
@@ -146,13 +156,13 @@ export interface BookReference {
   bookNumber: number;
   context: string;
   page?: number;
-  importance: 'establishes' | 'reinforces' | 'challenges' | 'breaks';
+  importance: "establishes" | "reinforces" | "challenges" | "breaks";
 }
 
 export interface MagicSystem {
   id: string;
   name: string;
-  type: 'hard' | 'soft' | 'hybrid';
+  type: "hard" | "soft" | "hybrid";
   description: string;
   rules: MagicRule[];
   limitations: string[];
@@ -180,7 +190,7 @@ export interface MagicEvolution {
 export interface SharedLocation {
   id: string;
   name: string;
-  type: 'continent' | 'kingdom' | 'city' | 'landmark' | 'dungeon';
+  type: "continent" | "kingdom" | "city" | "landmark" | "dungeon";
   description: string;
   significance: string;
   appearances: LocationAppearance[];
@@ -190,7 +200,7 @@ export interface SharedLocation {
 export interface LocationAppearance {
   bookNumber: number;
   chapters: number[];
-  role: 'setting' | 'mentioned' | 'reference';
+  role: "setting" | "mentioned" | "reference";
   description: string;
 }
 
@@ -204,7 +214,7 @@ export interface LocationChange {
 export interface SharedFaction {
   id: string;
   name: string;
-  type: 'government' | 'guild' | 'religion' | 'military' | 'criminal';
+  type: "government" | "guild" | "religion" | "military" | "criminal";
   description: string;
   goals: string[];
   evolution: FactionEvolution[];
@@ -221,7 +231,7 @@ export interface FactionEvolution {
 
 export interface FactionRelationship {
   targetFactionId: string;
-  relationship: 'allied' | 'neutral' | 'rival' | 'enemy';
+  relationship: "allied" | "neutral" | "rival" | "enemy";
   strength: number;
   history: FactionHistory[];
 }
@@ -255,7 +265,7 @@ export interface CultureEvolution {
 export interface Language {
   id: string;
   name: string;
-  type: 'common' | 'ancient' | 'magical' | 'racial';
+  type: "common" | "ancient" | "magical" | "racial";
   speakers: string[];
   characteristics: string[];
   evolution: LanguageEvolution[];
@@ -271,7 +281,7 @@ export interface LanguageEvolution {
 export interface Religion {
   id: string;
   name: string;
-  type: 'monotheistic' | 'polytheistic' | 'pantheistic' | 'animistic';
+  type: "monotheistic" | "polytheistic" | "pantheistic" | "animistic";
   deities: Deity[];
   beliefs: string[];
   practices: string[];
@@ -299,7 +309,7 @@ export interface ReligionEvolution {
 export interface EconomicSystem {
   id: string;
   name: string;
-  type: 'feudal' | 'mercantile' | 'magical' | 'barter' | 'modern';
+  type: "feudal" | "mercantile" | "magical" | "barter" | "modern";
   currency: Currency[];
   tradeMethods: string[];
   majorCommodities: string[];
@@ -326,9 +336,9 @@ export interface SeriesTerminology {
   id: string;
   term: string;
   definition: string;
-  category: 'magic' | 'technology' | 'culture' | 'politics' | 'geography';
+  category: "magic" | "technology" | "culture" | "politics" | "geography";
   firstMentioned: number;
-  importance: 'critical' | 'important' | 'moderate' | 'minor';
+  importance: "critical" | "important" | "moderate" | "minor";
   aliases: string[];
   usage: TermUsage[];
 }
@@ -343,7 +353,7 @@ export interface CharacterArc {
   id: string;
   characterId: string;
   bookNumber: number;
-  arcType: 'growth' | 'fall' | 'redemption' | 'transformation' | 'static';
+  arcType: "growth" | "fall" | "redemption" | "transformation" | "static";
   startingPoint: string;
   endingPoint: string;
   keyEvents: ArcEvent[];
@@ -355,7 +365,7 @@ export interface ArcEvent {
   name: string;
   description: string;
   chapter?: number;
-  impact: 'minor' | 'moderate' | 'major' | 'climactic';
+  impact: "minor" | "moderate" | "major" | "climactic";
   consequences: string[];
 }
 
@@ -363,15 +373,15 @@ export interface PlotThread {
   id: string;
   name: string;
   description: string;
-  type: 'main' | 'subplot' | 'character' | 'worldbuilding';
-  status: 'introduced' | 'developing' | 'climax' | 'resolved' | 'abandoned';
+  type: "main" | "subplot" | "character" | "worldbuilding";
+  status: "introduced" | "developing" | "climax" | "resolved" | "abandoned";
   books: PlotThreadAppearance[];
   resolution?: string;
 }
 
 export interface PlotThreadAppearance {
   bookNumber: number;
-  status: 'introduced' | 'developed' | 'advanced' | 'resolved';
+  status: "introduced" | "developed" | "advanced" | "resolved";
   chapters: number[];
   significance: string;
 }
@@ -410,7 +420,7 @@ export interface SeriesAnalytics {
 }
 
 export interface PacingAnalysis {
-  overallPace: 'fast' | 'moderate' | 'slow' | 'variable';
+  overallPace: "fast" | "moderate" | "slow" | "variable";
   actionScenes: number;
   dialogueScenes: number;
   descriptionScenes: number;
@@ -419,7 +429,7 @@ export interface PacingAnalysis {
 
 export interface BookPacing {
   bookNumber: number;
-  pace: 'fast' | 'moderate' | 'slow';
+  pace: "fast" | "moderate" | "slow";
   tensionCurve: number[];
 }
 

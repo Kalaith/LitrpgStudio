@@ -1,20 +1,31 @@
-import React from 'react';
-import type { Series } from '../../types/series';
+import React from "react";
+import type { Series } from "../../types/series";
 
 interface WorldBuildingTabProps {
   series: Series;
 }
 
-export const WorldBuildingTab: React.FC<WorldBuildingTabProps> = ({ series }) => (
+export const WorldBuildingTab: React.FC<WorldBuildingTabProps> = ({
+  series,
+}) => (
   <div className="space-y-6">
     {/* Magic Systems */}
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Magic Systems</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        Magic Systems
+      </h3>
       <div className="grid gap-4">
         {series.sharedElements.magicSystems.map((system) => (
-          <div key={system.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">{system.name}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{system.description}</p>
+          <div
+            key={system.id}
+            className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+          >
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+              {system.name}
+            </h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {system.description}
+            </p>
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
                 {system.type}
@@ -36,12 +47,21 @@ export const WorldBuildingTab: React.FC<WorldBuildingTabProps> = ({ series }) =>
 
     {/* Locations */}
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Locations</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        Locations
+      </h3>
       <div className="grid gap-4">
         {series.sharedElements.locations.map((location) => (
-          <div key={location.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">{location.name}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{location.description}</p>
+          <div
+            key={location.id}
+            className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+          >
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+              {location.name}
+            </h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {location.description}
+            </p>
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs">
                 {location.type}
@@ -63,12 +83,21 @@ export const WorldBuildingTab: React.FC<WorldBuildingTabProps> = ({ series }) =>
 
     {/* World Rules */}
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">World Rules</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        World Rules
+      </h3>
       <div className="space-y-3">
         {series.sharedElements.worldBuilding.worldRules.map((rule) => (
-          <div key={rule.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">{rule.name}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{rule.description}</p>
+          <div
+            key={rule.id}
+            className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+          >
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+              {rule.name}
+            </h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              {rule.description}
+            </p>
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs">
                 {rule.category}

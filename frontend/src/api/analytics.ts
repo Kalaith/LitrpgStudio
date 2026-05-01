@@ -1,15 +1,15 @@
-import { apiClient, ApiResponse } from './client';
-import type { SeriesAnalytics } from '../types/series';
+import { apiClient, ApiResponse } from "./client";
+import type { SeriesAnalytics } from "../types/series";
 
 export interface AnalyticsGenerationResult {
   analytics_id: string;
   generated_at: string;
-  status: 'completed' | 'pending' | 'failed';
+  status: "completed" | "pending" | "failed";
 }
 
 export interface ConsistencyIssue {
   id: string;
-  type: 'error' | 'warning' | 'info';
+  type: "error" | "warning" | "info";
   message: string;
   location?: string;
   severity: number;
@@ -40,20 +40,31 @@ export interface TimelineEventInput {
 
 export const analyticsApi = {
   // Series Analytics
-  getSeriesAnalytics: (seriesId: string): Promise<ApiResponse<SeriesAnalytics>> =>
+  getSeriesAnalytics: (
+    seriesId: string,
+  ): Promise<ApiResponse<SeriesAnalytics>> =>
     apiClient.get(`/series/${seriesId}/analytics`),
 
-  generateAnalytics: (seriesId: string): Promise<ApiResponse<AnalyticsGenerationResult>> =>
+  generateAnalytics: (
+    seriesId: string,
+  ): Promise<ApiResponse<AnalyticsGenerationResult>> =>
     apiClient.post(`/series/${seriesId}/analytics/generate`),
 };
 
 export const consistencyApi = {
   // Consistency Checking
-  checkConsistency: (seriesId: string): Promise<ApiResponse<ConsistencyIssue[]>> =>
+  checkConsistency: (
+    seriesId: string,
+  ): Promise<ApiResponse<ConsistencyIssue[]>> =>
     apiClient.get(`/series/${seriesId}/consistency-check`),
 
-  validateCharacterProgression: (seriesId: string, characterId: string): Promise<ApiResponse<ProgressionValidationResult>> =>
-    apiClient.get(`/series/${seriesId}/characters/${characterId}/progression-validation`),
+  validateCharacterProgression: (
+    seriesId: string,
+    characterId: string,
+  ): Promise<ApiResponse<ProgressionValidationResult>> =>
+    apiClient.get(
+      `/series/${seriesId}/characters/${characterId}/progression-validation`,
+    ),
 };
 
 export const timelineApi = {
@@ -61,10 +72,16 @@ export const timelineApi = {
   getTimeline: (seriesId: string): Promise<ApiResponse<TimelineEvent[]>> =>
     apiClient.get(`/series/${seriesId}/timeline`),
 
-  addEvent: (seriesId: string, event: TimelineEventInput): Promise<ApiResponse<TimelineEvent>> =>
+  addEvent: (
+    seriesId: string,
+    event: TimelineEventInput,
+  ): Promise<ApiResponse<TimelineEvent>> =>
     apiClient.post(`/series/${seriesId}/timeline`, event),
 
-  updateEvent: (eventId: string, updates: Partial<TimelineEvent>): Promise<ApiResponse<TimelineEvent>> =>
+  updateEvent: (
+    eventId: string,
+    updates: Partial<TimelineEvent>,
+  ): Promise<ApiResponse<TimelineEvent>> =>
     apiClient.put(`/timeline/${eventId}`, updates),
 
   deleteEvent: (eventId: string): Promise<ApiResponse<void>> =>

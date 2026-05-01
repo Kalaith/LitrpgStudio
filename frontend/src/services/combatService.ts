@@ -1,5 +1,8 @@
-import type { CombatAction, CombatStats } from '../components/CombatSystemDesigner';
-import { APP_CONFIG } from '../constants';
+import type {
+  CombatAction,
+  CombatStats,
+} from "../components/CombatSystemDesigner";
+import { APP_CONFIG } from "../constants";
 
 export interface DamageCalculationResult {
   hit: boolean;
@@ -29,21 +32,26 @@ export class CombatService {
   static calculateDamage(
     action: CombatAction,
     attacker: CombatStats,
-    defender: CombatStats
+    defender: CombatStats,
   ): DamageCalculationResult {
     // Base damage calculation
     let baseDmg = action.baseDamage;
 
     // Add stat-based damage
-    if (action.damageType === 'physical') {
+    if (action.damageType === "physical") {
       baseDmg += attacker.attack * 0.5;
-    } else if (action.damageType === 'magical' ||
-               ['fire', 'ice', 'lightning', 'poison'].includes(action.damageType)) {
+    } else if (
+      action.damageType === "magical" ||
+      ["fire", "ice", "lightning", "poison"].includes(action.damageType)
+    ) {
       baseDmg += attacker.magicPower * 0.5;
     }
 
     // Calculate defense reduction
-    const defense = action.damageType === 'physical' ? defender.defense : defender.magicDefense;
+    const defense =
+      action.damageType === "physical"
+        ? defender.defense
+        : defender.magicDefense;
     const damageReduction = defense / (defense + 100);
     let finalDamage = baseDmg * (1 - damageReduction);
 
@@ -57,7 +65,7 @@ export class CombatService {
         damage: 0,
         critical: false,
         effects: [],
-        hitChance
+        hitChance,
       };
     }
 
@@ -66,7 +74,7 @@ export class CombatService {
     const isCritical = Math.random() * 100 < critChance;
 
     if (isCritical) {
-      finalDamage *= (action.critMultiplier * (attacker.criticalDamage / 100));
+      finalDamage *= action.critMultiplier * (attacker.criticalDamage / 100);
     }
 
     return {
@@ -77,7 +85,7 @@ export class CombatService {
       baseDamage: baseDmg,
       damageReduction: damageReduction * 100,
       hitChance,
-      critChance
+      critChance,
     };
   }
 
@@ -85,7 +93,7 @@ export class CombatService {
     action: CombatAction,
     attacker: CombatStats,
     defender: CombatStats,
-    runs: number = APP_CONFIG.COMBAT_SIMULATION_RUNS
+    runs: number = APP_CONFIG.COMBAT_SIMULATION_RUNS,
   ): CombatSimulationResult {
     const results: DamageCalculationResult[] = [];
 
@@ -94,9 +102,9 @@ export class CombatService {
       results.push(result);
     }
 
-    const hits = results.filter(r => r.hit);
-    const criticals = results.filter(r => r.critical);
-    const damageValues = hits.map(r => r.damage);
+    const hits = results.filter((r) => r.hit);
+    const criticals = results.filter((r) => r.critical);
+    const damageValues = hits.map((r) => r.damage);
 
     return {
       totalSimulations: runs,
@@ -108,7 +116,7 @@ export class CombatService {
       minDamage: damageValues.length > 0 ? Math.min(...damageValues) : 0,
       hitRate: (hits.length / runs) * 100,
       critRate: (criticals.length / runs) * 100,
-      sampleResult: results[0]
+      sampleResult: results[0],
     };
   }
 
@@ -118,7 +126,9 @@ export class CombatService {
 
   static calculateDPSWithCrits(action: CombatAction): number {
     const baseDPS = this.calculateDPS(action);
-    return baseDPS * (1 + (action.critChance / 100) * (action.critMultiplier - 1));
+    return (
+      baseDPS * (1 + (action.critChance / 100) * (action.critMultiplier - 1))
+    );
   }
 
   static calculateResourceEfficiency(action: CombatAction): number {
@@ -127,37 +137,37 @@ export class CombatService {
   }
 
   static getBalanceRecommendation(action: CombatAction): {
-    dpsRating: 'low' | 'medium' | 'high';
-    efficiencyRating: 'inefficient' | 'fair' | 'efficient';
+    dpsRating: "low" | "medium" | "high";
+    efficiencyRating: "inefficient" | "fair" | "efficient";
     suggestions: string[];
   } {
     const dpsWithCrits = this.calculateDPSWithCrits(action);
     const efficiency = this.calculateResourceEfficiency(action);
     const suggestions: string[] = [];
 
-    let dpsRating: 'low' | 'medium' | 'high' = 'low';
+    let dpsRating: "low" | "medium" | "high" = "low";
     if (dpsWithCrits > 15) {
-      dpsRating = 'high';
-      suggestions.push('Consider reducing damage or increasing cooldown');
+      dpsRating = "high";
+      suggestions.push("Consider reducing damage or increasing cooldown");
     } else if (dpsWithCrits > 10) {
-      dpsRating = 'medium';
+      dpsRating = "medium";
     } else {
-      suggestions.push('Consider increasing damage or reducing cooldown');
+      suggestions.push("Consider increasing damage or reducing cooldown");
     }
 
-    let efficiencyRating: 'inefficient' | 'fair' | 'efficient' = 'inefficient';
+    let efficiencyRating: "inefficient" | "fair" | "efficient" = "inefficient";
     if (efficiency > 2) {
-      efficiencyRating = 'efficient';
+      efficiencyRating = "efficient";
     } else if (efficiency > 1.5) {
-      efficiencyRating = 'fair';
+      efficiencyRating = "fair";
     } else if (action.energyCost > 0) {
-      suggestions.push('Consider reducing energy cost or increasing damage');
+      suggestions.push("Consider reducing energy cost or increasing damage");
     }
 
     return {
       dpsRating,
       efficiencyRating,
-      suggestions
+      suggestions,
     };
   }
 }

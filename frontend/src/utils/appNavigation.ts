@@ -1,4 +1,4 @@
-export const APP_NAVIGATE_EVENT = 'writers-studio:navigate';
+export const APP_NAVIGATE_EVENT = "writers-studio:navigate";
 
 export interface AppNavigationDetail {
   view: string;
@@ -11,12 +11,17 @@ export interface EditorNavigationPayload {
   chapterId?: string;
 }
 
-export const navigateToView = (view: string, payload?: Record<string, unknown>): void => {
+export const navigateToView = (
+  view: string,
+  payload?: Record<string, unknown>,
+): void => {
   const detail: AppNavigationDetail = {
     view,
     payload,
     token: Date.now(),
   };
 
-  window.dispatchEvent(new CustomEvent<AppNavigationDetail>(APP_NAVIGATE_EVENT, { detail }));
+  window.dispatchEvent(
+    new CustomEvent<AppNavigationDetail>(APP_NAVIGATE_EVENT, { detail }),
+  );
 };

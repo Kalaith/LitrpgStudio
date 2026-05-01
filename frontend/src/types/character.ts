@@ -28,18 +28,18 @@ export interface Character {
 export interface StoryReference {
   storyId: string;
   chapterId?: string;
-  mentionType: 'main_character' | 'supporting' | 'mentioned' | 'appears';
+  mentionType: "main_character" | "supporting" | "mentioned" | "appears";
   context: string;
   chapterNumber?: number;
   sceneDescription?: string;
-  importanceLevel: 'background' | 'minor' | 'moderate' | 'major' | 'critical';
+  importanceLevel: "background" | "minor" | "moderate" | "major" | "critical";
 }
 
 export interface CharacterCrossReference {
   id: string;
-  sourceType: 'character' | 'location' | 'item' | 'event';
+  sourceType: "character" | "location" | "item" | "event";
   sourceId: string;
-  targetType: 'character' | 'location' | 'item' | 'event' | 'chapter';
+  targetType: "character" | "location" | "item" | "event" | "chapter";
   targetId: string;
   relationshipType: string;
   description?: string;
@@ -48,7 +48,7 @@ export interface CharacterCrossReference {
 
 export interface CharacterRelationship {
   characterId: string;
-  type: 'ally' | 'enemy' | 'neutral' | 'romantic' | 'family';
+  type: "ally" | "enemy" | "neutral" | "romantic" | "family";
   strength: number; // 1-10 scale
   description?: string;
   history?: string;
@@ -81,7 +81,13 @@ export interface Skill {
   category: SkillCategory;
 }
 
-export type SkillCategory = 'Combat' | 'Magic' | 'Crafting' | 'Social' | 'Utility' | 'Passive';
+export type SkillCategory =
+  | "Combat"
+  | "Magic"
+  | "Crafting"
+  | "Social"
+  | "Utility"
+  | "Passive";
 
 export interface Item {
   id: string;
@@ -94,8 +100,20 @@ export interface Item {
   equipped: boolean;
 }
 
-export type ItemType = 'Weapon' | 'Armor' | 'Accessory' | 'Consumable' | 'Material' | 'Quest';
-export type ItemRarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Artifact';
+export type ItemType =
+  | "Weapon"
+  | "Armor"
+  | "Accessory"
+  | "Consumable"
+  | "Material"
+  | "Quest";
+export type ItemRarity =
+  | "Common"
+  | "Uncommon"
+  | "Rare"
+  | "Epic"
+  | "Legendary"
+  | "Artifact";
 
 export interface LevelProgression {
   level: number;

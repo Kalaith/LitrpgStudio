@@ -1,37 +1,42 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { useCharacterStore } from '../stores/characterStore';
-import type { Character } from '../types/character';
-import type { WorldState, ConsistencyResult } from '../types/worldState';
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useWorldStateStore } from "../stores/worldStateStore";
+import { useCharacterStore } from "../stores/characterStore";
+import type { Character } from "../types/character";
+import type { WorldState, ConsistencyResult } from "../types/worldState";
 
 interface WorldStateMonitorProps {
   storyId: string;
   chapterNumber?: number;
 }
 
-type MonitorTab = 'overview' | 'characters' | 'locations' | 'events' | 'consistency';
+type MonitorTab =
+  | "overview"
+  | "characters"
+  | "locations"
+  | "events"
+  | "consistency";
 
 const monitorTabs: Array<{ id: MonitorTab; label: string; icon: string }> = [
-  { id: 'overview', label: 'Overview', icon: '🌍' },
-  { id: 'characters', label: 'Characters', icon: '👥' },
-  { id: 'locations', label: 'Locations', icon: '📍' },
-  { id: 'events', label: 'Events', icon: '📅' },
-  { id: 'consistency', label: 'Consistency', icon: '✓' }
+  { id: "overview", label: "Overview", icon: "🌍" },
+  { id: "characters", label: "Characters", icon: "👥" },
+  { id: "locations", label: "Locations", icon: "📍" },
+  { id: "events", label: "Events", icon: "📅" },
+  { id: "consistency", label: "Consistency", icon: "✓" },
 ];
 
 export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
   storyId,
-  chapterNumber
+  chapterNumber,
 }) => {
-  const [activeTab, setActiveTab] = useState<MonitorTab>('overview');
+  const [activeTab, setActiveTab] = useState<MonitorTab>("overview");
   const [autoCheck, setAutoCheck] = useState(true);
 
   const {
     getCurrentWorldState,
     getWorldStateHistory,
     runConsistencyCheck,
-    createWorldState
+    createWorldState,
   } = useWorldStateStore();
 
   const { characters } = useCharacterStore();
@@ -45,8 +50,10 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
     return runConsistencyCheck(currentWorldState.id, previousState?.id);
   }, [currentWorldState, worldStateHistory, autoCheck, runConsistencyCheck]);
 
-  const criticalIssues = consistencyResults.filter(r => r.severity >= 4);
-  const warnings = consistencyResults.filter(r => r.severity >= 2 && r.severity < 4);
+  const criticalIssues = consistencyResults.filter((r) => r.severity >= 4);
+  const warnings = consistencyResults.filter(
+    (r) => r.severity >= 2 && r.severity < 4,
+  );
 
   // Initialize world state if it doesn't exist
   useEffect(() => {
@@ -58,7 +65,9 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
   const handleCreateSnapshot = () => {
     if (currentWorldState) {
       const description = `Chapter ${currentWorldState.chapterNumber} snapshot`;
-      useWorldStateStore.getState().createSnapshot(currentWorldState.id, description);
+      useWorldStateStore
+        .getState()
+        .createSnapshot(currentWorldState.id, description);
     }
   };
 
@@ -68,22 +77,29 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Initializing world state...</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Initializing world state...
+            </p>
           </div>
         </div>
       );
     }
 
     switch (activeTab) {
-      case 'overview':
+      case "overview":
         return <OverviewTab worldState={currentWorldState} />;
-      case 'characters':
-        return <CharactersTab worldState={currentWorldState} characters={characters} />;
-      case 'locations':
+      case "characters":
+        return (
+          <CharactersTab
+            worldState={currentWorldState}
+            characters={characters}
+          />
+        );
+      case "locations":
         return <LocationsTab worldState={currentWorldState} />;
-      case 'events':
+      case "events":
         return <EventsTab worldState={currentWorldState} />;
-      case 'consistency':
+      case "consistency":
         return <ConsistencyTab results={consistencyResults} />;
       default:
         return null;
@@ -109,13 +125,17 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
               {criticalIssues.length > 0 && (
                 <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full">
                   <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                  <span className="text-sm font-medium">{criticalIssues.length} critical</span>
+                  <span className="text-sm font-medium">
+                    {criticalIssues.length} critical
+                  </span>
                 </div>
               )}
               {warnings.length > 0 && (
                 <div className="flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full">
                   <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                  <span className="text-sm font-medium">{warnings.length} warnings</span>
+                  <span className="text-sm font-medium">
+                    {warnings.length} warnings
+                  </span>
                 </div>
               )}
               {criticalIssues.length === 0 && warnings.length === 0 && (
@@ -156,8 +176,8 @@ export const WorldStateMonitor: React.FC<WorldStateMonitorProps> = ({
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
               <span>{tab.icon}</span>
@@ -193,13 +213,17 @@ const OverviewTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
           {worldState.state.characters.length}
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Characters</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Characters
+        </div>
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
           {worldState.state.locations.length}
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Locations</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Locations
+        </div>
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -217,24 +241,34 @@ const OverviewTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
 
     {/* Recent Changes */}
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Changes</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Recent Changes
+      </h3>
       <div className="space-y-3">
-        {worldState.changeLog.slice(-5).reverse().map(change => (
-          <div key={change.id} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
-                {change.changeType}
-              </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Chapter {change.chapterNumber}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-500">
-                {change.timestamp.toLocaleTimeString()}
-              </span>
+        {worldState.changeLog
+          .slice(-5)
+          .reverse()
+          .map((change) => (
+            <div
+              key={change.id}
+              className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                  {change.changeType}
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Chapter {change.chapterNumber}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-500">
+                  {change.timestamp.toLocaleTimeString()}
+                </span>
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {change.reason}
+              </p>
             </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">{change.reason}</p>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   </div>
@@ -246,54 +280,88 @@ const CharactersTab: React.FC<{
   characters: Character[];
 }> = ({ worldState, characters }) => (
   <div className="space-y-4">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Character States</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Character States
+    </h3>
     <div className="grid gap-4">
-      {worldState.state.characters.map(charState => {
-        const character = characters.find(c => c.id === charState.characterId);
+      {worldState.state.characters.map((charState) => {
+        const character = characters.find(
+          (c) => c.id === charState.characterId,
+        );
         return (
-          <div key={charState.characterId} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+          <div
+            key={charState.characterId}
+            className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+          >
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold text-gray-900 dark:text-white">
                 {character?.name || charState.name}
               </h4>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                charState.status === 'alive' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                charState.status === 'injured' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                charState.status === 'dead' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  charState.status === "alive"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : charState.status === "injured"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      : charState.status === "dead"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                }`}
+              >
                 {charState.status}
               </span>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-500">Level</div>
-                <div className="font-medium text-gray-900 dark:text-white">{charState.level}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  Level
+                </div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {charState.level}
+                </div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-500">Experience</div>
-                <div className="font-medium text-gray-900 dark:text-white">{charState.experience}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  Experience
+                </div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {charState.experience}
+                </div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-500">Location</div>
-                <div className="font-medium text-gray-900 dark:text-white">{charState.location || 'Unknown'}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  Location
+                </div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {charState.location || "Unknown"}
+                </div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-500">Items</div>
-                <div className="font-medium text-gray-900 dark:text-white">{charState.inventory.length}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  Items
+                </div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {charState.inventory.length}
+                </div>
               </div>
             </div>
 
             {Object.keys(charState.flags).length > 0 && (
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">Flags</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">
+                  Flags
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {Object.entries(charState.flags).map(([flag, value]) => (
-                    <span key={flag} className={`px-2 py-1 rounded text-xs ${
-                      value ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                    }`}>
+                    <span
+                      key={flag}
+                      className={`px-2 py-1 rounded text-xs ${
+                        value
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                      }`}
+                    >
                       {flag}
                     </span>
                   ))}
@@ -310,33 +378,49 @@ const CharactersTab: React.FC<{
 // Locations Tab
 const LocationsTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
   <div className="space-y-4">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Location States</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Location States
+    </h3>
     <div className="grid gap-4">
-      {worldState.state.locations.map(location => (
-        <div key={location.locationId} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{location.name}</h4>
+      {worldState.state.locations.map((location) => (
+        <div
+          key={location.locationId}
+          className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+        >
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+            {location.name}
+          </h4>
 
           <div className="grid grid-cols-2 gap-4 mb-3">
             <div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">Occupants</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                Occupants
+              </div>
               <div className="font-medium text-gray-900 dark:text-white">
                 {location.currentOccupants.length}
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">Time of Day</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                Time of Day
+              </div>
               <div className="font-medium text-gray-900 dark:text-white">
-                {location.timeOfDay || 'Unknown'}
+                {location.timeOfDay || "Unknown"}
               </div>
             </div>
           </div>
 
           {location.currentOccupants.length > 0 && (
             <div className="mb-3">
-              <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">Current Occupants</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">
+                Current Occupants
+              </div>
               <div className="flex flex-wrap gap-1">
-                {location.currentOccupants.map(occupant => (
-                  <span key={occupant} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                {location.currentOccupants.map((occupant) => (
+                  <span
+                    key={occupant}
+                    className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs"
+                  >
                     {occupant}
                   </span>
                 ))}
@@ -352,38 +436,60 @@ const LocationsTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
 // Events Tab
 const EventsTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
   <div className="space-y-4">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Story Events</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Story Events
+    </h3>
     <div className="grid gap-4">
-      {worldState.state.events.map(event => (
-        <div key={event.eventId} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+      {worldState.state.events.map((event) => (
+        <div
+          key={event.eventId}
+          className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+        >
           <div className="flex items-center justify-between mb-2">
-            <h4 className="font-semibold text-gray-900 dark:text-white">{event.name}</h4>
-            <span className={`px-2 py-1 rounded text-xs font-medium ${
-              event.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-              event.status === 'active' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-              event.status === 'failed' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-              'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-            }`}>
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              {event.name}
+            </h4>
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                event.status === "completed"
+                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  : event.status === "active"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    : event.status === "failed"
+                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+              }`}
+            >
               {event.status}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-2">
             <div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">Participants</div>
-              <div className="font-medium text-gray-900 dark:text-white">{event.participants.length}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                Participants
+              </div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                {event.participants.length}
+              </div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">Chapter Range</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                Chapter Range
+              </div>
               <div className="font-medium text-gray-900 dark:text-white">
-                {event.startChapter ? `${event.startChapter}${event.endChapter ? `-${event.endChapter}` : '+'}` : 'TBD'}
+                {event.startChapter
+                  ? `${event.startChapter}${event.endChapter ? `-${event.endChapter}` : "+"}`
+                  : "TBD"}
               </div>
             </div>
           </div>
 
           {event.consequences.length > 0 && (
             <div>
-              <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">Consequences</div>
+              <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">
+                Consequences
+              </div>
               <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc list-inside">
                 {event.consequences.map((consequence, index) => (
                   <li key={index}>{consequence}</li>
@@ -398,9 +504,13 @@ const EventsTab: React.FC<{ worldState: WorldState }> = ({ worldState }) => (
 );
 
 // Consistency Tab
-const ConsistencyTab: React.FC<{ results: ConsistencyResult[] }> = ({ results }) => (
+const ConsistencyTab: React.FC<{ results: ConsistencyResult[] }> = ({
+  results,
+}) => (
   <div className="space-y-4">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Consistency Check Results</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Consistency Check Results
+    </h3>
 
     {results.length === 0 ? (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -408,24 +518,37 @@ const ConsistencyTab: React.FC<{ results: ConsistencyResult[] }> = ({ results })
       </div>
     ) : (
       <div className="space-y-3">
-        {results.map(result => (
-          <div key={result.id} className={`p-4 rounded-lg border-l-4 ${
-            result.severity >= 4 ? 'bg-red-50 dark:bg-red-900/20 border-red-500' :
-            result.severity >= 2 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500' :
-            'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-          }`}>
+        {results.map((result) => (
+          <div
+            key={result.id}
+            className={`p-4 rounded-lg border-l-4 ${
+              result.severity >= 4
+                ? "bg-red-50 dark:bg-red-900/20 border-red-500"
+                : result.severity >= 2
+                  ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500"
+                  : "bg-blue-50 dark:bg-blue-900/20 border-blue-500"
+            }`}
+          >
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-gray-900 dark:text-white">{result.description}</h4>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                result.type === 'error' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                result.type === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-              }`}>
+              <h4 className="font-semibold text-gray-900 dark:text-white">
+                {result.description}
+              </h4>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  result.type === "error"
+                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    : result.type === "warning"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                }`}
+              >
                 {result.type}
               </span>
             </div>
 
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{result.details}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+              {result.details}
+            </p>
 
             {result.suggestedFix && (
               <div className="text-sm text-gray-600 dark:text-gray-400">

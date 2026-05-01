@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   GripVertical,
   X,
@@ -14,25 +14,25 @@ import {
   FileText,
   Target,
   BarChart3,
-  Calendar
-} from 'lucide-react';
-import { useDashboardData } from '../hooks/useDashboardData';
+  Calendar,
+} from "lucide-react";
+import { useDashboardData } from "../hooks/useDashboardData";
 
 export type WidgetType =
-  | 'word_count'
-  | 'writing_streak'
-  | 'character_overview'
-  | 'timeline_events'
-  | 'writing_goals'
-  | 'recent_activity'
-  | 'story_progress'
-  | 'quick_stats';
+  | "word_count"
+  | "writing_streak"
+  | "character_overview"
+  | "timeline_events"
+  | "writing_goals"
+  | "recent_activity"
+  | "story_progress"
+  | "quick_stats";
 
 export interface WidgetConfig {
   id: string;
   type: WidgetType;
   title: string;
-  size: 'small' | 'medium' | 'large';
+  size: "small" | "medium" | "large";
   position: { x: number; y: number };
   settings?: Record<string, unknown>;
   collapsed?: boolean;
@@ -50,23 +50,35 @@ interface DashboardWidgetProps {
 
 // Widget size mappings with better responsive design
 const sizeClasses = {
-  small: 'col-span-1 min-h-[7rem] sm:min-h-[8rem] max-h-[10rem] sm:max-h-[12rem]',
-  medium: 'col-span-1 sm:col-span-1 md:col-span-2 min-h-[8rem] sm:min-h-[8rem] max-h-[14rem] sm:max-h-[16rem]',
-  large: 'col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-3 min-h-[10rem] sm:min-h-[12rem] max-h-[18rem] sm:max-h-[20rem]'
+  small:
+    "col-span-1 min-h-[7rem] sm:min-h-[8rem] max-h-[10rem] sm:max-h-[12rem]",
+  medium:
+    "col-span-1 sm:col-span-1 md:col-span-2 min-h-[8rem] sm:min-h-[8rem] max-h-[14rem] sm:max-h-[16rem]",
+  large:
+    "col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-3 min-h-[10rem] sm:min-h-[12rem] max-h-[18rem] sm:max-h-[20rem]",
 };
 
 // Widget icons
 const getWidgetIcon = (type: WidgetType) => {
   switch (type) {
-    case 'word_count': return FileText;
-    case 'writing_streak': return TrendingUp;
-    case 'character_overview': return Users;
-    case 'timeline_events': return Clock;
-    case 'writing_goals': return Target;
-    case 'recent_activity': return Calendar;
-    case 'story_progress': return BarChart3;
-    case 'quick_stats': return BarChart3;
-    default: return BarChart3;
+    case "word_count":
+      return FileText;
+    case "writing_streak":
+      return TrendingUp;
+    case "character_overview":
+      return Users;
+    case "timeline_events":
+      return Clock;
+    case "writing_goals":
+      return Target;
+    case "recent_activity":
+      return Calendar;
+    case "story_progress":
+      return BarChart3;
+    case "quick_stats":
+      return BarChart3;
+    default:
+      return BarChart3;
   }
 };
 
@@ -76,7 +88,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   onRemove,
   isDragging = false,
   dragHandleProps,
-  className = ''
+  className = "",
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -87,18 +99,18 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   const handleToggleCollapse = () => {
     onUpdate({
       ...config,
-      collapsed: !config.collapsed
+      collapsed: !config.collapsed,
     });
   };
 
   const handleResize = () => {
-    const sizes: Array<WidgetConfig['size']> = ['small', 'medium', 'large'];
+    const sizes: Array<WidgetConfig["size"]> = ["small", "medium", "large"];
     const currentIndex = sizes.indexOf(config.size);
     const nextSize = sizes[(currentIndex + 1) % sizes.length];
 
     onUpdate({
       ...config,
-      size: nextSize
+      size: nextSize,
     });
   };
 
@@ -118,7 +130,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
     }
 
     switch (config.type) {
-      case 'word_count':
+      case "word_count":
         return (
           <div className="flex flex-col h-full justify-center">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
@@ -131,7 +143,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           </div>
         );
 
-      case 'writing_streak':
+      case "writing_streak":
         return (
           <div className="flex flex-col h-full justify-center">
             <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
@@ -139,19 +151,19 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             </div>
             <div className="text-sm text-gray-500">Day Streak</div>
             <div className="text-xs text-gray-400 mt-1">
-              {stats.writingStreak > 0 ? 'Keep it up!' : 'Start writing today!'}
+              {stats.writingStreak > 0 ? "Keep it up!" : "Start writing today!"}
             </div>
           </div>
         );
 
-      case 'character_overview':
+      case "character_overview":
         return (
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Characters</span>
               <span className="text-lg font-bold">{stats.totalCharacters}</span>
             </div>
-            {config.size !== 'small' && (
+            {config.size !== "small" && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span>Main Characters</span>
@@ -170,14 +182,14 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           </div>
         );
 
-      case 'timeline_events':
+      case "timeline_events":
         return (
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Upcoming Events</span>
               <span className="text-lg font-bold">{stats.upcomingEvents}</span>
             </div>
-            {config.size !== 'small' && (
+            {config.size !== "small" && (
               <div className="space-y-1">
                 {stats.upcomingEvents === 0 ? (
                   <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -193,8 +205,11 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           </div>
         );
 
-      case 'writing_goals': {
-        const progressPercent = stats.dailyGoal > 0 ? Math.round((stats.todayWords / stats.dailyGoal) * 100) : 0;
+      case "writing_goals": {
+        const progressPercent =
+          stats.dailyGoal > 0
+            ? Math.round((stats.todayWords / stats.dailyGoal) * 100)
+            : 0;
         return (
           <div className="flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
@@ -216,13 +231,23 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         );
       }
 
-      case 'story_progress': {
-        const chapterProgress = stats.storyProgress.chaptersTotal > 0
-          ? Math.round((stats.storyProgress.chaptersComplete / stats.storyProgress.chaptersTotal) * 100)
-          : 0;
-        const wordProgress = stats.storyProgress.wordsTarget > 0
-          ? Math.round((stats.storyProgress.wordsComplete / stats.storyProgress.wordsTarget) * 100)
-          : 0;
+      case "story_progress": {
+        const chapterProgress =
+          stats.storyProgress.chaptersTotal > 0
+            ? Math.round(
+                (stats.storyProgress.chaptersComplete /
+                  stats.storyProgress.chaptersTotal) *
+                  100,
+              )
+            : 0;
+        const wordProgress =
+          stats.storyProgress.wordsTarget > 0
+            ? Math.round(
+                (stats.storyProgress.wordsComplete /
+                  stats.storyProgress.wordsTarget) *
+                  100,
+              )
+            : 0;
 
         return (
           <div className="flex flex-col h-full">
@@ -232,19 +257,31 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span>Chapters</span>
-                <span>{stats.storyProgress.chaptersComplete}/{stats.storyProgress.chaptersTotal}</span>
+                <span>
+                  {stats.storyProgress.chaptersComplete}/
+                  {stats.storyProgress.chaptersTotal}
+                </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
-                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${chapterProgress}%` }}></div>
+                <div
+                  className="bg-blue-500 h-1.5 rounded-full"
+                  style={{ width: `${chapterProgress}%` }}
+                ></div>
               </div>
-              {config.size !== 'small' && (
+              {config.size !== "small" && (
                 <>
                   <div className="flex items-center justify-between text-xs">
                     <span>Target Words</span>
-                    <span>{stats.storyProgress.wordsComplete.toLocaleString()}/{stats.storyProgress.wordsTarget.toLocaleString()}</span>
+                    <span>
+                      {stats.storyProgress.wordsComplete.toLocaleString()}/
+                      {stats.storyProgress.wordsTarget.toLocaleString()}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
-                    <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${wordProgress}%` }}></div>
+                    <div
+                      className="bg-purple-500 h-1.5 rounded-full"
+                      style={{ width: `${wordProgress}%` }}
+                    ></div>
                   </div>
                 </>
               )}
@@ -253,7 +290,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         );
       }
 
-      case 'recent_activity':
+      case "recent_activity":
         return (
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
@@ -261,12 +298,13 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             </div>
             <div className="flex-1 space-y-2 text-xs text-gray-600 dark:text-gray-400">
               {stats.recentActivity.length === 0 ? (
-                <div className="text-center py-4">
-                  No recent activity
-                </div>
+                <div className="text-center py-4">No recent activity</div>
               ) : (
                 stats.recentActivity.slice(0, 3).map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-2">
+                  <div
+                    key={activity.id}
+                    className="flex items-center space-x-2"
+                  >
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="truncate">{activity.description}</span>
                   </div>
@@ -276,25 +314,33 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           </div>
         );
 
-      case 'quick_stats':
+      case "quick_stats":
         return (
           <div className="grid grid-cols-2 gap-4 h-full">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalCharacters}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {stats.totalCharacters}
+              </div>
               <div className="text-xs text-gray-500">Characters</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.totalSeries}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.totalSeries}
+              </div>
               <div className="text-xs text-gray-500">Series</div>
             </div>
-            {config.size !== 'small' && (
+            {config.size !== "small" && (
               <>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{stats.totalBooks}</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {stats.totalBooks}
+                  </div>
                   <div className="text-xs text-gray-500">Books</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">{stats.totalChapters}</div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {stats.totalChapters}
+                  </div>
                   <div className="text-xs text-gray-500">Chapters</div>
                 </div>
               </>
@@ -323,8 +369,8 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         border border-gray-200 dark:border-gray-700
         rounded-lg shadow-sm
         transition-all duration-200
-        ${isDragging ? 'shadow-lg scale-105 rotate-1 z-10' : 'hover:shadow-md'}
-        ${config.collapsed ? 'h-12' : 'flex flex-col'}
+        ${isDragging ? "shadow-lg scale-105 rotate-1 z-10" : "hover:shadow-md"}
+        ${config.collapsed ? "h-12" : "flex flex-col"}
         overflow-hidden
         ${className}
       `}
@@ -355,7 +401,10 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             disabled={isRefreshing}
             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
-            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+            <RefreshCw
+              size={12}
+              className={isRefreshing ? "animate-spin" : ""}
+            />
           </button>
 
           {/* Collapse/Expand Button */}
@@ -363,7 +412,11 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
             onClick={handleToggleCollapse}
             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
-            {config.collapsed ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+            {config.collapsed ? (
+              <Maximize2 size={12} />
+            ) : (
+              <Minimize2 size={12} />
+            )}
           </button>
 
           {/* Menu Button */}
@@ -411,13 +464,11 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
         {!config.collapsed && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="p-2 sm:p-3 flex-1 overflow-hidden min-h-0"
           >
-            <div className="h-full overflow-auto">
-              {renderWidgetContent()}
-            </div>
+            <div className="h-full overflow-auto">{renderWidgetContent()}</div>
           </motion.div>
         )}
       </AnimatePresence>

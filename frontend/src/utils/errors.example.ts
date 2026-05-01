@@ -19,7 +19,7 @@ import {
   isApiError,
   isValidationError,
   getErrorMessage,
-} from './errors';
+} from "./errors";
 
 // =============================================================================
 // EXAMPLE 1: Throwing Custom Errors
@@ -27,35 +27,35 @@ import {
 
 function exampleThrowingErrors() {
   // Basic app error
-  throw new AppError('Something went wrong');
+  throw new AppError("Something went wrong");
 
   // App error with metadata
-  throw new AppError('Failed to process user', {
-    userId: '123',
-    action: 'delete',
+  throw new AppError("Failed to process user", {
+    userId: "123",
+    action: "delete",
     timestamp: new Date(),
   });
 
   // API error
-  throw new ApiError('Failed to fetch data', 404, {
-    endpoint: '/api/users',
-    method: 'GET',
+  throw new ApiError("Failed to fetch data", 404, {
+    endpoint: "/api/users",
+    method: "GET",
   });
 
   // Validation error
-  throw new ValidationError('Form validation failed', {
-    name: ['Name is required', 'Name must be at least 3 characters'],
-    email: ['Email is required', 'Email must be valid'],
+  throw new ValidationError("Form validation failed", {
+    name: ["Name is required", "Name must be at least 3 characters"],
+    email: ["Email is required", "Email must be valid"],
   });
 
   // Network error
-  throw new NetworkError('Unable to connect to server');
+  throw new NetworkError("Unable to connect to server");
 
   // Not found error
-  throw new NotFoundError('User not found', 'User', '123');
+  throw new NotFoundError("User not found", "User", "123");
 
   // Unauthorized error
-  throw new UnauthorizedError('Please log in to continue');
+  throw new UnauthorizedError("Please log in to continue");
 }
 
 // =============================================================================
@@ -65,7 +65,7 @@ function exampleThrowingErrors() {
 function exampleHandleError() {
   try {
     // Some operation that might fail
-    throw new ApiError('Server error', 500);
+    throw new ApiError("Server error", 500);
   } catch (error) {
     const errorInfo = handleError(error);
     console.log(errorInfo.message); // "Server error"
@@ -83,9 +83,9 @@ function ExampleComponent() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/data');
+      const response = await fetch("/api/data");
       if (!response.ok) {
-        throw new ApiError('Failed to fetch data', response.status);
+        throw new ApiError("Failed to fetch data", response.status);
       }
       const data = await response.json();
       return data;
@@ -106,20 +106,20 @@ function ExampleComponent() {
 
 function exampleToastNotifications() {
   // Success toast
-  toast.success('Data saved successfully!');
+  toast.success("Data saved successfully!");
 
   // Error toast
-  toast.error('Failed to save data');
+  toast.error("Failed to save data");
 
   // Warning toast
-  toast.warning('Please review your input');
+  toast.warning("Please review your input");
 
   // Info toast
-  toast.info('Processing your request...');
+  toast.info("Processing your request...");
 
   // Custom duration (in milliseconds)
-  toast.success('Quick message', 1000);
-  toast.error('Long error message', 5000);
+  toast.success("Quick message", 1000);
+  toast.error("Long error message", 5000);
 }
 
 // =============================================================================
@@ -129,9 +129,9 @@ function exampleToastNotifications() {
 async function exampleWithRetry() {
   // Basic retry with defaults (3 attempts, 1s delay, 2x backoff)
   const data = await withRetry(async () => {
-    const response = await fetch('/api/data');
+    const response = await fetch("/api/data");
     if (!response.ok) {
-      throw new ApiError('Failed to fetch', response.status);
+      throw new ApiError("Failed to fetch", response.status);
     }
     return response.json();
   });
@@ -140,7 +140,7 @@ async function exampleWithRetry() {
   // Custom retry configuration
   const customRetry = await withRetry(
     async () => {
-      return await fetch('/api/important-data').then(r => r.json());
+      return await fetch("/api/important-data").then((r) => r.json());
     },
     {
       attempts: 5,
@@ -159,7 +159,7 @@ async function exampleWithRetry() {
         console.log(`Retry attempt ${attempt}:`, getErrorMessage(error));
         toast.warning(`Retrying... (attempt ${attempt})`);
       },
-    }
+    },
   );
 
   return customRetry;
@@ -172,7 +172,7 @@ async function exampleWithRetry() {
 function exampleErrorTypeChecking(error: unknown) {
   // Check specific error types
   if (isApiError(error)) {
-    console.log('API Error:', error.status);
+    console.log("API Error:", error.status);
     if (error.status === 401) {
       // Redirect to login
     } else if (error.status === 404) {
@@ -181,7 +181,7 @@ function exampleErrorTypeChecking(error: unknown) {
   }
 
   if (isValidationError(error)) {
-    console.log('Validation errors:', error.validationErrors);
+    console.log("Validation errors:", error.validationErrors);
     // Display field-specific errors in form
   }
 
@@ -200,14 +200,14 @@ async function exampleCompleteApiPattern() {
     // Attempt API call with retry logic
     const data = await withRetry(
       async () => {
-        const response = await fetch('/api/users');
+        const response = await fetch("/api/users");
 
         // Handle different status codes
         if (response.status === 401) {
-          throw new UnauthorizedError('Authentication required');
+          throw new UnauthorizedError("Authentication required");
         }
         if (response.status === 404) {
-          throw new NotFoundError('Users not found', 'User');
+          throw new NotFoundError("Users not found", "User");
         }
         if (!response.ok) {
           throw new ApiError(`HTTP ${response.status}`, response.status);
@@ -225,12 +225,12 @@ async function exampleCompleteApiPattern() {
           return true;
         },
         onRetry: (_error, _attempt) => {
-          toast.info('Retrying...');
+          toast.info("Retrying...");
         },
-      }
+      },
     );
 
-    toast.success('Users loaded successfully');
+    toast.success("Users loaded successfully");
     return data;
   } catch (error) {
     // Handle error with toast and console logging
@@ -249,20 +249,20 @@ function exampleFormValidation(formData: Record<string, string | undefined>) {
   const errors: Record<string, string[]> = {};
 
   if (!formData.name || formData.name.trim().length === 0) {
-    errors.name = ['Name is required'];
+    errors.name = ["Name is required"];
   } else if (formData.name.length < 3) {
-    errors.name = ['Name must be at least 3 characters'];
+    errors.name = ["Name must be at least 3 characters"];
   }
 
   if (!formData.email) {
-    errors.email = ['Email is required'];
+    errors.email = ["Email is required"];
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    errors.email = ['Email must be valid'];
+    errors.email = ["Email must be valid"];
   }
 
   if (Object.keys(errors).length > 0) {
-    throw new ValidationError('Form validation failed', errors, {
-      formId: 'user-form',
+    throw new ValidationError("Form validation failed", errors, {
+      formId: "user-form",
       attemptedAt: new Date(),
     });
   }
@@ -276,12 +276,14 @@ function exampleFormValidation(formData: Record<string, string | undefined>) {
 
 async function exampleNetworkErrorHandling() {
   try {
-    const response = await fetch('/api/data');
+    const response = await fetch("/api/data");
     return response.json();
   } catch (error) {
     // Check if it's a network error (no internet, timeout, etc.)
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new NetworkError('Unable to connect to server. Please check your internet connection.');
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new NetworkError(
+        "Unable to connect to server. Please check your internet connection.",
+      );
     }
 
     // Rethrow other errors
@@ -303,7 +305,7 @@ class ErrorBoundaryExample {
 
   componentDidCatch(error: Error, errorInfo: Record<string, unknown>) {
     const errorDetails = handleError(error);
-    console.error('Error boundary caught:', errorDetails, errorInfo);
+    console.error("Error boundary caught:", errorDetails, errorInfo);
     toast.error(errorDetails.message);
   }
 }

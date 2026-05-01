@@ -97,7 +97,6 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         $publicSuffixes = [
             '/health',
             '/api/v1/health',
-            '/api/v1/init-database',
             '/api/v1/auth/guest-session',
         ];
 

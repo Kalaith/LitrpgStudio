@@ -46,6 +46,33 @@ final class DraftImportController
                 $format = 'markdown';
             }
 
+            $parsedChapters = $this->parser->parse($content);
+            if (count($parsedChapters) === 0) {
+                return $this->json($response, [
+                    'success' => false,
+                    'error' => 'No chapter content could be parsed from your draft. Make sure chapters are separated by headings like "Chapter 1: Title".',
+                ], 400);
+            }
+
+            $chapterPreview = $this->buildChapterPreview($parsedChapters, $format);
+            $previewOnly = $this->toBool($payload['previewOnly'] ?? false);
+            $confirmChapters = $this->toBool($payload['confirmChapters'] ?? false);
+
+            if ($previewOnly) {
+                return $this->json($response, [
+                    'success' => true,
+                    'data' => $chapterPreview,
+                ]);
+            }
+
+            if (!$confirmChapters) {
+                return $this->json($response, [
+                    'success' => false,
+                    'error' => 'Chapter scan confirmation is required before importing.',
+                    'data' => $chapterPreview,
+                ], 409);
+            }
+
             // Resolve (or create) the target series.
             $isNewSeries = ($args['seriesId'] === 'new');
             if ($isNewSeries) {
@@ -70,14 +97,6 @@ final class DraftImportController
                         'error'   => 'Series not found',
                     ], 404);
                 }
-            }
-
-            $parsedChapters = $this->parser->parse($content);
-            if (count($parsedChapters) === 0) {
-                return $this->json($response, [
-                    'success' => false,
-                    'error' => 'No chapter content could be parsed from your draft. Make sure chapters are separated by headings like "Chapter 1: Title".',
-                ], 400);
             }
 
             $result = Capsule::connection()->transaction(function () use ($series, $isNewSeries, $bookTitle, $storyTitle, $format, $parsedChapters): array {
@@ -194,6 +213,77 @@ final class DraftImportController
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $parsedChapters
+     * @return array<string, mixed>
+     */
+    private function buildChapterPreview(array $parsedChapters, string $format): array
+    {
+        $chapterSummaries = [];
+        $totalWordCount = 0;
+        $totalSceneCount = 0;
+        $warnings = [];
+
+        foreach ($parsedChapters as $index => $parsedChapter) {
+            $wordCount = (int)($parsedChapter['word_count'] ?? 0);
+            $sceneCount = (int)($parsedChapter['scene_count'] ?? 1);
+            $totalWordCount += $wordCount;
+            $totalSceneCount += $sceneCount;
+
+            $chapterSummaries[] = [
+                'id' => 'candidate-' . ($index + 1),
+                'title' => (string)($parsedChapter['title'] ?? sprintf('Chapter %d', $index + 1)),
+                'chapter_number' => $index + 1,
+                'word_count' => $wordCount,
+                'scene_count' => $sceneCount,
+            ];
+        }
+
+        if (count($chapterSummaries) === 1 && $totalWordCount >= 10000) {
+            $warnings[] = 'Only one long chapter was detected. Check the draft headings before confirming the import.';
+        }
+
+        foreach ($chapterSummaries as $chapter) {
+            if ((int)$chapter['word_count'] >= 10000) {
+                $warnings[] = sprintf(
+                    '"%s" is %s words. Confirm this is intended before importing.',
+                    (string)$chapter['title'],
+                    number_format((int)$chapter['word_count'])
+                );
+                break;
+            }
+        }
+
+        return [
+            'chapters' => $chapterSummaries,
+            'summary' => [
+                'chapter_count' => count($chapterSummaries),
+                'scene_count' => $totalSceneCount,
+                'word_count' => $totalWordCount,
+                'format' => $format,
+            ],
+            'warnings' => array_values(array_unique($warnings)),
+            'requires_confirmation' => true,
+        ];
+    }
+
+    private function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower(trim($value)), ['1', 'true', 'yes', 'on'], true);
+        }
+
+        if (is_numeric($value)) {
+            return (int)$value === 1;
+        }
+
+        return false;
     }
 
     private function json(Response $response, array $body, int $status = 200): Response

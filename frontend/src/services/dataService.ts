@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from '../constants';
+import { STORAGE_KEYS } from "../constants";
 
 export abstract class BaseDataService<T> {
   protected storageKey: string;
@@ -22,11 +22,11 @@ export abstract class BaseDataService<T> {
       localStorage.setItem(this.storageKey, JSON.stringify(data));
     } catch (error) {
       console.error(`Error saving data to ${this.storageKey}:`, error);
-      throw new Error('Failed to save data');
+      throw new Error("Failed to save data");
     }
   }
 
-  abstract create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T>;
+  abstract create(item: Omit<T, "id" | "createdAt" | "updatedAt">): Promise<T>;
   abstract findById(id: string): Promise<T | null>;
   abstract findAll(): Promise<T[]>;
   abstract update(id: string, updates: Partial<T>): Promise<T | null>;
@@ -39,14 +39,16 @@ export interface StoredEntity {
   updatedAt: string;
 }
 
-export class GenericDataService<T extends StoredEntity> extends BaseDataService<T> {
-  async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
+export class GenericDataService<
+  T extends StoredEntity,
+> extends BaseDataService<T> {
+  async create(item: Omit<T, "id" | "createdAt" | "updatedAt">): Promise<T> {
     const now = new Date().toISOString();
     const newItem: T = {
       ...item,
       id: crypto.randomUUID(),
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     } as T;
 
     const data = this.getStorageData();
@@ -58,7 +60,7 @@ export class GenericDataService<T extends StoredEntity> extends BaseDataService<
 
   async findById(id: string): Promise<T | null> {
     const data = this.getStorageData();
-    return data.find(item => item.id === id) || null;
+    return data.find((item) => item.id === id) || null;
   }
 
   async findAll(): Promise<T[]> {
@@ -67,14 +69,14 @@ export class GenericDataService<T extends StoredEntity> extends BaseDataService<
 
   async update(id: string, updates: Partial<T>): Promise<T | null> {
     const data = this.getStorageData();
-    const index = data.findIndex(item => item.id === id);
+    const index = data.findIndex((item) => item.id === id);
 
     if (index === -1) return null;
 
     const updatedItem: T = {
       ...data[index],
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     data[index] = updatedItem;
@@ -85,7 +87,7 @@ export class GenericDataService<T extends StoredEntity> extends BaseDataService<
 
   async delete(id: string): Promise<boolean> {
     const data = this.getStorageData();
-    const filteredData = data.filter(item => item.id !== id);
+    const filteredData = data.filter((item) => item.id !== id);
 
     if (filteredData.length === data.length) return false;
 
@@ -108,7 +110,7 @@ export class GenericDataService<T extends StoredEntity> extends BaseDataService<
 
   async exists(id: string): Promise<boolean> {
     const data = this.getStorageData();
-    return data.some(item => item.id === id);
+    return data.some((item) => item.id === id);
   }
 }
 
@@ -128,14 +130,14 @@ export interface ItemEntity extends StoredEntity {
   rarity: string;
   level: number;
   description: string;
-  stats: Array<{ name: string; value: number; type: 'flat' | 'percentage' }>;
+  stats: Array<{ name: string; value: number; type: "flat" | "percentage" }>;
 }
 
 export interface StoryEntity extends StoredEntity {
   title: string;
   description: string;
   genre: string;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   wordCount: number;
   chapters: Array<{
     id: string;
@@ -146,25 +148,29 @@ export interface StoryEntity extends StoredEntity {
 }
 
 // Service instances
-export const characterService = new GenericDataService<CharacterEntity>(STORAGE_KEYS.CHARACTER_DATA);
-export const itemService = new GenericDataService<ItemEntity>('items');
-export const storyService = new GenericDataService<StoryEntity>(STORAGE_KEYS.STORY_DATA);
+export const characterService = new GenericDataService<CharacterEntity>(
+  STORAGE_KEYS.CHARACTER_DATA,
+);
+export const itemService = new GenericDataService<ItemEntity>("items");
+export const storyService = new GenericDataService<StoryEntity>(
+  STORAGE_KEYS.STORY_DATA,
+);
 
 // Utility functions for data operations
 export class DataOperations {
   static async importData<T extends StoredEntity>(
     service: GenericDataService<T>,
-    data: T[]
+    data: T[],
   ): Promise<void> {
     await service.clear();
 
     for (const item of data) {
-      await service.create(item as Omit<T, 'id' | 'createdAt' | 'updatedAt'>);
+      await service.create(item as Omit<T, "id" | "createdAt" | "updatedAt">);
     }
   }
 
   static async exportData<T extends StoredEntity>(
-    service: GenericDataService<T>
+    service: GenericDataService<T>,
   ): Promise<T[]> {
     return await service.findAll();
   }
@@ -173,19 +179,28 @@ export class DataOperations {
     return {
       characters: await characterService.findAll(),
       items: await itemService.findAll(),
-      stories: await storyService.findAll()
+      stories: await storyService.findAll(),
     };
   }
 
   static async restoreData(backup: Record<string, unknown[]>): Promise<void> {
     if (backup.characters) {
-      await DataOperations.importData(characterService, backup.characters as CharacterEntity[]);
+      await DataOperations.importData(
+        characterService,
+        backup.characters as CharacterEntity[],
+      );
     }
     if (backup.items) {
-      await DataOperations.importData(itemService, backup.items as ItemEntity[]);
+      await DataOperations.importData(
+        itemService,
+        backup.items as ItemEntity[],
+      );
     }
     if (backup.stories) {
-      await DataOperations.importData(storyService, backup.stories as StoryEntity[]);
+      await DataOperations.importData(
+        storyService,
+        backup.stories as StoryEntity[],
+      );
     }
   }
 }

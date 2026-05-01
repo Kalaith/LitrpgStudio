@@ -1,5 +1,5 @@
-import type { BaseEntity, EntityRelationship } from '../types/entityRegistry';
-import type { TimelineEvent } from '../types/unifiedTimeline';
+import type { BaseEntity, EntityRelationship } from "../types/entityRegistry";
+import type { TimelineEvent } from "../types/unifiedTimeline";
 
 export interface PerformanceMetrics {
   entityCount: number;
@@ -32,7 +32,7 @@ export interface LazyLoadConfig {
 export interface CacheStrategy {
   maxSize: number;
   ttl: number; // time to live in milliseconds
-  strategy: 'lru' | 'lfu' | 'fifo';
+  strategy: "lru" | "lfu" | "fifo";
   enablePersistence: boolean;
 }
 
@@ -41,9 +41,18 @@ export class PerformanceOptimizer {
   private strategies: Map<string, OptimizationStrategy> = new Map();
   private lazyLoadConfig: LazyLoadConfig;
   private cacheStrategy: CacheStrategy;
-  private entityCache: Map<string, { data: BaseEntity; timestamp: number; accessCount: number }> = new Map();
-  private relationshipCache: Map<string, { data: EntityRelationship[]; timestamp: number; accessCount: number }> = new Map();
-  private searchCache: Map<string, { data: unknown; timestamp: number; accessCount: number }> = new Map();
+  private entityCache: Map<
+    string,
+    { data: BaseEntity; timestamp: number; accessCount: number }
+  > = new Map();
+  private relationshipCache: Map<
+    string,
+    { data: EntityRelationship[]; timestamp: number; accessCount: number }
+  > = new Map();
+  private searchCache: Map<
+    string,
+    { data: unknown; timestamp: number; accessCount: number }
+  > = new Map();
   private isOptimizing = false;
   private optimizationInterval: number | null = null;
 
@@ -55,7 +64,7 @@ export class PerformanceOptimizer {
       memoryUsage: 0,
       renderTime: 0,
       searchLatency: 0,
-      lastOptimized: new Date()
+      lastOptimized: new Date(),
     };
 
     this.lazyLoadConfig = {
@@ -63,14 +72,14 @@ export class PerformanceOptimizer {
       eventsPerPage: 100,
       preloadDistance: 2,
       cacheSize: 1000,
-      enableVirtualization: true
+      enableVirtualization: true,
     };
 
     this.cacheStrategy = {
       maxSize: 500,
       ttl: 300000, // 5 minutes
-      strategy: 'lru',
-      enablePersistence: true
+      strategy: "lru",
+      enablePersistence: true,
     };
 
     this.initializeStrategies();
@@ -80,74 +89,74 @@ export class PerformanceOptimizer {
   private initializeStrategies() {
     const strategies: OptimizationStrategy[] = [
       {
-        id: 'entity-indexing',
-        name: 'Entity Indexing',
-        description: 'Create search indexes for faster entity queries',
+        id: "entity-indexing",
+        name: "Entity Indexing",
+        description: "Create search indexes for faster entity queries",
         enabled: true,
         priority: 1,
         estimatedImprovement: 40,
         implement: async () => {
           await this.implementEntityIndexing();
-        }
+        },
       },
       {
-        id: 'relationship-caching',
-        name: 'Relationship Caching',
-        description: 'Cache frequently accessed entity relationships',
+        id: "relationship-caching",
+        name: "Relationship Caching",
+        description: "Cache frequently accessed entity relationships",
         enabled: true,
         priority: 2,
         estimatedImprovement: 30,
         implement: async () => {
           await this.implementRelationshipCaching();
-        }
+        },
       },
       {
-        id: 'lazy-loading',
-        name: 'Lazy Loading',
-        description: 'Load content on-demand to reduce initial load time',
+        id: "lazy-loading",
+        name: "Lazy Loading",
+        description: "Load content on-demand to reduce initial load time",
         enabled: true,
         priority: 3,
         estimatedImprovement: 25,
         implement: async () => {
           await this.implementLazyLoading();
-        }
+        },
       },
       {
-        id: 'memory-optimization',
-        name: 'Memory Optimization',
-        description: 'Optimize memory usage for large datasets',
+        id: "memory-optimization",
+        name: "Memory Optimization",
+        description: "Optimize memory usage for large datasets",
         enabled: true,
         priority: 4,
         estimatedImprovement: 20,
         implement: async () => {
           await this.implementMemoryOptimization();
-        }
+        },
       },
       {
-        id: 'search-optimization',
-        name: 'Search Optimization',
-        description: 'Optimize search algorithms and caching',
+        id: "search-optimization",
+        name: "Search Optimization",
+        description: "Optimize search algorithms and caching",
         enabled: true,
         priority: 5,
         estimatedImprovement: 35,
         implement: async () => {
           await this.implementSearchOptimization();
-        }
+        },
       },
       {
-        id: 'render-optimization',
-        name: 'Render Optimization',
-        description: 'Optimize component rendering and virtual DOM',
+        id: "render-optimization",
+        name: "Render Optimization",
+        description: "Optimize component rendering and virtual DOM",
         enabled: true,
         priority: 6,
         estimatedImprovement: 15,
         implement: async () => {
           await this.implementRenderOptimization();
-        }
-      }
+        },
+      },
     ];
 
-    strategies.forEach(strategy => {
+    strategies.forEach((strategy) => {
       this.strategies.set(strategy.id, strategy);
     });
   }
@@ -170,7 +179,7 @@ export class PerformanceOptimizer {
       ...this.metrics,
       memoryUsage: this.calculateMemoryUsage(),
       renderTime: performance.now() % 100, // Mock render time
-      searchLatency: this.calculateAverageSearchLatency()
+      searchLatency: this.calculateAverageSearchLatency(),
     };
   }
 
@@ -217,11 +226,11 @@ export class PerformanceOptimizer {
     const startTime = performance.now();
 
     try {
-      console.log('Starting performance optimization...');
+      console.log("Starting performance optimization...");
 
       // Run enabled strategies in priority order
       const enabledStrategies = Array.from(this.strategies.values())
-        .filter(s => s.enabled)
+        .filter((s) => s.enabled)
         .sort((a, b) => a.priority - b.priority);
 
       for (const strategy of enabledStrategies) {
@@ -236,7 +245,6 @@ export class PerformanceOptimizer {
       this.metrics.lastOptimized = new Date();
       const optimizationTime = performance.now() - startTime;
       console.log(`Optimization completed in ${optimizationTime.toFixed(2)}ms`);
-
     } finally {
       this.isOptimizing = false;
     }
@@ -250,7 +258,7 @@ export class PerformanceOptimizer {
     const typeIndex = new Map<string, string[]>();
     const tagIndex = new Map<string, string[]>();
 
-    entities.forEach(entity => {
+    entities.forEach((entity) => {
       // Name index
       const nameKey = entity.name.toLowerCase();
       if (!nameIndex.has(nameKey)) {
@@ -266,7 +274,7 @@ export class PerformanceOptimizer {
 
       // Tag index
       if (entity.tags) {
-        entity.tags.forEach(tag => {
+        entity.tags.forEach((tag) => {
           const tagKey = tag.toLowerCase();
           if (!tagIndex.has(tagKey)) {
             tagIndex.set(tagKey, []);
@@ -277,7 +285,11 @@ export class PerformanceOptimizer {
     });
 
     // Store indexes (in a real implementation, these would be persisted)
-    (window as Window & { __entityIndexes?: unknown }).__entityIndexes = { nameIndex, typeIndex, tagIndex };
+    (window as Window & { __entityIndexes?: unknown }).__entityIndexes = {
+      nameIndex,
+      typeIndex,
+      tagIndex,
+    };
   }
 
   private async implementRelationshipCaching(): Promise<void> {
@@ -299,14 +311,21 @@ export class PerformanceOptimizer {
     const eventCount = this.metrics.timelineEventCount;
 
     if (entityCount > 1000) {
-      this.lazyLoadConfig.entitiesPerPage = Math.min(25, this.lazyLoadConfig.entitiesPerPage);
+      this.lazyLoadConfig.entitiesPerPage = Math.min(
+        25,
+        this.lazyLoadConfig.entitiesPerPage,
+      );
     }
 
     if (eventCount > 5000) {
-      this.lazyLoadConfig.eventsPerPage = Math.min(50, this.lazyLoadConfig.eventsPerPage);
+      this.lazyLoadConfig.eventsPerPage = Math.min(
+        50,
+        this.lazyLoadConfig.eventsPerPage,
+      );
     }
 
-    this.lazyLoadConfig.enableVirtualization = entityCount > 500 || eventCount > 1000;
+    this.lazyLoadConfig.enableVirtualization =
+      entityCount > 500 || eventCount > 1000;
   }
 
   private async implementMemoryOptimization(): Promise<void> {
@@ -316,8 +335,14 @@ export class PerformanceOptimizer {
 
     // Reduce cache sizes if memory usage is high
     if (this.metrics.memoryUsage > 150) {
-      this.cacheStrategy.maxSize = Math.max(250, this.cacheStrategy.maxSize * 0.8);
-      this.lazyLoadConfig.cacheSize = Math.max(500, this.lazyLoadConfig.cacheSize * 0.8);
+      this.cacheStrategy.maxSize = Math.max(
+        250,
+        this.cacheStrategy.maxSize * 0.8,
+      );
+      this.lazyLoadConfig.cacheSize = Math.max(
+        500,
+        this.lazyLoadConfig.cacheSize * 0.8,
+      );
     }
 
     // Force garbage collection if available
@@ -332,13 +357,16 @@ export class PerformanceOptimizer {
     this.cleanExpiredSearchCache();
 
     // Pre-cache common search queries
-    const commonQueries = ['character', 'location', 'item', 'skill', 'story'];
+    const commonQueries = ["character", "location", "item", "skill", "story"];
     for (const query of commonQueries) {
       await this.cacheSearchResults(query);
     }
 
     // Implement search result pagination
-    this.lazyLoadConfig.preloadDistance = Math.min(1, this.lazyLoadConfig.preloadDistance);
+    this.lazyLoadConfig.preloadDistance = Math.min(
+      1,
+      this.lazyLoadConfig.preloadDistance,
+    );
   }
 
   private async implementRenderOptimization(): Promise<void> {
@@ -365,7 +393,7 @@ export class PerformanceOptimizer {
 
     // Implement cache size limit
     if (this.entityCache.size > this.cacheStrategy.maxSize) {
-      this.evictCacheEntries('entity');
+      this.evictCacheEntries("entity");
     }
   }
 
@@ -378,7 +406,7 @@ export class PerformanceOptimizer {
     }
 
     if (this.relationshipCache.size > this.cacheStrategy.maxSize) {
-      this.evictCacheEntries('relationship');
+      this.evictCacheEntries("relationship");
     }
   }
 
@@ -391,26 +419,29 @@ export class PerformanceOptimizer {
     }
 
     if (this.searchCache.size > this.cacheStrategy.maxSize) {
-      this.evictCacheEntries('search');
+      this.evictCacheEntries("search");
     }
   }
 
-  private evictCacheEntries(cacheType: 'entity' | 'relationship' | 'search') {
-    const cache = cacheType === 'entity' ? this.entityCache :
-                 cacheType === 'relationship' ? this.relationshipCache :
-                 this.searchCache;
+  private evictCacheEntries(cacheType: "entity" | "relationship" | "search") {
+    const cache =
+      cacheType === "entity"
+        ? this.entityCache
+        : cacheType === "relationship"
+          ? this.relationshipCache
+          : this.searchCache;
 
     const entries = Array.from(cache.entries());
 
     // Sort by strategy (LRU, LFU, etc.)
     switch (this.cacheStrategy.strategy) {
-      case 'lru':
+      case "lru":
         entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
         break;
-      case 'lfu':
+      case "lfu":
         entries.sort((a, b) => a[1].accessCount - b[1].accessCount);
         break;
-      case 'fifo':
+      case "fifo":
         // Already in insertion order
         break;
     }
@@ -427,10 +458,10 @@ export class PerformanceOptimizer {
       this.relationshipCache.set(entityId, {
         data: relationships,
         timestamp: Date.now(),
-        accessCount: 1
+        accessCount: 1,
       });
     } catch (error) {
-      console.error('Failed to cache entity relationships:', error);
+      console.error("Failed to cache entity relationships:", error);
     }
   }
 
@@ -440,10 +471,10 @@ export class PerformanceOptimizer {
       this.searchCache.set(query, {
         data: results,
         timestamp: Date.now(),
-        accessCount: 1
+        accessCount: 1,
       });
     } catch (error) {
-      console.error('Failed to cache search results:', error);
+      console.error("Failed to cache search results:", error);
     }
   }
 
@@ -453,7 +484,9 @@ export class PerformanceOptimizer {
     return [];
   }
 
-  private async getEntityRelationships(_entityId: string): Promise<EntityRelationship[]> {
+  private async getEntityRelationships(
+    _entityId: string,
+  ): Promise<EntityRelationship[]> {
     // Mock implementation
     return [];
   }
@@ -464,7 +497,10 @@ export class PerformanceOptimizer {
   }
 
   // Lazy Loading Utilities
-  async loadEntitiesPage(page: number, pageSize?: number): Promise<BaseEntity[]> {
+  async loadEntitiesPage(
+    page: number,
+    pageSize?: number,
+  ): Promise<BaseEntity[]> {
     const size = pageSize || this.lazyLoadConfig.entitiesPerPage;
     void page;
     void size;
@@ -485,13 +521,16 @@ export class PerformanceOptimizer {
     this.searchCache.set(cacheKey, {
       data: entities,
       timestamp: Date.now(),
-      accessCount: 1
+      accessCount: 1,
     });
 
     return entities;
   }
 
-  async loadEventsPage(page: number, pageSize?: number): Promise<TimelineEvent[]> {
+  async loadEventsPage(
+    page: number,
+    pageSize?: number,
+  ): Promise<TimelineEvent[]> {
     const size = pageSize || this.lazyLoadConfig.eventsPerPage;
     void page;
     void size;
@@ -509,7 +548,7 @@ export class PerformanceOptimizer {
     this.searchCache.set(cacheKey, {
       data: events,
       timestamp: Date.now(),
-      accessCount: 1
+      accessCount: 1,
     });
 
     return events;
@@ -556,10 +595,23 @@ export class PerformanceOptimizer {
   }
 
   getCacheHitRate(): number {
-    const totalCacheSize = this.entityCache.size + this.relationshipCache.size + this.searchCache.size;
-    const totalAccesses = Array.from(this.entityCache.values()).reduce((sum, entry) => sum + entry.accessCount, 0) +
-                         Array.from(this.relationshipCache.values()).reduce((sum, entry) => sum + entry.accessCount, 0) +
-                         Array.from(this.searchCache.values()).reduce((sum, entry) => sum + entry.accessCount, 0);
+    const totalCacheSize =
+      this.entityCache.size +
+      this.relationshipCache.size +
+      this.searchCache.size;
+    const totalAccesses =
+      Array.from(this.entityCache.values()).reduce(
+        (sum, entry) => sum + entry.accessCount,
+        0,
+      ) +
+      Array.from(this.relationshipCache.values()).reduce(
+        (sum, entry) => sum + entry.accessCount,
+        0,
+      ) +
+      Array.from(this.searchCache.values()).reduce(
+        (sum, entry) => sum + entry.accessCount,
+        0,
+      );
 
     return totalAccesses > 0 ? totalCacheSize / totalAccesses : 0;
   }

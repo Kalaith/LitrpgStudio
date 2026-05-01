@@ -1,16 +1,16 @@
 // Test file to check if imports work
-import type { BaseEntity } from './types/entityRegistry';
+import type { BaseEntity } from "./types/entityRegistry";
 
-console.log('Import test successful');
+console.log("Import test successful");
 
 const testEntity: BaseEntity = {
-  id: 'test',
-  name: 'Test Entity',
-  type: 'character',
+  id: "test",
+  name: "Test Entity",
+  type: "character",
   tags: [],
   createdAt: new Date(),
   updatedAt: new Date(),
-  metadata: {}
+  metadata: {},
 };
 
-console.log('Test entity created:', testEntity);
+console.log("Test entity created:", testEntity);

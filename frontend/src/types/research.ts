@@ -21,27 +21,27 @@ export interface ResearchCollection {
   tags: string[];
   color: string;
   icon: string;
-  visibility: 'private' | 'public' | 'shared';
+  visibility: "private" | "public" | "shared";
   collaborators: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CollectionCategory =
-  | 'worldbuilding'
-  | 'characters'
-  | 'magic_systems'
-  | 'combat'
-  | 'economics'
-  | 'cultures'
-  | 'technology'
-  | 'history'
-  | 'language'
-  | 'mythology'
-  | 'science'
-  | 'reference'
-  | 'inspiration'
-  | 'general';
+  | "worldbuilding"
+  | "characters"
+  | "magic_systems"
+  | "combat"
+  | "economics"
+  | "cultures"
+  | "technology"
+  | "history"
+  | "language"
+  | "mythology"
+  | "science"
+  | "reference"
+  | "inspiration"
+  | "general";
 
 export interface ResearchSource {
   id: string;
@@ -63,21 +63,21 @@ export interface ResearchSource {
 }
 
 export type SourceType =
-  | 'article'
-  | 'book'
-  | 'research_paper'
-  | 'website'
-  | 'video'
-  | 'podcast'
-  | 'image'
-  | 'document'
-  | 'note'
-  | 'quote'
-  | 'interview'
-  | 'forum_post'
-  | 'social_media'
-  | 'dataset'
-  | 'other';
+  | "article"
+  | "book"
+  | "research_paper"
+  | "website"
+  | "video"
+  | "podcast"
+  | "image"
+  | "document"
+  | "note"
+  | "quote"
+  | "interview"
+  | "forum_post"
+  | "social_media"
+  | "dataset"
+  | "other";
 
 export interface SourceContent {
   text?: string;
@@ -98,14 +98,14 @@ export interface Excerpt {
   page?: number;
   timestamp?: number;
   context: string;
-  importance: 'low' | 'medium' | 'high' | 'critical';
+  importance: "low" | "medium" | "high" | "critical";
   tags: string[];
   linkedElements: string[];
 }
 
 export interface MediaContent {
   id: string;
-  type: 'image' | 'video' | 'audio' | 'diagram' | 'chart';
+  type: "image" | "video" | "audio" | "diagram" | "chart";
   url: string;
   thumbnail?: string;
   caption: string;
@@ -140,7 +140,7 @@ export interface Section {
 export interface Reference {
   id: string;
   text: string;
-  type: 'citation' | 'footnote' | 'endnote' | 'bibliography';
+  type: "citation" | "footnote" | "endnote" | "bibliography";
   linkedSources: string[];
 }
 
@@ -171,8 +171,8 @@ export interface ContentQuality {
 }
 
 export interface QualityIssue {
-  type: 'outdated' | 'bias' | 'incomplete' | 'unverified' | 'low_quality';
-  severity: 'low' | 'medium' | 'high';
+  type: "outdated" | "bias" | "incomplete" | "unverified" | "low_quality";
+  severity: "low" | "medium" | "high";
   description: string;
   suggestion?: string;
 }
@@ -208,7 +208,7 @@ export interface Annotation {
   type: AnnotationType;
   content: string;
   location: AnnotationLocation;
-  importance: 'low' | 'medium' | 'high' | 'critical';
+  importance: "low" | "medium" | "high" | "critical";
   category: string;
   tags: string[];
   linkedElements: LinkedElement[];
@@ -218,18 +218,18 @@ export interface Annotation {
 }
 
 export type AnnotationType =
-  | 'highlight'
-  | 'note'
-  | 'question'
-  | 'idea'
-  | 'correction'
-  | 'reference'
-  | 'summary'
-  | 'critique'
-  | 'connection';
+  | "highlight"
+  | "note"
+  | "question"
+  | "idea"
+  | "correction"
+  | "reference"
+  | "summary"
+  | "critique"
+  | "connection";
 
 export interface AnnotationLocation {
-  type: 'text' | 'page' | 'time' | 'coordinate';
+  type: "text" | "page" | "time" | "coordinate";
   startIndex?: number;
   endIndex?: number;
   page?: number;
@@ -239,7 +239,7 @@ export interface AnnotationLocation {
 }
 
 export interface LinkedElement {
-  type: 'character' | 'location' | 'item' | 'concept' | 'story' | 'chapter';
+  type: "character" | "location" | "item" | "concept" | "story" | "chapter";
   id: string;
   name: string;
   relationship: string;
@@ -256,7 +256,14 @@ export interface Citation {
   notes: string;
 }
 
-export type CitationStyle = 'APA' | 'MLA' | 'Chicago' | 'Harvard' | 'IEEE' | 'Vancouver' | 'custom';
+export type CitationStyle =
+  | "APA"
+  | "MLA"
+  | "Chicago"
+  | "Harvard"
+  | "IEEE"
+  | "Vancouver"
+  | "custom";
 
 export interface CitationFields {
   title: string;
@@ -294,14 +301,14 @@ export interface Attachment {
 }
 
 export type AttachmentType =
-  | 'document'
-  | 'image'
-  | 'video'
-  | 'audio'
-  | 'spreadsheet'
-  | 'presentation'
-  | 'archive'
-  | 'other';
+  | "document"
+  | "image"
+  | "video"
+  | "audio"
+  | "spreadsheet"
+  | "presentation"
+  | "archive"
+  | "other";
 
 export interface ResearchLink {
   id: string;
@@ -318,28 +325,28 @@ export interface ResearchLink {
 }
 
 export type LinkTargetType =
-  | 'character'
-  | 'location'
-  | 'item'
-  | 'story'
-  | 'chapter'
-  | 'world_rule'
-  | 'magic_system'
-  | 'faction'
-  | 'concept'
-  | 'source';
+  | "character"
+  | "location"
+  | "item"
+  | "story"
+  | "chapter"
+  | "world_rule"
+  | "magic_system"
+  | "faction"
+  | "concept"
+  | "source";
 
 export type LinkType =
-  | 'inspiration'
-  | 'reference'
-  | 'basis'
-  | 'contradiction'
-  | 'support'
-  | 'expansion'
-  | 'adaptation'
-  | 'comparison'
-  | 'context'
-  | 'background';
+  | "inspiration"
+  | "reference"
+  | "basis"
+  | "contradiction"
+  | "support"
+  | "expansion"
+  | "adaptation"
+  | "comparison"
+  | "context"
+  | "background";
 
 export interface ResearchTag {
   id: string;
@@ -368,7 +375,7 @@ export interface Contributor {
   id: string;
   name: string;
   email: string;
-  role: 'owner' | 'editor' | 'viewer' | 'contributor';
+  role: "owner" | "editor" | "viewer" | "contributor";
   permissions: Permission[];
   lastActivity: Date;
   contributionCount: number;
@@ -383,45 +390,50 @@ export interface Permission {
 export interface SyncSettings {
   enabled: boolean;
   services: SyncService[];
-  frequency: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'manual';
+  frequency: "realtime" | "hourly" | "daily" | "weekly" | "manual";
   conflicts: ConflictResolution;
   lastSync: Date;
 }
 
 export interface SyncService {
   name: string;
-  type: 'cloud_storage' | 'note_app' | 'reference_manager' | 'web_clipper';
+  type: "cloud_storage" | "note_app" | "reference_manager" | "web_clipper";
   enabled: boolean;
   settings: Record<string, unknown>;
-  status: 'connected' | 'disconnected' | 'error';
+  status: "connected" | "disconnected" | "error";
 }
 
-export type ConflictResolution = 'manual' | 'local_wins' | 'remote_wins' | 'merge' | 'duplicate';
+export type ConflictResolution =
+  | "manual"
+  | "local_wins"
+  | "remote_wins"
+  | "merge"
+  | "duplicate";
 
 export interface Integration {
   id: string;
   name: string;
   type: IntegrationType;
-  status: 'active' | 'inactive' | 'error';
+  status: "active" | "inactive" | "error";
   settings: IntegrationSettings;
   lastSync: Date;
   errorMessage?: string;
 }
 
 export type IntegrationType =
-  | 'zotero'
-  | 'mendeley'
-  | 'notion'
-  | 'obsidian'
-  | 'roam'
-  | 'evernote'
-  | 'onenote'
-  | 'google_drive'
-  | 'dropbox'
-  | 'web_clipper'
-  | 'rss_feed'
-  | 'api'
-  | 'webhook';
+  | "zotero"
+  | "mendeley"
+  | "notion"
+  | "obsidian"
+  | "roam"
+  | "evernote"
+  | "onenote"
+  | "google_drive"
+  | "dropbox"
+  | "web_clipper"
+  | "rss_feed"
+  | "api"
+  | "webhook";
 
 export interface IntegrationSettings {
   apiKey?: string;
@@ -430,12 +442,12 @@ export interface IntegrationSettings {
   filters: IntegrationFilter[];
   mapping: FieldMapping[];
   autoSync: boolean;
-  syncDirection: 'import' | 'export' | 'bidirectional';
+  syncDirection: "import" | "export" | "bidirectional";
 }
 
 export interface IntegrationFilter {
   field: string;
-  operator: 'equals' | 'contains' | 'starts_with' | 'regex';
+  operator: "equals" | "contains" | "starts_with" | "regex";
   value: string;
   active: boolean;
 }
@@ -477,18 +489,18 @@ export interface SearchHistory {
 }
 
 export interface DisplaySettings {
-  defaultView: 'grid' | 'list' | 'timeline' | 'graph';
+  defaultView: "grid" | "list" | "timeline" | "graph";
   itemsPerPage: number;
   sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: "asc" | "desc";
   groupBy?: string;
   showPreviews: boolean;
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   compactMode: boolean;
 }
 
 export interface PrivacySettings {
-  defaultVisibility: 'private' | 'public' | 'shared';
+  defaultVisibility: "private" | "public" | "shared";
   allowIndexing: boolean;
   anonymizeExports: boolean;
   dataRetention: number; // days
@@ -497,9 +509,9 @@ export interface PrivacySettings {
 
 export interface BackupSettings {
   enabled: boolean;
-  frequency: 'daily' | 'weekly' | 'monthly';
+  frequency: "daily" | "weekly" | "monthly";
   retention: number; // number of backups to keep
-  destination: 'local' | 'cloud';
+  destination: "local" | "cloud";
   encryption: boolean;
   compression: boolean;
 }
@@ -519,7 +531,7 @@ export interface ResearchQuery {
   query: string;
   filters: QueryFilter[];
   sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: "asc" | "desc";
   limit: number;
   saved: boolean;
   createdAt: Date;
@@ -529,7 +541,7 @@ export interface ResearchQuery {
 
 export interface QueryFilter {
   field: string;
-  operator: 'equals' | 'contains' | 'greater' | 'less' | 'range' | 'exists';
+  operator: "equals" | "contains" | "greater" | "less" | "range" | "exists";
   value: unknown;
   active: boolean;
 }
@@ -559,28 +571,28 @@ export interface ResearchExport {
   includeAttachments: boolean;
   template?: string;
   createdAt: Date;
-  status: 'pending' | 'processing' | 'completed' | 'error';
+  status: "pending" | "processing" | "completed" | "error";
   downloadUrl?: string;
   errorMessage?: string;
 }
 
 export type ExportFormat =
-  | 'pdf'
-  | 'docx'
-  | 'html'
-  | 'markdown'
-  | 'json'
-  | 'csv'
-  | 'bibtex'
-  | 'ris'
-  | 'endnote'
-  | 'zotero';
+  | "pdf"
+  | "docx"
+  | "html"
+  | "markdown"
+  | "json"
+  | "csv"
+  | "bibtex"
+  | "ris"
+  | "endnote"
+  | "zotero";
 
 export interface ImportJob {
   id: string;
   name: string;
   source: ImportSource;
-  status: 'pending' | 'processing' | 'completed' | 'error' | 'cancelled';
+  status: "pending" | "processing" | "completed" | "error" | "cancelled";
   progress: number;
   totalItems: number;
   processedItems: number;
@@ -593,7 +605,7 @@ export interface ImportJob {
 }
 
 export interface ImportSource {
-  type: 'file' | 'url' | 'api' | 'integration';
+  type: "file" | "url" | "api" | "integration";
   location: string;
   format: string;
   size?: number;
@@ -608,7 +620,7 @@ export interface ImportError {
 }
 
 export interface ImportSettings {
-  duplicateHandling: 'skip' | 'update' | 'duplicate';
+  duplicateHandling: "skip" | "update" | "duplicate";
   validateData: boolean;
   autoTag: boolean;
   defaultCollection?: string;
@@ -618,7 +630,7 @@ export interface ImportSettings {
 
 export interface ImportRule {
   condition: string;
-  action: 'skip' | 'modify' | 'tag' | 'collect';
+  action: "skip" | "modify" | "tag" | "collect";
   parameters: Record<string, unknown>;
 }
 
@@ -637,7 +649,7 @@ export interface ResearchWorkspace {
 }
 
 export interface WorkspaceLayout {
-  type: 'grid' | 'columns' | 'tabs' | 'custom';
+  type: "grid" | "columns" | "tabs" | "custom";
   configuration: Record<string, unknown>;
   responsive: boolean;
 }
@@ -654,18 +666,18 @@ export interface WorkspacePanel {
 }
 
 export type PanelType =
-  | 'source_list'
-  | 'source_detail'
-  | 'annotation_list'
-  | 'tag_cloud'
-  | 'link_graph'
-  | 'timeline'
-  | 'search'
-  | 'filters'
-  | 'collections'
-  | 'notes'
-  | 'citations'
-  | 'attachments';
+  | "source_list"
+  | "source_detail"
+  | "annotation_list"
+  | "tag_cloud"
+  | "link_graph"
+  | "timeline"
+  | "search"
+  | "filters"
+  | "collections"
+  | "notes"
+  | "citations"
+  | "attachments";
 
 export interface PanelPosition {
   x: number;
@@ -720,7 +732,7 @@ export interface ResearchAnalytics {
 export interface AnalyticsPeriod {
   start: Date;
   end: Date;
-  granularity: 'day' | 'week' | 'month' | 'year';
+  granularity: "day" | "week" | "month" | "year";
 }
 
 export interface AnalyticsMetrics {
@@ -738,7 +750,7 @@ export interface AnalyticsMetrics {
 export interface AnalyticsTrend {
   metric: string;
   values: TrendValue[];
-  direction: 'up' | 'down' | 'stable';
+  direction: "up" | "down" | "stable";
   changePercent: number;
 }
 
@@ -748,20 +760,20 @@ export interface TrendValue {
 }
 
 export interface AnalyticsInsight {
-  type: 'pattern' | 'anomaly' | 'recommendation' | 'achievement';
+  type: "pattern" | "anomaly" | "recommendation" | "achievement";
   title: string;
   description: string;
-  impact: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
   actionable: boolean;
   relatedMetrics: string[];
 }
 
 export interface AnalyticsRecommendation {
-  type: 'organization' | 'productivity' | 'collaboration' | 'quality';
+  type: "organization" | "productivity" | "collaboration" | "quality";
   title: string;
   description: string;
   expectedBenefit: string;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
   priority: number;
   actions: RecommendationAction[];
 }

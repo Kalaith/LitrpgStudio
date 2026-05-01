@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import CharacterForm from '../components/CharacterForm';
+import { useState, useEffect } from "react";
+import CharacterForm from "../components/CharacterForm";
 
 interface CharacterSkill {
   name: string;
@@ -32,10 +32,12 @@ interface CharacterManagerProps {
 
 const CharacterManager: React.FC<CharacterManagerProps> = ({
   isCreating = false,
-  onCreateComplete
+  onCreateComplete,
 }) => {
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(
+    null,
+  );
   const [isCreatingLocal, setIsCreatingLocal] = useState(false);
 
   // Update local creating state when prop changes
@@ -46,7 +48,7 @@ const CharacterManager: React.FC<CharacterManagerProps> = ({
   }, [isCreating]);
 
   useEffect(() => {
-    const savedCharacters = localStorage.getItem('characters');
+    const savedCharacters = localStorage.getItem("characters");
     if (savedCharacters) {
       setCharacters(JSON.parse(savedCharacters));
     }
@@ -55,24 +57,24 @@ const CharacterManager: React.FC<CharacterManagerProps> = ({
   const handleSave = (character: Character) => {
     let updatedCharacters;
     if (editingCharacter) {
-      updatedCharacters = characters.map(c => 
-        c.id === character.id ? character : c
+      updatedCharacters = characters.map((c) =>
+        c.id === character.id ? character : c,
       );
     } else {
       updatedCharacters = [...characters, character];
     }
-    
+
     setCharacters(updatedCharacters);
-    localStorage.setItem('characters', JSON.stringify(updatedCharacters));
+    localStorage.setItem("characters", JSON.stringify(updatedCharacters));
     setEditingCharacter(null);
     setIsCreatingLocal(false);
     onCreateComplete?.();
   };
 
   const handleDelete = (id: string) => {
-    const updatedCharacters = characters.filter(c => c.id !== id);
+    const updatedCharacters = characters.filter((c) => c.id !== id);
     setCharacters(updatedCharacters);
-    localStorage.setItem('characters', JSON.stringify(updatedCharacters));
+    localStorage.setItem("characters", JSON.stringify(updatedCharacters));
   };
 
   if (isCreatingLocal || editingCharacter) {
@@ -80,7 +82,7 @@ const CharacterManager: React.FC<CharacterManagerProps> = ({
       <div className="flex-1 p-6 overflow-auto">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl font-semibold mb-6">
-            {isCreatingLocal ? 'Create New Character' : 'Edit Character'}
+            {isCreatingLocal ? "Create New Character" : "Edit Character"}
           </h2>
           <CharacterForm
             initialCharacter={editingCharacter || undefined}
@@ -99,23 +101,29 @@ const CharacterManager: React.FC<CharacterManagerProps> = ({
     <div className="flex-1 p-6 overflow-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Character Management</h2>
-        <button className="btn-primary" onClick={() => setIsCreatingLocal(true)}>
+        <button
+          className="btn-primary"
+          onClick={() => setIsCreatingLocal(true)}
+        >
           + Add Character
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {characters.map(character => (
-          <div key={character.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        {characters.map((character) => (
+          <div
+            key={character.id}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"
+          >
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold">{character.name}</h3>
               <div className="space-x-2">
-                <button 
+                <button
                   className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                   onClick={() => setEditingCharacter(character)}
                 >
                   Edit
                 </button>
-                <button 
+                <button
                   className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   onClick={() => handleDelete(character.id)}
                 >
@@ -129,11 +137,14 @@ const CharacterManager: React.FC<CharacterManagerProps> = ({
             <div className="mt-4 grid grid-cols-2 gap-2">
               {Object.entries(character.stats).map(([stat, value]) => (
                 <div key={stat} className="text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">{stat}:</span>{' '}
+                  <span className="text-gray-500 dark:text-gray-400">
+                    {stat}:
+                  </span>{" "}
                   <span className="font-medium">{value}</span>
                 </div>
               ))}
-            </div>            {character.skills?.length > 0 && (
+            </div>{" "}
+            {character.skills?.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-sm font-medium mb-2">Skills</h4>
                 <div className="space-y-1">

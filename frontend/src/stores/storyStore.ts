@@ -1,7 +1,13 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Story, Chapter, StoryEvent, StoryTemplate, CharacterProgressionEvent } from '../types/story';
-import { storiesApi, chaptersApi, writingSessionsApi } from '../api/stories';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type {
+  Story,
+  Chapter,
+  StoryEvent,
+  StoryTemplate,
+  CharacterProgressionEvent,
+} from "../types/story";
+import { storiesApi, chaptersApi, writingSessionsApi } from "../api/stories";
 
 interface StoryState {
   stories: Story[];
@@ -31,34 +37,55 @@ interface StoryActions {
   fetchTemplates: () => Promise<void>;
 
   // Story Management (async)
-  createStory: (story: Omit<Story, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Story>;
+  createStory: (
+    story: Omit<Story, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<Story>;
   updateStory: (storyId: string, updates: Partial<Story>) => Promise<void>;
   deleteStory: (storyId: string) => Promise<void>;
   setCurrentStory: (story: Story | null) => void;
 
   // Chapter Management (async)
-  addChapter: (storyId: string, chapter: Omit<Chapter, 'id' | 'storyId' | 'createdAt' | 'updatedAt'>) => Promise<Chapter>;
-  updateChapter: (chapterId: string, updates: Partial<Chapter>) => Promise<void>;
+  addChapter: (
+    storyId: string,
+    chapter: Omit<Chapter, "id" | "storyId" | "createdAt" | "updatedAt">,
+  ) => Promise<Chapter>;
+  updateChapter: (
+    chapterId: string,
+    updates: Partial<Chapter>,
+  ) => Promise<void>;
   deleteChapter: (chapterId: string) => Promise<void>;
   reorderChapters: (storyId: string, chapterIds: string[]) => Promise<void>;
-  
+
   // Story Events (async)
-  addStoryEvent: (storyId: string, event: Omit<StoryEvent, 'id'>) => Promise<void>;
+  addStoryEvent: (
+    storyId: string,
+    event: Omit<StoryEvent, "id">,
+  ) => Promise<void>;
   updateStoryEvent: (eventId: string, updates: Partial<StoryEvent>) => void;
   deleteStoryEvent: (eventId: string) => void;
 
   // Character Progression (async)
-  addCharacterProgression: (chapterId: string, progression: CharacterProgressionEvent) => Promise<void>;
+  addCharacterProgression: (
+    chapterId: string,
+    progression: CharacterProgressionEvent,
+  ) => Promise<void>;
 
   // Writing Sessions (async)
-  startWritingSession: (storyId: string, chapterId?: string, wordTarget?: number) => Promise<void>;
+  startWritingSession: (
+    storyId: string,
+    chapterId?: string,
+    wordTarget?: number,
+  ) => Promise<void>;
   endWritingSession: () => Promise<void>;
   updateSessionProgress: (wordsWritten: number) => Promise<void>;
 
   // Templates (async)
   saveAsTemplate: (story: Story, templateName: string) => Promise<void>;
-  createFromTemplate: (templateId: string, storyTitle: string) => Promise<Story>;
-  
+  createFromTemplate: (
+    templateId: string,
+    storyTitle: string,
+  ) => Promise<Story>;
+
   // Utility
   calculateWordCount: (storyId: string) => number;
   clearAll: () => void;
@@ -92,17 +119,22 @@ export const useStoryStore = create<StoryStore>()(
             // Auto-select: if nothing is current, pick the first story;
             // if the persisted currentStory no longer exists, clear it.
             let nextCurrent = current;
-            if (current && !fetched.some(s => s.id === current.id)) {
+            if (current && !fetched.some((s) => s.id === current.id)) {
               nextCurrent = fetched.length > 0 ? fetched[0] : null;
             } else if (!current && fetched.length > 0) {
               nextCurrent = fetched[0];
             }
             set({ stories: fetched, currentStory: nextCurrent });
           } else {
-            set({ error: response.error || 'Failed to fetch stories' });
+            set({ error: response.error || "Failed to fetch stories" });
           }
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to fetch stories' });
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch stories",
+          });
         } finally {
           set({ loading: false });
         }
@@ -116,13 +148,16 @@ export const useStoryStore = create<StoryStore>()(
             const full = response.data;
             // Update both currentStory and the matching entry in the stories array
             // so subsequent accesses from the array also have full chapter content.
-            const stories = get().stories.map(s => s.id === id ? full : s);
+            const stories = get().stories.map((s) => (s.id === id ? full : s));
             set({ currentStory: full, stories });
           } else {
-            set({ error: response.error || 'Failed to fetch story' });
+            set({ error: response.error || "Failed to fetch story" });
           }
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to fetch story' });
+          set({
+            error:
+              error instanceof Error ? error.message : "Failed to fetch story",
+          });
         } finally {
           set({ loading: false });
         }
@@ -135,10 +170,15 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             set({ templates: response.data });
           } else {
-            set({ error: response.error || 'Failed to fetch templates' });
+            set({ error: response.error || "Failed to fetch templates" });
           }
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to fetch templates' });
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch templates",
+          });
         } finally {
           set({ loading: false });
         }
@@ -154,15 +194,19 @@ export const useStoryStore = create<StoryStore>()(
             set((state) => ({
               stories: [...state.stories, newStory],
               currentStory: newStory,
-              loading: false
+              loading: false,
             }));
             return newStory;
           } else {
-            set({ error: response.error || 'Failed to create story', loading: false });
-            throw new Error(response.error || 'Failed to create story');
+            set({
+              error: response.error || "Failed to create story",
+              loading: false,
+            });
+            throw new Error(response.error || "Failed to create story");
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to create story';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to create story";
           set({ error: errorMessage, loading: false });
           throw error;
         }
@@ -175,15 +219,24 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             const updatedStory = response.data;
             set((state) => ({
-              stories: state.stories.map(s => s.id === storyId ? updatedStory : s),
-              currentStory: state.currentStory?.id === storyId ? updatedStory : state.currentStory,
-              loading: false
+              stories: state.stories.map((s) =>
+                s.id === storyId ? updatedStory : s,
+              ),
+              currentStory:
+                state.currentStory?.id === storyId
+                  ? updatedStory
+                  : state.currentStory,
+              loading: false,
             }));
           } else {
-            set({ error: response.error || 'Failed to update story', loading: false });
+            set({
+              error: response.error || "Failed to update story",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to update story';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to update story";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -194,16 +247,24 @@ export const useStoryStore = create<StoryStore>()(
           const response = await storiesApi.delete(storyId);
           if (response.success) {
             set((state) => ({
-              stories: state.stories.filter(s => s.id !== storyId),
-              currentStory: state.currentStory?.id === storyId ? null : state.currentStory,
-              writingSession: state.writingSession?.storyId === storyId ? null : state.writingSession,
-              loading: false
+              stories: state.stories.filter((s) => s.id !== storyId),
+              currentStory:
+                state.currentStory?.id === storyId ? null : state.currentStory,
+              writingSession:
+                state.writingSession?.storyId === storyId
+                  ? null
+                  : state.writingSession,
+              loading: false,
             }));
           } else {
-            set({ error: response.error || 'Failed to delete story', loading: false });
+            set({
+              error: response.error || "Failed to delete story",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to delete story';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to delete story";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -218,7 +279,7 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             const newChapter = response.data;
             set((state) => {
-              const story = state.stories.find(s => s.id === storyId);
+              const story = state.stories.find((s) => s.id === storyId);
               if (!story) return { loading: false };
 
               const updatedStory: Story = {
@@ -228,18 +289,27 @@ export const useStoryStore = create<StoryStore>()(
               };
 
               return {
-                stories: state.stories.map(s => s.id === storyId ? updatedStory : s),
-                currentStory: state.currentStory?.id === storyId ? updatedStory : state.currentStory,
-                loading: false
+                stories: state.stories.map((s) =>
+                  s.id === storyId ? updatedStory : s,
+                ),
+                currentStory:
+                  state.currentStory?.id === storyId
+                    ? updatedStory
+                    : state.currentStory,
+                loading: false,
               };
             });
             return newChapter;
           } else {
-            set({ error: response.error || 'Failed to create chapter', loading: false });
-            throw new Error(response.error || 'Failed to create chapter');
+            set({
+              error: response.error || "Failed to create chapter",
+              loading: false,
+            });
+            throw new Error(response.error || "Failed to create chapter");
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to create chapter';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to create chapter";
           set({ error: errorMessage, loading: false });
           throw error;
         }
@@ -252,33 +322,45 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             const updatedChapter = response.data;
             set((state) => {
-              const storyWithChapter = state.stories.find(s =>
-                s.chapters.some(c => c.id === chapterId)
+              const storyWithChapter = state.stories.find((s) =>
+                s.chapters.some((c) => c.id === chapterId),
               );
               if (!storyWithChapter) return { loading: false };
 
-              const updatedChapters = storyWithChapter.chapters.map(c =>
-                c.id === chapterId ? updatedChapter : c
+              const updatedChapters = storyWithChapter.chapters.map((c) =>
+                c.id === chapterId ? updatedChapter : c,
               );
 
               const updatedStory: Story = {
                 ...storyWithChapter,
                 chapters: updatedChapters,
-                wordCount: updatedChapters.reduce((total, c) => total + c.wordCount, 0),
+                wordCount: updatedChapters.reduce(
+                  (total, c) => total + c.wordCount,
+                  0,
+                ),
                 updatedAt: new Date(),
               };
 
               return {
-                stories: state.stories.map(s => s.id === storyWithChapter.id ? updatedStory : s),
-                currentStory: state.currentStory?.id === storyWithChapter.id ? updatedStory : state.currentStory,
-                loading: false
+                stories: state.stories.map((s) =>
+                  s.id === storyWithChapter.id ? updatedStory : s,
+                ),
+                currentStory:
+                  state.currentStory?.id === storyWithChapter.id
+                    ? updatedStory
+                    : state.currentStory,
+                loading: false,
               };
             });
           } else {
-            set({ error: response.error || 'Failed to update chapter', loading: false });
+            set({
+              error: response.error || "Failed to update chapter",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to update chapter';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to update chapter";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -289,33 +371,45 @@ export const useStoryStore = create<StoryStore>()(
           const response = await chaptersApi.delete(chapterId);
           if (response.success) {
             set((state) => {
-              const storyWithChapter = state.stories.find(s =>
-                s.chapters.some(c => c.id === chapterId)
+              const storyWithChapter = state.stories.find((s) =>
+                s.chapters.some((c) => c.id === chapterId),
               );
               if (!storyWithChapter) return { loading: false };
 
               const updatedChapters = storyWithChapter.chapters
-                .filter(c => c.id !== chapterId)
+                .filter((c) => c.id !== chapterId)
                 .map((c, index) => ({ ...c, order: index + 1 }));
 
               const updatedStory: Story = {
                 ...storyWithChapter,
                 chapters: updatedChapters,
-                wordCount: updatedChapters.reduce((total, c) => total + c.wordCount, 0),
+                wordCount: updatedChapters.reduce(
+                  (total, c) => total + c.wordCount,
+                  0,
+                ),
                 updatedAt: new Date(),
               };
 
               return {
-                stories: state.stories.map(s => s.id === storyWithChapter.id ? updatedStory : s),
-                currentStory: state.currentStory?.id === storyWithChapter.id ? updatedStory : state.currentStory,
-                loading: false
+                stories: state.stories.map((s) =>
+                  s.id === storyWithChapter.id ? updatedStory : s,
+                ),
+                currentStory:
+                  state.currentStory?.id === storyWithChapter.id
+                    ? updatedStory
+                    : state.currentStory,
+                loading: false,
               };
             });
           } else {
-            set({ error: response.error || 'Failed to delete chapter', loading: false });
+            set({
+              error: response.error || "Failed to delete chapter",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to delete chapter';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to delete chapter";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -327,7 +421,7 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             const reorderedChapters = response.data;
             set((state) => {
-              const story = state.stories.find(s => s.id === storyId);
+              const story = state.stories.find((s) => s.id === storyId);
               if (!story) return { loading: false };
 
               const updatedStory: Story = {
@@ -337,16 +431,27 @@ export const useStoryStore = create<StoryStore>()(
               };
 
               return {
-                stories: state.stories.map(s => s.id === storyId ? updatedStory : s),
-                currentStory: state.currentStory?.id === storyId ? updatedStory : state.currentStory,
-                loading: false
+                stories: state.stories.map((s) =>
+                  s.id === storyId ? updatedStory : s,
+                ),
+                currentStory:
+                  state.currentStory?.id === storyId
+                    ? updatedStory
+                    : state.currentStory,
+                loading: false,
               };
             });
           } else {
-            set({ error: response.error || 'Failed to reorder chapters', loading: false });
+            set({
+              error: response.error || "Failed to reorder chapters",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to reorder chapters';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to reorder chapters";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -359,28 +464,39 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success && response.data) {
             const updatedStory = response.data;
             set((state) => ({
-              stories: state.stories.map(s => s.id === storyId ? updatedStory : s),
-              currentStory: state.currentStory?.id === storyId ? updatedStory : state.currentStory,
-              loading: false
+              stories: state.stories.map((s) =>
+                s.id === storyId ? updatedStory : s,
+              ),
+              currentStory:
+                state.currentStory?.id === storyId
+                  ? updatedStory
+                  : state.currentStory,
+              loading: false,
             }));
           } else {
-            set({ error: response.error || 'Failed to add story event', loading: false });
+            set({
+              error: response.error || "Failed to add story event",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to add story event';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to add story event";
           set({ error: errorMessage, loading: false });
         }
       },
 
       updateStoryEvent: (eventId, updates) =>
         set((state) => {
-          const storyWithEvent = state.stories.find(s =>
-            s.timeline.some(e => e.id === eventId)
+          const storyWithEvent = state.stories.find((s) =>
+            s.timeline.some((e) => e.id === eventId),
           );
           if (!storyWithEvent) return state;
 
-          const updatedTimeline = storyWithEvent.timeline.map(e =>
-            e.id === eventId ? { ...e, ...updates } : e
+          const updatedTimeline = storyWithEvent.timeline.map((e) =>
+            e.id === eventId ? { ...e, ...updates } : e,
           );
 
           const updatedStory: Story = {
@@ -390,31 +506,37 @@ export const useStoryStore = create<StoryStore>()(
           };
 
           return {
-            stories: state.stories.map(s =>
-              s.id === storyWithEvent.id ? updatedStory : s
+            stories: state.stories.map((s) =>
+              s.id === storyWithEvent.id ? updatedStory : s,
             ),
-            currentStory: state.currentStory?.id === storyWithEvent.id ? updatedStory : state.currentStory,
+            currentStory:
+              state.currentStory?.id === storyWithEvent.id
+                ? updatedStory
+                : state.currentStory,
           };
         }),
 
       deleteStoryEvent: (eventId) =>
         set((state) => {
-          const storyWithEvent = state.stories.find(s =>
-            s.timeline.some(e => e.id === eventId)
+          const storyWithEvent = state.stories.find((s) =>
+            s.timeline.some((e) => e.id === eventId),
           );
           if (!storyWithEvent) return state;
 
           const updatedStory: Story = {
             ...storyWithEvent,
-            timeline: storyWithEvent.timeline.filter(e => e.id !== eventId),
+            timeline: storyWithEvent.timeline.filter((e) => e.id !== eventId),
             updatedAt: new Date(),
           };
 
           return {
-            stories: state.stories.map(s =>
-              s.id === storyWithEvent.id ? updatedStory : s
+            stories: state.stories.map((s) =>
+              s.id === storyWithEvent.id ? updatedStory : s,
             ),
-            currentStory: state.currentStory?.id === storyWithEvent.id ? updatedStory : state.currentStory,
+            currentStory:
+              state.currentStory?.id === storyWithEvent.id
+                ? updatedStory
+                : state.currentStory,
           };
         }),
 
@@ -422,17 +544,20 @@ export const useStoryStore = create<StoryStore>()(
       addCharacterProgression: async (chapterId, progression) => {
         set({ loading: true, error: null });
         try {
-          const response = await chaptersApi.addCharacterProgression(chapterId, progression);
+          const response = await chaptersApi.addCharacterProgression(
+            chapterId,
+            progression,
+          );
           if (response.success && response.data) {
             const updatedChapter = response.data;
             set((state) => {
-              const storyWithChapter = state.stories.find(s =>
-                s.chapters.some(c => c.id === chapterId)
+              const storyWithChapter = state.stories.find((s) =>
+                s.chapters.some((c) => c.id === chapterId),
               );
               if (!storyWithChapter) return { loading: false };
 
-              const updatedChapters = storyWithChapter.chapters.map(c =>
-                c.id === chapterId ? updatedChapter : c
+              const updatedChapters = storyWithChapter.chapters.map((c) =>
+                c.id === chapterId ? updatedChapter : c,
               );
 
               const updatedStory: Story = {
@@ -442,18 +567,27 @@ export const useStoryStore = create<StoryStore>()(
               };
 
               return {
-                stories: state.stories.map(s =>
-                  s.id === storyWithChapter.id ? updatedStory : s
+                stories: state.stories.map((s) =>
+                  s.id === storyWithChapter.id ? updatedStory : s,
                 ),
-                currentStory: state.currentStory?.id === storyWithChapter.id ? updatedStory : state.currentStory,
-                loading: false
+                currentStory:
+                  state.currentStory?.id === storyWithChapter.id
+                    ? updatedStory
+                    : state.currentStory,
+                loading: false,
               };
             });
           } else {
-            set({ error: response.error || 'Failed to add character progression', loading: false });
+            set({
+              error: response.error || "Failed to add character progression",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to add character progression';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to add character progression";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -462,7 +596,11 @@ export const useStoryStore = create<StoryStore>()(
       startWritingSession: async (storyId, chapterId, wordTarget = 500) => {
         set({ loading: true, error: null });
         try {
-          const response = await writingSessionsApi.start(storyId, chapterId, wordTarget);
+          const response = await writingSessionsApi.start(
+            storyId,
+            chapterId,
+            wordTarget,
+          );
           if (response.success) {
             set({
               writingSession: {
@@ -472,13 +610,19 @@ export const useStoryStore = create<StoryStore>()(
                 wordTarget,
                 wordsWritten: 0,
               },
-              loading: false
+              loading: false,
             });
           } else {
-            set({ error: response.error || 'Failed to start writing session', loading: false });
+            set({
+              error: response.error || "Failed to start writing session",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to start writing session';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to start writing session";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -490,10 +634,16 @@ export const useStoryStore = create<StoryStore>()(
           if (response.success) {
             set({ writingSession: null, loading: false });
           } else {
-            set({ error: response.error || 'Failed to end writing session', loading: false });
+            set({
+              error: response.error || "Failed to end writing session",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to end writing session';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to end writing session";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -501,7 +651,8 @@ export const useStoryStore = create<StoryStore>()(
       updateSessionProgress: async (wordsWritten) => {
         set({ loading: true, error: null });
         try {
-          const response = await writingSessionsApi.updateProgress(wordsWritten);
+          const response =
+            await writingSessionsApi.updateProgress(wordsWritten);
           if (response.success) {
             set((state) =>
               state.writingSession
@@ -510,15 +661,21 @@ export const useStoryStore = create<StoryStore>()(
                       ...state.writingSession,
                       wordsWritten,
                     },
-                    loading: false
+                    loading: false,
                   }
-                : { loading: false }
+                : { loading: false },
             );
           } else {
-            set({ error: response.error || 'Failed to update session progress', loading: false });
+            set({
+              error: response.error || "Failed to update session progress",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to update session progress';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to update session progress";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -527,11 +684,11 @@ export const useStoryStore = create<StoryStore>()(
       saveAsTemplate: async (story, templateName) => {
         set({ loading: true, error: null });
         try {
-          const templateData: Omit<StoryTemplate, 'id'> = {
+          const templateData: Omit<StoryTemplate, "id"> = {
             name: templateName,
             description: story.description,
             genre: story.genre,
-            outline: story.chapters.map(c => c.title),
+            outline: story.chapters.map((c) => c.title),
             suggestedLength: story.targetWordCount || story.wordCount,
             characterTemplates: [story.mainCharacter.id],
           };
@@ -540,13 +697,17 @@ export const useStoryStore = create<StoryStore>()(
             const newTemplate = response.data;
             set((state) => ({
               templates: [...state.templates, newTemplate],
-              loading: false
+              loading: false,
             }));
           } else {
-            set({ error: response.error || 'Failed to save template', loading: false });
+            set({
+              error: response.error || "Failed to save template",
+              loading: false,
+            });
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to save template';
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to save template";
           set({ error: errorMessage, loading: false });
         }
       },
@@ -554,21 +715,32 @@ export const useStoryStore = create<StoryStore>()(
       createFromTemplate: async (templateId, storyTitle) => {
         set({ loading: true, error: null });
         try {
-          const response = await storiesApi.createFromTemplate(templateId, storyTitle);
+          const response = await storiesApi.createFromTemplate(
+            templateId,
+            storyTitle,
+          );
           if (response.success && response.data) {
             const newStory = response.data;
             set((state) => ({
               stories: [...state.stories, newStory],
               currentStory: newStory,
-              loading: false
+              loading: false,
             }));
             return newStory;
           } else {
-            set({ error: response.error || 'Failed to create story from template', loading: false });
-            throw new Error(response.error || 'Failed to create story from template');
+            set({
+              error: response.error || "Failed to create story from template",
+              loading: false,
+            });
+            throw new Error(
+              response.error || "Failed to create story from template",
+            );
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Failed to create story from template';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to create story from template";
           set({ error: errorMessage, loading: false });
           throw error;
         }
@@ -576,8 +748,10 @@ export const useStoryStore = create<StoryStore>()(
 
       // Utility
       calculateWordCount: (storyId) => {
-        const story = get().stories.find(s => s.id === storyId);
-        return story ? story.chapters.reduce((total, c) => total + c.wordCount, 0) : 0;
+        const story = get().stories.find((s) => s.id === storyId);
+        return story
+          ? story.chapters.reduce((total, c) => total + c.wordCount, 0)
+          : 0;
       },
 
       clearAll: () =>
@@ -589,7 +763,7 @@ export const useStoryStore = create<StoryStore>()(
         }),
     }),
     {
-      name: 'writers-story-storage',
+      name: "writers-story-storage",
       partialize: (state) => ({
         stories: state.stories,
         currentStory: state.currentStory,
@@ -598,12 +772,16 @@ export const useStoryStore = create<StoryStore>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         // If the persisted currentStory no longer exists in stories, clear or pick first
-        if (state.currentStory && !state.stories.some(s => s.id === state.currentStory!.id)) {
-          state.currentStory = state.stories.length > 0 ? state.stories[0] : null;
+        if (
+          state.currentStory &&
+          !state.stories.some((s) => s.id === state.currentStory!.id)
+        ) {
+          state.currentStory =
+            state.stories.length > 0 ? state.stories[0] : null;
         } else if (!state.currentStory && state.stories.length > 0) {
           state.currentStory = state.stories[0];
         }
       },
-    }
-  )
+    },
+  ),
 );

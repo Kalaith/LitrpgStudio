@@ -79,7 +79,17 @@ final class DraftImportParser
             return false;
         }
 
-        return (bool) preg_match('/^(?:#{1,6}\s*)?(?:chapter|ch\.?)\s+[0-9ivxlcdm]+\b/i', $trimmed);
+        $numberPattern = '(?:[0-9]+|[ivxlcdm]+|one|two|three|four|five|six|seven|eight|nine|ten|'
+            . 'eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|'
+            . 'twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)';
+
+        return (bool) preg_match(
+            '/^(?:#{1,6}\s*)?(?:(?:chapter|ch\.?)\s+' . $numberPattern . '\b.*|(?:prologue|epilogue)\b.*)$/i',
+            $trimmed
+        ) || (bool) preg_match(
+            '/^(?:#{1,6}\s*)?scene\s+' . $numberPattern . '\b.*$/i',
+            $trimmed
+        );
     }
 
     /**
@@ -110,6 +120,10 @@ final class DraftImportParser
         $clean = trim(preg_replace('/^#{1,6}\s*/', '', trim($heading)) ?? '');
         if ($clean === '') {
             return 'Chapter ' . $chapterNumber;
+        }
+
+        if (preg_match('/^(?:scene|prologue|epilogue)\b/i', $clean)) {
+            return $clean;
         }
 
         if (!preg_match('/^chapter\b/i', $clean)) {

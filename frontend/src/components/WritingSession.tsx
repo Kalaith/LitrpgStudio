@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
-import { useAnalyticsStore } from '../stores/analyticsStore';
-import { useStoryStore } from '../stores/storyStore';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
+import { useAnalyticsStore } from "../stores/analyticsStore";
+import { useStoryStore } from "../stores/storyStore";
 
 interface WritingSessionProps {
   onClose?: () => void;
   className?: string;
 }
 
-export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, className = '' }) => {
+export const WritingSession: React.FC<WritingSessionProps> = ({
+  onClose,
+  className = "",
+}) => {
   const {
     currentSession,
     isTrackingSession,
@@ -22,11 +25,15 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
 
   const { stories, currentStory } = useStoryStore();
 
-  const [selectedStoryId, setSelectedStoryId] = useState(currentStory?.id || '');
-  const [selectedChapterId, setSelectedChapterId] = useState('');
-  const [sessionType, setSessionType] = useState<'new_chapter' | 'section' | 'continue'>('continue');
-  const [newChapterTitle, setNewChapterTitle] = useState('');
-  const [sectionName, setSectionName] = useState('');
+  const [selectedStoryId, setSelectedStoryId] = useState(
+    currentStory?.id || "",
+  );
+  const [selectedChapterId, setSelectedChapterId] = useState("");
+  const [sessionType, setSessionType] = useState<
+    "new_chapter" | "section" | "continue"
+  >("continue");
+  const [newChapterTitle, setNewChapterTitle] = useState("");
+  const [sectionName, setSectionName] = useState("");
   const [wordTarget, setWordTarget] = useState(500);
   const [sessionTime, setSessionTime] = useState(0);
 
@@ -35,7 +42,9 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     if (!isTrackingSession || !currentSession) return;
 
     const interval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - currentSession.startTime.getTime()) / 1000);
+      const elapsed = Math.floor(
+        (Date.now() - currentSession.startTime.getTime()) / 1000,
+      );
       setSessionTime(elapsed);
     }, 1000);
 
@@ -45,7 +54,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
   // Update word count from current story
   useEffect(() => {
     if (currentSession && selectedStoryId) {
-      const story = stories.find(s => s.id === selectedStoryId);
+      const story = stories.find((s) => s.id === selectedStoryId);
       if (story) {
         updateSessionProgress(story.wordCount);
       }
@@ -56,20 +65,27 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     if (!selectedStoryId) return;
 
     // Validate session type requirements
-    if (sessionType === 'new_chapter' && !newChapterTitle.trim()) return;
-    if (sessionType === 'section' && (!sectionName.trim() || !selectedChapterId)) return;
-    if (sessionType === 'continue' && !selectedChapterId) return;
+    if (sessionType === "new_chapter" && !newChapterTitle.trim()) return;
+    if (
+      sessionType === "section" &&
+      (!sectionName.trim() || !selectedChapterId)
+    )
+      return;
+    if (sessionType === "continue" && !selectedChapterId) return;
 
     startSession(
       selectedStoryId,
       selectedChapterId || undefined,
       wordTarget,
       sessionType,
-      sessionType === 'new_chapter' ? newChapterTitle :
-      sessionType === 'section' ? sectionName : undefined
+      sessionType === "new_chapter"
+        ? newChapterTitle
+        : sessionType === "section"
+          ? sectionName
+          : undefined,
     );
 
-    const story = stories.find(s => s.id === selectedStoryId);
+    const story = stories.find((s) => s.id === selectedStoryId);
     void story;
   };
 
@@ -77,12 +93,12 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     if (!selectedStoryId) return false;
 
     switch (sessionType) {
-      case 'new_chapter':
-        return newChapterTitle.trim() !== '';
-      case 'section':
-        return selectedChapterId && sectionName.trim() !== '';
-      case 'continue':
-        return selectedChapterId !== '';
+      case "new_chapter":
+        return newChapterTitle.trim() !== "";
+      case "section":
+        return selectedChapterId && sectionName.trim() !== "";
+      case "continue":
+        return selectedChapterId !== "";
       default:
         return false;
     }
@@ -99,9 +115,9 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
     const secs = seconds % 60;
 
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
   const getCurrentWPM = () => {
@@ -112,10 +128,13 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
 
   const getProgressPercentage = () => {
     if (!currentSession) return 0;
-    return Math.min((currentSession.wordsWritten / currentSession.wordTarget) * 100, 100);
+    return Math.min(
+      (currentSession.wordsWritten / currentSession.wordTarget) * 100,
+      100,
+    );
   };
 
-  const selectedStory = stories.find(s => s.id === selectedStoryId);
+  const selectedStory = stories.find((s) => s.id === selectedStoryId);
   const availableChapters = selectedStory?.chapters || [];
 
   return (
@@ -150,12 +169,12 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 value={selectedStoryId}
                 onChange={(e) => {
                   setSelectedStoryId(e.target.value);
-                  setSelectedChapterId('');
+                  setSelectedChapterId("");
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Choose a story...</option>
-                {stories.map(story => (
+                {stories.map((story) => (
                   <option key={story.id} value={story.id}>
                     {story.title}
                   </option>
@@ -172,33 +191,33 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <button
                     onClick={() => {
-                      setSessionType('new_chapter');
-                      setSelectedChapterId('');
+                      setSessionType("new_chapter");
+                      setSelectedChapterId("");
                     }}
                     className={`px-3 py-2 rounded-md text-sm font-medium border ${
-                      sessionType === 'new_chapter'
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      sessionType === "new_chapter"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     📝 New Chapter
                   </button>
                   <button
-                    onClick={() => setSessionType('section')}
+                    onClick={() => setSessionType("section")}
                     className={`px-3 py-2 rounded-md text-sm font-medium border ${
-                      sessionType === 'section'
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      sessionType === "section"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     📄 Section
                   </button>
                   <button
-                    onClick={() => setSessionType('continue')}
+                    onClick={() => setSessionType("continue")}
                     className={`px-3 py-2 rounded-md text-sm font-medium border ${
-                      sessionType === 'continue'
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      sessionType === "continue"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     ⏯️ Continue
@@ -206,7 +225,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 </div>
 
                 {/* New Chapter Input */}
-                {sessionType === 'new_chapter' && (
+                {sessionType === "new_chapter" && (
                   <div className="mt-3">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       New Chapter Title
@@ -225,7 +244,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 )}
 
                 {/* Section Input */}
-                {sessionType === 'section' && (
+                {sessionType === "section" && (
                   <div className="space-y-3">
                     {availableChapters.length > 0 && (
                       <div>
@@ -237,8 +256,10 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                           onChange={(e) => setSelectedChapterId(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                          <option value="">Select chapter for section...</option>
-                          {availableChapters.map(chapter => (
+                          <option value="">
+                            Select chapter for section...
+                          </option>
+                          {availableChapters.map((chapter) => (
                             <option key={chapter.id} value={chapter.id}>
                               {chapter.title}
                             </option>
@@ -265,7 +286,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 )}
 
                 {/* Continue Existing Chapter */}
-                {sessionType === 'continue' && availableChapters.length > 0 && (
+                {sessionType === "continue" && availableChapters.length > 0 && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Continue Chapter
@@ -276,7 +297,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select chapter to continue...</option>
-                      {availableChapters.map(chapter => (
+                      {availableChapters.map((chapter) => (
                         <option key={chapter.id} value={chapter.id}>
                           {chapter.title} ({chapter.wordCount || 0} words)
                         </option>
@@ -296,14 +317,14 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 Word Target
               </label>
               <div className="flex space-x-2">
-                {[250, 500, 750, 1000, 1500].map(target => (
+                {[250, 500, 750, 1000, 1500].map((target) => (
                   <button
                     key={target}
                     onClick={() => setWordTarget(target)}
                     className={`px-3 py-2 rounded-md text-sm font-medium ${
                       wordTarget === target
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     {target}
@@ -326,20 +347,23 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
               disabled={!isSessionReady()}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {sessionType === 'new_chapter' && 'Start New Chapter'}
-              {sessionType === 'section' && 'Start Section Writing'}
-              {sessionType === 'continue' && 'Continue Chapter'}
+              {sessionType === "new_chapter" && "Start New Chapter"}
+              {sessionType === "section" && "Start Section Writing"}
+              {sessionType === "continue" && "Continue Chapter"}
             </button>
 
             {/* Validation Messages */}
             {!isSessionReady() && selectedStoryId && (
               <div className="text-sm text-gray-500 text-center">
-                {sessionType === 'new_chapter' && !newChapterTitle.trim() &&
-                  'Enter a title for your new chapter'}
-                {sessionType === 'section' && (!selectedChapterId || !sectionName.trim()) &&
-                  'Select a chapter and enter a section name'}
-                {sessionType === 'continue' && !selectedChapterId &&
-                  'Select a chapter to continue'}
+                {sessionType === "new_chapter" &&
+                  !newChapterTitle.trim() &&
+                  "Enter a title for your new chapter"}
+                {sessionType === "section" &&
+                  (!selectedChapterId || !sectionName.trim()) &&
+                  "Select a chapter and enter a section name"}
+                {sessionType === "continue" &&
+                  !selectedChapterId &&
+                  "Select a chapter to continue"}
               </div>
             )}
           </motion.div>
@@ -359,23 +383,39 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                     {selectedStory?.title}
                   </h3>
                   <div className="text-sm text-gray-600">
-                    {sessionType === 'new_chapter' && (
+                    {sessionType === "new_chapter" && (
                       <span>📝 New Chapter: {newChapterTitle}</span>
                     )}
-                    {sessionType === 'section' && (
-                      <span>📄 Section: {sectionName}
+                    {sessionType === "section" && (
+                      <span>
+                        📄 Section: {sectionName}
                         {selectedChapterId && (
-                          <span className="text-gray-500"> in {availableChapters.find(c => c.id === selectedChapterId)?.title}</span>
+                          <span className="text-gray-500">
+                            {" "}
+                            in{" "}
+                            {
+                              availableChapters.find(
+                                (c) => c.id === selectedChapterId,
+                              )?.title
+                            }
+                          </span>
                         )}
                       </span>
                     )}
-                    {sessionType === 'continue' && selectedChapterId && (
-                      <span>⏯️ Continuing: {availableChapters.find(c => c.id === selectedChapterId)?.title}</span>
+                    {sessionType === "continue" && selectedChapterId && (
+                      <span>
+                        ⏯️ Continuing:{" "}
+                        {
+                          availableChapters.find(
+                            (c) => c.id === selectedChapterId,
+                          )?.title
+                        }
+                      </span>
                     )}
                   </div>
                 </div>
                 <span className="text-sm text-gray-500">
-                  {format(currentSession.startTime, 'HH:mm')}
+                  {format(currentSession.startTime, "HH:mm")}
                 </span>
               </div>
             </div>
@@ -385,9 +425,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
               <div className="text-4xl font-bold text-gray-800 mb-2">
                 {formatTime(sessionTime)}
               </div>
-              <div className="text-sm text-gray-500">
-                Session Time
-              </div>
+              <div className="text-sm text-gray-500">Session Time</div>
             </div>
 
             {/* Word Progress */}
@@ -395,7 +433,8 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Progress</span>
                 <span>
-                  {currentSession.wordsWritten} / {currentSession.wordTarget} words
+                  {currentSession.wordsWritten} / {currentSession.wordTarget}{" "}
+                  words
                 </span>
               </div>
 
@@ -433,8 +472,7 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 <div className="text-2xl font-bold text-purple-600">
                   {currentSession.wordTarget - currentSession.wordsWritten > 0
                     ? currentSession.wordTarget - currentSession.wordsWritten
-                    : 0
-                  }
+                    : 0}
                 </div>
                 <div className="text-xs text-gray-500">Remaining</div>
               </div>
@@ -446,11 +484,11 @@ export const WritingSession: React.FC<WritingSessionProps> = ({ onClose, classNa
                 onClick={isTrackingSession ? pauseSession : resumeSession}
                 className={`flex-1 py-2 px-4 rounded-md font-medium ${
                   isTrackingSession
-                    ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                    : 'bg-green-500 text-white hover:bg-green-600'
+                    ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                    : "bg-green-500 text-white hover:bg-green-600"
                 }`}
               >
-                {isTrackingSession ? 'Pause' : 'Resume'}
+                {isTrackingSession ? "Pause" : "Resume"}
               </button>
 
               <button

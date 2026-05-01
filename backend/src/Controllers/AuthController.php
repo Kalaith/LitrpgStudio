@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -66,6 +67,58 @@ final class AuthController
                 'success' => false,
                 'message' => 'guest_user_id must be a guest account id',
                 'error' => 'Invalid guest_user_id',
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $guestToken = trim((string) ($payload['guest_token'] ?? ''));
+        if ($guestToken === '') {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'message' => 'guest_token is required',
+                'error' => 'Guest ownership proof is required',
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $jwtSecret = trim((string) ($_ENV['JWT_SECRET'] ?? ''));
+        if ($jwtSecret === '') {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'message' => 'Guest linking is unavailable',
+                'error' => 'JWT secret is not configured',
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+
+        try {
+            $guestClaims = JWT::decode($guestToken, new Key($jwtSecret, 'HS256'));
+        } catch (\Throwable $e) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'message' => 'Guest session could not be verified',
+                'error' => 'Invalid guest token',
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $tokenGuestUserId = $this->extractClaimString($guestClaims, 'user_id') ?? $this->extractClaimString($guestClaims, 'sub');
+        $tokenAuthType = $this->extractClaimString($guestClaims, 'auth_type') ?? '';
+        $tokenRole = $this->extractClaimString($guestClaims, 'role') ?? '';
+        $tokenIsGuest = $this->extractClaimBool($guestClaims, 'is_guest')
+            || $tokenAuthType === 'guest'
+            || $tokenRole === 'guest'
+            || ($tokenGuestUserId !== null && str_starts_with($tokenGuestUserId, 'guest_'));
+
+        if ($tokenGuestUserId !== $guestUserId || !$tokenIsGuest) {
+            $response->getBody()->write(json_encode([
+                'success' => false,
+                'message' => 'Guest session does not match the requested account link',
+                'error' => 'Invalid guest ownership proof',
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
@@ -178,6 +231,43 @@ final class AuthController
     private function generateId(): string
     {
         return bin2hex(random_bytes(16));
+    }
+
+    private function extractClaimString(object $claims, string $key): ?string
+    {
+        if (!isset($claims->{$key})) {
+            return null;
+        }
+
+        $value = $claims->{$key};
+        if (is_string($value) || is_numeric($value)) {
+            $value = trim((string) $value);
+            return $value !== '' ? $value : null;
+        }
+
+        return null;
+    }
+
+    private function extractClaimBool(object $claims, string $key): bool
+    {
+        if (!isset($claims->{$key})) {
+            return false;
+        }
+
+        $value = $claims->{$key};
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower(trim($value)), ['1', 'true', 'yes'], true);
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value === 1;
+        }
+
+        return false;
     }
 
     public function currentUser(Request $request, Response $response): Response

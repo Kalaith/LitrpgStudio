@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   MapPin,
@@ -15,13 +15,13 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronRight,
-  BookOpen
-} from 'lucide-react';
-import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import { useStoryStore } from '../stores/storyStore';
-import type { BaseEntity } from '../types/entityRegistry';
-import type { TimelineEvent } from '../types/unifiedTimeline';
+  BookOpen,
+} from "lucide-react";
+import { useEntityRegistryStore } from "../stores/entityRegistryStore";
+import { useUnifiedTimelineStore } from "../stores/unifiedTimelineStore";
+import { useStoryStore } from "../stores/storyStore";
+import type { BaseEntity } from "../types/entityRegistry";
+import type { TimelineEvent } from "../types/unifiedTimeline";
 
 interface ContextSidebarProps {
   currentStoryId?: string;
@@ -41,7 +41,7 @@ interface ContextSection {
 }
 
 interface ConsistencyIssue {
-  type: 'warning' | 'info';
+  type: "warning" | "info";
   message: string;
   entityId: string;
 }
@@ -50,23 +50,28 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   currentStoryId,
   currentChapterId,
   currentPosition = 0,
-  className = '',
+  className = "",
   onEntityClick,
-  onEventClick
+  onEventClick,
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['characters', 'locations', 'timeline'])
+    new Set(["characters", "locations", "timeline"]),
   );
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showConsistencyAlerts, setShowConsistencyAlerts] = useState(true);
 
-  const { searchEntities, getRelationshipsForEntity } = useEntityRegistryStore();
+  const { searchEntities, getRelationshipsForEntity } =
+    useEntityRegistryStore();
   const { searchEvents } = useUnifiedTimelineStore();
   const { stories, currentStory } = useStoryStore();
 
   // Get current story context
-  const activeStory = currentStoryId ? stories.find(s => s.id === currentStoryId) : currentStory;
-  const activeChapter = activeStory?.chapters?.find(c => c.id === currentChapterId);
+  const activeStory = currentStoryId
+    ? stories.find((s) => s.id === currentStoryId)
+    : currentStory;
+  const activeChapter = activeStory?.chapters?.find(
+    (c) => c.id === currentChapterId,
+  );
 
   // Context-aware entity filtering
   const contextualEntities = useMemo(() => {
@@ -75,60 +80,65 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
     // Get entities related to current story
     const storyEntities = searchEntities({
       filter: {
-        hasRelationshipWith: activeStory.id
+        hasRelationshipWith: activeStory.id,
       },
       includeRelationships: true,
-      limit: 50
+      limit: 50,
     });
 
     // If we have chapter context, prioritize chapter-related entities
     if (activeChapter) {
       const chapterEntities = searchEntities({
         filter: {
-          hasRelationshipWith: activeChapter.id
+          hasRelationshipWith: activeChapter.id,
         },
-        includeRelationships: true
+        includeRelationships: true,
       });
 
       // Merge and prioritize chapter entities
       const entityMap = new Map();
-      storyEntities.forEach(result => {
-        entityMap.set(result.entity.id, { ...result, relevance: result.relevanceScore });
+      storyEntities.forEach((result) => {
+        entityMap.set(result.entity.id, {
+          ...result,
+          relevance: result.relevanceScore,
+        });
       });
 
-      chapterEntities.forEach(result => {
+      chapterEntities.forEach((result) => {
         const existing = entityMap.get(result.entity.id);
         entityMap.set(result.entity.id, {
           ...result,
-          relevance: (existing?.relevance || 0) + result.relevanceScore + 5 // Chapter bonus
+          relevance: (existing?.relevance || 0) + result.relevanceScore + 5, // Chapter bonus
         });
       });
 
       return Array.from(entityMap.values())
         .sort((a, b) => b.relevance - a.relevance)
-        .map(r => r.entity);
+        .map((r) => r.entity);
     }
 
-    return storyEntities.map(r => r.entity);
+    return storyEntities.map((r) => r.entity);
   }, [activeStory, activeChapter, searchEntities]);
 
   // Context-aware timeline events
   const contextualEvents = useMemo(() => {
     if (!activeStory) return [];
 
-    let events = searchEvents('', {
+    let events = searchEvents("", {
       entities: [activeStory.id],
-      scopes: ['story', 'character']
+      scopes: ["story", "character"],
     });
 
     // If we have chapter context, filter to relevant timeline
     if (activeChapter) {
-      events = events.filter(event =>
-        !event.storyContext?.chapterId ||
-        event.storyContext.chapterId === activeChapter.id ||
-        // Include events that happen before/during this chapter
-        (event.timestamp.storyChapter && activeChapter.order &&
-         event.timestamp.storyChapter <= activeChapter.order)
+      events = events.filter(
+        (event) =>
+          !event.storyContext?.chapterId ||
+          event.storyContext.chapterId === activeChapter.id ||
+          // Include events that happen before/during this chapter
+          (event.timestamp.storyChapter &&
+            activeChapter.order &&
+            event.timestamp.storyChapter <= activeChapter.order),
       );
     }
 
@@ -139,50 +149,51 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   const contextSections: ContextSection[] = useMemo(() => {
     const sections: ContextSection[] = [
       {
-        id: 'characters',
-        title: 'Characters',
+        id: "characters",
+        title: "Characters",
         icon: Users,
-        items: contextualEntities.filter(e => e.type === 'character'),
-        expanded: expandedSections.has('characters')
+        items: contextualEntities.filter((e) => e.type === "character"),
+        expanded: expandedSections.has("characters"),
       },
       {
-        id: 'locations',
-        title: 'Locations',
+        id: "locations",
+        title: "Locations",
         icon: MapPin,
-        items: contextualEntities.filter(e => e.type === 'location'),
-        expanded: expandedSections.has('locations')
+        items: contextualEntities.filter((e) => e.type === "location"),
+        expanded: expandedSections.has("locations"),
       },
       {
-        id: 'items',
-        title: 'Items & Equipment',
+        id: "items",
+        title: "Items & Equipment",
         icon: Package,
-        items: contextualEntities.filter(e => e.type === 'item'),
-        expanded: expandedSections.has('items')
+        items: contextualEntities.filter((e) => e.type === "item"),
+        expanded: expandedSections.has("items"),
       },
       {
-        id: 'skills',
-        title: 'Skills & Abilities',
+        id: "skills",
+        title: "Skills & Abilities",
         icon: Zap,
-        items: contextualEntities.filter(e => e.type === 'skill'),
-        expanded: expandedSections.has('skills')
+        items: contextualEntities.filter((e) => e.type === "skill"),
+        expanded: expandedSections.has("skills"),
       },
       {
-        id: 'timeline',
-        title: 'Recent Events',
+        id: "timeline",
+        title: "Recent Events",
         icon: Clock,
         items: contextualEvents,
-        expanded: expandedSections.has('timeline')
-      }
+        expanded: expandedSections.has("timeline"),
+      },
     ];
 
     // Filter out empty sections and apply search
-    return sections.filter(section => {
+    return sections.filter((section) => {
       if (section.items.length === 0) return false;
 
       if (searchQuery) {
-        section.items = section.items.filter(item =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        section.items = section.items.filter(
+          (item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.description?.toLowerCase().includes(searchQuery.toLowerCase()),
         );
         return section.items.length > 0;
       }
@@ -198,16 +209,18 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
     const issues: ConsistencyIssue[] = [];
 
     // Check for character location consistency
-    const characters = contextualEntities.filter(e => e.type === 'character');
-    characters.forEach(character => {
+    const characters = contextualEntities.filter((e) => e.type === "character");
+    characters.forEach((character) => {
       const relationships = getRelationshipsForEntity(character.id);
-      const locationRels = relationships.filter(r => r.relationshipType === 'located_in');
+      const locationRels = relationships.filter(
+        (r) => r.relationshipType === "located_in",
+      );
 
       if (locationRels.length > 1) {
         issues.push({
-          type: 'warning' as const,
+          type: "warning" as const,
           message: `${character.name} appears to be in multiple locations`,
-          entityId: character.id
+          entityId: character.id,
         });
       }
     });
@@ -218,19 +231,26 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
         const prev = contextualEvents[i - 1];
         const current = contextualEvents[i];
 
-        if (prev.timestamp.storyDay && current.timestamp.storyDay &&
-            prev.timestamp.storyDay < current.timestamp.storyDay) {
+        if (
+          prev.timestamp.storyDay &&
+          current.timestamp.storyDay &&
+          prev.timestamp.storyDay < current.timestamp.storyDay
+        ) {
           // Check if any characters are in impossible situations
-          const prevEntities = prev.involvedEntities.map(e => e.id);
-          const currentEntities = current.involvedEntities.map(e => e.id);
-          const sharedEntities = prevEntities.filter(id => currentEntities.includes(id));
+          const prevEntities = prev.involvedEntities.map((e) => e.id);
+          const currentEntities = current.involvedEntities.map((e) => e.id);
+          const sharedEntities = prevEntities.filter((id) =>
+            currentEntities.includes(id),
+          );
 
-          if (sharedEntities.length > 0 &&
-              current.timestamp.storyDay - prev.timestamp.storyDay < 1) {
+          if (
+            sharedEntities.length > 0 &&
+            current.timestamp.storyDay - prev.timestamp.storyDay < 1
+          ) {
             issues.push({
-              type: 'info' as const,
+              type: "info" as const,
               message: `Quick succession of events involving shared characters`,
-              entityId: sharedEntities[0]
+              entityId: sharedEntities[0],
             });
           }
         }
@@ -238,10 +258,16 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
     }
 
     return issues.slice(0, 5); // Limit alerts
-  }, [contextualEntities, contextualEvents, activeStory, showConsistencyAlerts, getRelationshipsForEntity]);
+  }, [
+    contextualEntities,
+    contextualEvents,
+    activeStory,
+    showConsistencyAlerts,
+    getRelationshipsForEntity,
+  ]);
 
   const toggleSection = useCallback((sectionId: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(sectionId)) {
         newSet.delete(sectionId);
@@ -252,15 +278,18 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
     });
   }, []);
 
-  const handleEntityClick = useCallback((item: BaseEntity | TimelineEvent) => {
-    if ('type' in item && item.type) {
-      // It's an entity
-      onEntityClick?.(item as BaseEntity);
-    } else {
-      // It's a timeline event
-      onEventClick?.(item as TimelineEvent);
-    }
-  }, [onEntityClick, onEventClick]);
+  const handleEntityClick = useCallback(
+    (item: BaseEntity | TimelineEvent) => {
+      if ("type" in item && item.type) {
+        // It's an entity
+        onEntityClick?.(item as BaseEntity);
+      } else {
+        // It's a timeline event
+        onEventClick?.(item as TimelineEvent);
+      }
+    },
+    [onEntityClick, onEventClick],
+  );
 
   const EntityItem = ({ entity }: { entity: BaseEntity }) => (
     <motion.div
@@ -280,7 +309,10 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
           </div>
         )}
       </div>
-      <ExternalLink size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <ExternalLink
+        size={14}
+        className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+      />
     </motion.div>
   );
 
@@ -291,27 +323,39 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
       className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group"
       onClick={() => handleEntityClick(event)}
     >
-      <div className={`w-2 h-2 rounded-full ${
-        event.plotImpact?.importance === 5 ? 'bg-red-500' :
-        event.plotImpact?.importance === 4 ? 'bg-orange-500' :
-        event.plotImpact?.importance === 3 ? 'bg-yellow-500' :
-        'bg-green-500'
-      }`}></div>
+      <div
+        className={`w-2 h-2 rounded-full ${
+          event.plotImpact?.importance === 5
+            ? "bg-red-500"
+            : event.plotImpact?.importance === 4
+              ? "bg-orange-500"
+              : event.plotImpact?.importance === 3
+                ? "bg-yellow-500"
+                : "bg-green-500"
+        }`}
+      ></div>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {event.name}
         </div>
         <div className="text-xs text-gray-500 truncate">
-          {event.timestamp.storyDay ? `Day ${event.timestamp.storyDay}` : 'Timeline event'}
+          {event.timestamp.storyDay
+            ? `Day ${event.timestamp.storyDay}`
+            : "Timeline event"}
         </div>
       </div>
-      <Clock size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Clock
+        size={14}
+        className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+      />
     </motion.div>
   );
 
   if (!activeStory) {
     return (
-      <div className={`w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 ${className}`}>
+      <div
+        className={`w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 ${className}`}
+      >
         <div className="text-center text-gray-500 dark:text-gray-400">
           <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
           <p className="text-sm">Select a story to see relevant context</p>
@@ -321,11 +365,15 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
   }
 
   return (
-    <div className={`w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col ${className}`}>
+    <div
+      className={`w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col ${className}`}
+    >
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Writing Context</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            Writing Context
+          </h3>
           <button
             onClick={() => setShowConsistencyAlerts(!showConsistencyAlerts)}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -337,9 +385,7 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
         {/* Current Context Display */}
         <div className="text-xs text-gray-600 dark:text-gray-400 mb-3">
           <div className="font-medium">{activeStory.title}</div>
-          {activeChapter && (
-            <div>Chapter: {activeChapter.title}</div>
-          )}
+          {activeChapter && <div>Chapter: {activeChapter.title}</div>}
           {currentPosition > 0 && (
             <div>Position: ~{Math.floor(currentPosition / 250)} paragraphs</div>
           )}
@@ -370,16 +416,20 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
               <div
                 key={index}
                 className={`p-2 rounded text-xs ${
-                  issue.type === 'warning'
-                    ? 'bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
-                    : 'bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300'
+                  issue.type === "warning"
+                    ? "bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300"
+                    : "bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300"
                 }`}
               >
                 <div className="flex items-start">
-                  {issue.type === 'warning' ?
-                    <AlertTriangle size={12} className="mt-0.5 mr-1 flex-shrink-0" /> :
+                  {issue.type === "warning" ? (
+                    <AlertTriangle
+                      size={12}
+                      className="mt-0.5 mr-1 flex-shrink-0"
+                    />
+                  ) : (
                     <Info size={12} className="mt-0.5 mr-1 flex-shrink-0" />
-                  }
+                  )}
                   <span>{issue.message}</span>
                 </div>
               </div>
@@ -391,7 +441,10 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
       {/* Context Sections */}
       <div className="flex-1 overflow-y-auto">
         {contextSections.map((section) => (
-          <div key={section.id} className="border-b border-gray-200 dark:border-gray-700">
+          <div
+            key={section.id}
+            className="border-b border-gray-200 dark:border-gray-700"
+          >
             <button
               onClick={() => toggleSection(section.id)}
               className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
@@ -406,10 +459,11 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
                     {section.items.length}
                   </span>
                 </div>
-                {section.expanded ?
-                  <ChevronDown size={16} className="text-gray-400" /> :
+                {section.expanded ? (
+                  <ChevronDown size={16} className="text-gray-400" />
+                ) : (
                   <ChevronRight size={16} className="text-gray-400" />
-                }
+                )}
               </div>
             </button>
 
@@ -417,7 +471,7 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
               {section.expanded && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
+                  animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
@@ -425,12 +479,14 @@ export const ContextSidebar: React.FC<ContextSidebarProps> = ({
                   <div className="px-4 pb-4 space-y-1">
                     {section.items.length === 0 ? (
                       <div className="text-xs text-gray-500 italic py-2">
-                        {searchQuery ? 'No matching items' : 'No items in this category'}
+                        {searchQuery
+                          ? "No matching items"
+                          : "No items in this category"}
                       </div>
                     ) : (
                       section.items.map((item) => (
                         <div key={item.id}>
-                          {'type' in item ? (
+                          {"type" in item ? (
                             <EntityItem entity={item as BaseEntity} />
                           ) : (
                             <EventItem event={item as TimelineEvent} />

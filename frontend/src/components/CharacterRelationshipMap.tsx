@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
-import { motion } from 'framer-motion';
-import type { Character } from '../types/character';
-import { RELATIONSHIP_COLORS } from '../constants';
+import { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
+import { motion } from "framer-motion";
+import type { Character } from "../types/character";
+import { RELATIONSHIP_COLORS } from "../constants";
 
 interface RelationshipNode extends d3.SimulationNodeDatum {
   id: string;
@@ -14,7 +14,7 @@ interface RelationshipNode extends d3.SimulationNodeDatum {
 interface RelationshipLink extends d3.SimulationLinkDatum<RelationshipNode> {
   source: RelationshipNode;
   target: RelationshipNode;
-  type: 'ally' | 'enemy' | 'neutral' | 'romantic' | 'family';
+  type: "ally" | "enemy" | "neutral" | "romantic" | "family";
   strength: number;
 }
 
@@ -23,7 +23,7 @@ interface CharacterRelationshipMapProps {
   relationships?: Array<{
     sourceId: string;
     targetId: string;
-    type: 'ally' | 'enemy' | 'neutral' | 'romantic' | 'family';
+    type: "ally" | "enemy" | "neutral" | "romantic" | "family";
     strength: number;
   }>;
   onNodeClick?: (character: Character) => void;
@@ -32,7 +32,7 @@ interface CharacterRelationshipMapProps {
 export default function CharacterRelationshipMap({
   characters,
   relationships = [],
-  onNodeClick
+  onNodeClick,
 }: CharacterRelationshipMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedNode, setSelectedNode] = useState<Character | null>(null);
@@ -49,26 +49,26 @@ export default function CharacterRelationshipMap({
     const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
     // Create nodes from characters
-    const nodes: RelationshipNode[] = characters.map(character => ({
+    const nodes: RelationshipNode[] = characters.map((character) => ({
       id: character.id,
       name: character.name,
       character,
       level: character.level,
       x: Math.random() * (width - 2 * margin.left) + margin.left,
-      y: Math.random() * (height - 2 * margin.top) + margin.top
+      y: Math.random() * (height - 2 * margin.top) + margin.top,
     }));
 
     // Create links from relationships
     const links: RelationshipLink[] = relationships
-      .map(rel => {
-        const source = nodes.find(n => n.id === rel.sourceId);
-        const target = nodes.find(n => n.id === rel.targetId);
+      .map((rel) => {
+        const source = nodes.find((n) => n.id === rel.sourceId);
+        const target = nodes.find((n) => n.id === rel.targetId);
         if (source && target) {
           return {
             source,
             target,
             type: rel.type,
-            strength: rel.strength
+            strength: rel.strength,
           };
         }
         return null;
@@ -76,10 +76,15 @@ export default function CharacterRelationshipMap({
       .filter(Boolean) as RelationshipLink[];
 
     // Set up the simulation
-    const simulation = d3.forceSimulation<RelationshipNode>(nodes)
-      .force("link", d3.forceLink<RelationshipNode, RelationshipLink>(links)
-        .id(d => d.id)
-        .distance(d => 100 - d.strength * 20))
+    const simulation = d3
+      .forceSimulation<RelationshipNode>(nodes)
+      .force(
+        "link",
+        d3
+          .forceLink<RelationshipNode, RelationshipLink>(links)
+          .id((d) => d.id)
+          .distance((d) => 100 - d.strength * 20),
+      )
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(30));
@@ -91,7 +96,8 @@ export default function CharacterRelationshipMap({
     const container = svg.append("g");
 
     // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
@@ -100,31 +106,39 @@ export default function CharacterRelationshipMap({
     svg.call(zoom);
 
     // Create links
-    const link = container.append("g")
+    const link = container
+      .append("g")
       .attr("class", "links")
       .selectAll("line")
       .data(links)
-      .enter().append("line")
-      .attr("stroke", d => relationshipColors[d.type])
+      .enter()
+      .append("line")
+      .attr("stroke", (d) => relationshipColors[d.type])
       .attr("stroke-opacity", 0.6)
-      .attr("stroke-width", d => Math.sqrt(d.strength) * 2);
+      .attr("stroke-width", (d) => Math.sqrt(d.strength) * 2);
 
     // Create nodes
-    const node = container.append("g")
+    const node = container
+      .append("g")
       .attr("class", "nodes")
       .selectAll("g")
       .data(nodes)
-      .enter().append("g")
+      .enter()
+      .append("g")
       .attr("class", "node")
-      .call(d3.drag<SVGGElement, RelationshipNode>()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
+      .call(
+        d3
+          .drag<SVGGElement, RelationshipNode>()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended),
+      );
 
     // Add circles for nodes
-    node.append("circle")
-      .attr("r", d => 5 + d.level * 2)
-      .attr("fill", d => {
+    node
+      .append("circle")
+      .attr("r", (d) => 5 + d.level * 2)
+      .attr("fill", (d) => {
         const hue = (d.level * 30) % 360;
         return `hsl(${hue}, 70%, 50%)`;
       })
@@ -132,20 +146,22 @@ export default function CharacterRelationshipMap({
       .attr("stroke-width", 2);
 
     // Add labels
-    node.append("text")
-      .text(d => d.name)
+    node
+      .append("text")
+      .text((d) => d.name)
       .attr("x", 0)
-      .attr("y", d => -(5 + d.level * 2) - 5)
+      .attr("y", (d) => -(5 + d.level * 2) - 5)
       .attr("text-anchor", "middle")
       .attr("font-size", "12px")
       .attr("font-weight", "bold")
       .attr("fill", "#374151");
 
     // Add level indicators
-    node.append("text")
-      .text(d => `Lv.${d.level}`)
+    node
+      .append("text")
+      .text((d) => `Lv.${d.level}`)
       .attr("x", 0)
-      .attr("y", d => (5 + d.level * 2) + 15)
+      .attr("y", (d) => 5 + d.level * 2 + 15)
       .attr("text-anchor", "middle")
       .attr("font-size", "10px")
       .attr("fill", "#6B7280");
@@ -159,7 +175,9 @@ export default function CharacterRelationshipMap({
     });
 
     // Tooltip
-    const tooltip = d3.select("body").append("div")
+    const tooltip = d3
+      .select("body")
+      .append("div")
       .attr("class", "tooltip")
       .style("position", "absolute")
       .style("visibility", "hidden")
@@ -171,47 +189,57 @@ export default function CharacterRelationshipMap({
       .style("pointer-events", "none")
       .style("z-index", "1000");
 
-    node.on("mouseover", (_event, d) => {
-      tooltip.style("visibility", "visible")
-        .html(`
+    node
+      .on("mouseover", (_event, d) => {
+        tooltip.style("visibility", "visible").html(`
           <strong>${d.name}</strong><br/>
           Level: ${d.level}<br/>
           Class: ${d.character.class}<br/>
           Race: ${d.character.race}
         `);
-    })
-    .on("mousemove", (event) => {
-      tooltip.style("top", (event.pageY - 10) + "px")
-        .style("left", (event.pageX + 10) + "px");
-    })
-    .on("mouseout", () => {
-      tooltip.style("visibility", "hidden");
-    });
+      })
+      .on("mousemove", (event) => {
+        tooltip
+          .style("top", event.pageY - 10 + "px")
+          .style("left", event.pageX + 10 + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+      });
 
     // Update positions on tick
     simulation.on("tick", () => {
       link
-        .attr("x1", d => (d.source as RelationshipNode).x!)
-        .attr("y1", d => (d.source as RelationshipNode).y!)
-        .attr("x2", d => (d.target as RelationshipNode).x!)
-        .attr("y2", d => (d.target as RelationshipNode).y!);
+        .attr("x1", (d) => (d.source as RelationshipNode).x!)
+        .attr("y1", (d) => (d.source as RelationshipNode).y!)
+        .attr("x2", (d) => (d.target as RelationshipNode).x!)
+        .attr("y2", (d) => (d.target as RelationshipNode).y!);
 
-      node.attr("transform", d => `translate(${d.x},${d.y})`);
+      node.attr("transform", (d) => `translate(${d.x},${d.y})`);
     });
 
     // Drag functions with proper typing
-    function dragstarted(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
+    function dragstarted(
+      event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>,
+      d: RelationshipNode,
+    ) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
     }
 
-    function dragged(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
+    function dragged(
+      event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>,
+      d: RelationshipNode,
+    ) {
       d.fx = event.x;
       d.fy = event.y;
     }
 
-    function dragended(event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>, d: RelationshipNode) {
+    function dragended(
+      event: d3.D3DragEvent<SVGGElement, RelationshipNode, RelationshipNode>,
+      d: RelationshipNode,
+    ) {
       if (!event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;
@@ -232,7 +260,7 @@ export default function CharacterRelationshipMap({
               onClick={() => setShowLegend(!showLegend)}
               className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              {showLegend ? 'Hide' : 'Show'} Legend
+              {showLegend ? "Hide" : "Show"} Legend
             </button>
           </div>
         </div>
@@ -254,11 +282,11 @@ export default function CharacterRelationshipMap({
           <h4 className="font-semibold mb-3">Relationship Types</h4>
           <div className="space-y-2">
             {[
-              { type: 'ally', color: '#10B981', label: 'Ally' },
-              { type: 'enemy', color: '#EF4444', label: 'Enemy' },
-              { type: 'neutral', color: '#6B7280', label: 'Neutral' },
-              { type: 'romantic', color: '#F59E0B', label: 'Romantic' },
-              { type: 'family', color: '#8B5CF6', label: 'Family' },
+              { type: "ally", color: "#10B981", label: "Ally" },
+              { type: "enemy", color: "#EF4444", label: "Enemy" },
+              { type: "neutral", color: "#6B7280", label: "Neutral" },
+              { type: "romantic", color: "#F59E0B", label: "Romantic" },
+              { type: "family", color: "#8B5CF6", label: "Family" },
             ].map(({ type, color, label }) => (
               <div key={type} className="flex items-center">
                 <div
@@ -274,10 +302,18 @@ export default function CharacterRelationshipMap({
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
               <h4 className="font-semibold mb-2">Selected Character</h4>
               <div className="text-sm space-y-1">
-                <p><strong>Name:</strong> {selectedNode.name}</p>
-                <p><strong>Level:</strong> {selectedNode.level}</p>
-                <p><strong>Class:</strong> {selectedNode.class}</p>
-                <p><strong>Race:</strong> {selectedNode.race}</p>
+                <p>
+                  <strong>Name:</strong> {selectedNode.name}
+                </p>
+                <p>
+                  <strong>Level:</strong> {selectedNode.level}
+                </p>
+                <p>
+                  <strong>Class:</strong> {selectedNode.class}
+                </p>
+                <p>
+                  <strong>Race:</strong> {selectedNode.race}
+                </p>
               </div>
             </div>
           )}

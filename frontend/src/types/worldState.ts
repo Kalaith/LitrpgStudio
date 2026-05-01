@@ -34,7 +34,7 @@ export interface LocationState {
   currentOccupants: string[];
   properties: Record<string, unknown>;
   accessibleFrom: string[];
-  timeOfDay?: 'dawn' | 'morning' | 'noon' | 'afternoon' | 'dusk' | 'night';
+  timeOfDay?: "dawn" | "morning" | "noon" | "afternoon" | "dusk" | "night";
   weather?: string;
   flags: Record<string, boolean>;
 }
@@ -42,7 +42,7 @@ export interface LocationState {
 export interface ItemState {
   itemId: string;
   name: string;
-  location: 'character' | 'location' | 'destroyed' | 'lost';
+  location: "character" | "location" | "destroyed" | "lost";
   ownerId?: string;
   locationId?: string;
   properties: Record<string, unknown>;
@@ -52,7 +52,7 @@ export interface ItemState {
 export interface EventState {
   eventId: string;
   name: string;
-  status: 'pending' | 'active' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "active" | "completed" | "failed" | "cancelled";
   startChapter?: number;
   endChapter?: number;
   participants: string[];
@@ -63,7 +63,7 @@ export interface EventState {
 export interface WorldProperty {
   key: string;
   value: unknown;
-  type: 'string' | 'number' | 'boolean' | 'object';
+  type: "string" | "number" | "boolean" | "object";
   description: string;
   lastChanged: Date;
   changeReason: string;
@@ -73,7 +73,7 @@ export interface StateChange {
   id: string;
   timestamp: Date;
   chapterNumber: number;
-  changeType: 'character' | 'location' | 'item' | 'event' | 'property';
+  changeType: "character" | "location" | "item" | "event" | "property";
   targetId: string;
   property: string;
   oldValue: unknown;
@@ -84,8 +84,8 @@ export interface StateChange {
 
 export interface ConsistencyResult {
   id: string;
-  type: 'error' | 'warning' | 'info';
-  category: 'character' | 'location' | 'item' | 'timeline' | 'logic';
+  type: "error" | "warning" | "info";
+  category: "character" | "location" | "item" | "timeline" | "logic";
   description: string;
   details: string;
   affectedElements: string[];
@@ -109,16 +109,16 @@ export interface ValidationRule {
 }
 
 export type CharacterStatus =
-  | 'alive'
-  | 'injured'
-  | 'unconscious'
-  | 'dead'
-  | 'missing'
-  | 'captured'
-  | 'sleeping'
-  | 'traveling'
-  | 'busy'
-  | 'available';
+  | "alive"
+  | "injured"
+  | "unconscious"
+  | "dead"
+  | "missing"
+  | "captured"
+  | "sleeping"
+  | "traveling"
+  | "busy"
+  | "available";
 
 export interface WorldStateSnapshot {
   worldState: WorldState;

@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   format,
   startOfWeek,
@@ -7,7 +7,7 @@ import {
   differenceInMinutes,
   parseISO,
   subDays,
-} from 'date-fns';
+} from "date-fns";
 import type {
   AnalyticsStore,
   WritingSession,
@@ -18,12 +18,12 @@ import type {
   ProductivityInsight,
   ChapterCompletionRate,
   TimeOfDayStats,
-} from '../types/analytics';
-import { useStoryStore } from './storyStore';
+} from "../types/analytics";
+import { useStoryStore } from "./storyStore";
 
 const generateId = () => crypto.randomUUID();
 
-const getDateString = (date: Date = new Date()) => format(date, 'yyyy-MM-dd');
+const getDateString = (date: Date = new Date()) => format(date, "yyyy-MM-dd");
 
 export const useAnalyticsStore = create<AnalyticsStore>()(
   persist(
@@ -34,7 +34,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       streak: {
         current: 0,
         longest: 0,
-        lastWritingDate: '',
+        lastWritingDate: "",
       },
       dailyStats: {},
       insights: [],
@@ -42,9 +42,17 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       currentSession: null,
 
       // Session Management
-      startSession: (storyId, chapterId, wordTarget = 500, sessionType, sessionContext) => {
+      startSession: (
+        storyId,
+        chapterId,
+        wordTarget = 500,
+        sessionType,
+        sessionContext,
+      ) => {
         const now = new Date();
-        const story = useStoryStore.getState().stories.find(s => s.id === storyId);
+        const story = useStoryStore
+          .getState()
+          .stories.find((s) => s.id === storyId);
         const initialWordCount = story?.wordCount || 0;
 
         const session: WritingSession = {
@@ -60,7 +68,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           isActive: true,
           date: getDateString(now),
           sessionType,
-          sessionContext
+          sessionContext,
         };
 
         set({
@@ -75,9 +83,15 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
 
         const now = new Date();
         const duration = differenceInMinutes(now, currentSession.startTime);
-        const story = useStoryStore.getState().stories.find(s => s.id === currentSession.storyId);
-        const finalWordCount = story?.wordCount || currentSession.initialWordCount;
-        const wordsWritten = Math.max(0, finalWordCount - currentSession.initialWordCount);
+        const story = useStoryStore
+          .getState()
+          .stories.find((s) => s.id === currentSession.storyId);
+        const finalWordCount =
+          story?.wordCount || currentSession.initialWordCount;
+        const wordsWritten = Math.max(
+          0,
+          finalWordCount - currentSession.initialWordCount,
+        );
 
         const completedSession: WritingSession = {
           ...currentSession,
@@ -88,7 +102,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           isActive: false,
         };
 
-        set(state => ({
+        set((state) => ({
           sessions: [...state.sessions, completedSession],
           currentSession: null,
           isTrackingSession: false,
@@ -100,10 +114,13 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       },
 
       updateSessionProgress: (currentWordCount) => {
-        set(state => {
+        set((state) => {
           if (!state.currentSession) return state;
 
-          const wordsWritten = Math.max(0, currentWordCount - state.currentSession.initialWordCount);
+          const wordsWritten = Math.max(
+            0,
+            currentWordCount - state.currentSession.initialWordCount,
+          );
           return {
             currentSession: {
               ...state.currentSession,
@@ -135,31 +152,31 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           createdAt: new Date(),
         };
 
-        set(state => ({
+        set((state) => ({
           goals: [...state.goals, goal],
         }));
       },
 
       updateGoal: (goalId, updates) => {
-        set(state => ({
-          goals: state.goals.map(goal =>
-            goal.id === goalId ? { ...goal, ...updates } : goal
+        set((state) => ({
+          goals: state.goals.map((goal) =>
+            goal.id === goalId ? { ...goal, ...updates } : goal,
           ),
         }));
       },
 
       deleteGoal: (goalId) => {
-        set(state => ({
-          goals: state.goals.filter(goal => goal.id !== goalId),
+        set((state) => ({
+          goals: state.goals.filter((goal) => goal.id !== goalId),
         }));
       },
 
       markGoalComplete: (goalId) => {
-        set(state => ({
-          goals: state.goals.map(goal =>
+        set((state) => ({
+          goals: state.goals.map((goal) =>
             goal.id === goalId
               ? { ...goal, completedAt: new Date(), isActive: false }
-              : goal
+              : goal,
           ),
         }));
       },
@@ -167,11 +184,16 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       // Analytics Calculation
       calculateDailyStats: (date) => {
         const { sessions } = get();
-        const daySessions = sessions.filter(s => s.date === date && !s.isActive);
+        const daySessions = sessions.filter(
+          (s) => s.date === date && !s.isActive,
+        );
 
         const stats: DailyWritingStats = {
           date,
-          wordsWritten: daySessions.reduce((total, s) => total + s.wordsWritten, 0),
+          wordsWritten: daySessions.reduce(
+            (total, s) => total + s.wordsWritten,
+            0,
+          ),
           sessionsCount: daySessions.length,
           totalMinutes: daySessions.reduce((total, s) => total + s.duration, 0),
           averageWPM: 0,
@@ -180,11 +202,13 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         };
 
         if (stats.totalMinutes > 0) {
-          stats.averageWPM = Math.round(stats.wordsWritten / (stats.totalMinutes / 60));
+          stats.averageWPM = Math.round(
+            stats.wordsWritten / (stats.totalMinutes / 60),
+          );
         }
 
         // Update daily stats cache
-        set(state => ({
+        set((state) => ({
           dailyStats: {
             ...state.dailyStats,
             [date]: stats,
@@ -197,53 +221,86 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       calculateWeeklyStats: (weekStart) => {
         const dailyStats: DailyWritingStats[] = [];
         for (let i = 0; i < 7; i++) {
-          const date = format(subDays(parseISO(weekStart), -i), 'yyyy-MM-dd');
+          const date = format(subDays(parseISO(weekStart), -i), "yyyy-MM-dd");
           dailyStats.push(get().calculateDailyStats(date));
         }
 
         const stats: WeeklyWritingStats = {
           weekStart,
-          wordsWritten: dailyStats.reduce((total, d) => total + d.wordsWritten, 0),
-          sessionsCount: dailyStats.reduce((total, d) => total + d.sessionsCount, 0),
-          totalMinutes: dailyStats.reduce((total, d) => total + d.totalMinutes, 0),
+          wordsWritten: dailyStats.reduce(
+            (total, d) => total + d.wordsWritten,
+            0,
+          ),
+          sessionsCount: dailyStats.reduce(
+            (total, d) => total + d.sessionsCount,
+            0,
+          ),
+          totalMinutes: dailyStats.reduce(
+            (total, d) => total + d.totalMinutes,
+            0,
+          ),
           averageWPM: 0,
-          goalsAchieved: dailyStats.reduce((total, d) => total + d.goalsAchieved, 0),
+          goalsAchieved: dailyStats.reduce(
+            (total, d) => total + d.goalsAchieved,
+            0,
+          ),
           dailyStats,
         };
 
         if (stats.totalMinutes > 0) {
-          stats.averageWPM = Math.round(stats.wordsWritten / (stats.totalMinutes / 60));
+          stats.averageWPM = Math.round(
+            stats.wordsWritten / (stats.totalMinutes / 60),
+          );
         }
 
         return stats;
       },
 
       calculateMonthlyStats: (month) => {
-        const monthStart = format(startOfMonth(parseISO(month + '-01')), 'yyyy-MM-dd');
+        const monthStart = format(
+          startOfMonth(parseISO(month + "-01")),
+          "yyyy-MM-dd",
+        );
         const weeklyStats: WeeklyWritingStats[] = [];
-        const currentWeek = startOfWeek(parseISO(monthStart), { weekStartsOn: 1 });
-        const monthEnd = parseISO(month + '-01');
+        const currentWeek = startOfWeek(parseISO(monthStart), {
+          weekStartsOn: 1,
+        });
+        const monthEnd = parseISO(month + "-01");
         monthEnd.setMonth(monthEnd.getMonth() + 1);
         monthEnd.setDate(0);
 
         while (currentWeek <= monthEnd) {
-          const weekStart = format(currentWeek, 'yyyy-MM-dd');
+          const weekStart = format(currentWeek, "yyyy-MM-dd");
           weeklyStats.push(get().calculateWeeklyStats(weekStart));
           currentWeek.setDate(currentWeek.getDate() + 7);
         }
 
         const stats: MonthlyWritingStats = {
           month,
-          wordsWritten: weeklyStats.reduce((total, w) => total + w.wordsWritten, 0),
-          sessionsCount: weeklyStats.reduce((total, w) => total + w.sessionsCount, 0),
-          totalMinutes: weeklyStats.reduce((total, w) => total + w.totalMinutes, 0),
+          wordsWritten: weeklyStats.reduce(
+            (total, w) => total + w.wordsWritten,
+            0,
+          ),
+          sessionsCount: weeklyStats.reduce(
+            (total, w) => total + w.sessionsCount,
+            0,
+          ),
+          totalMinutes: weeklyStats.reduce(
+            (total, w) => total + w.totalMinutes,
+            0,
+          ),
           averageWPM: 0,
-          goalsAchieved: weeklyStats.reduce((total, w) => total + w.goalsAchieved, 0),
+          goalsAchieved: weeklyStats.reduce(
+            (total, w) => total + w.goalsAchieved,
+            0,
+          ),
           weeklyStats,
         };
 
         if (stats.totalMinutes > 0) {
-          stats.averageWPM = Math.round(stats.wordsWritten / (stats.totalMinutes / 60));
+          stats.averageWPM = Math.round(
+            stats.wordsWritten / (stats.totalMinutes / 60),
+          );
         }
 
         return stats;
@@ -257,7 +314,10 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         const newStreak = { ...streak };
 
         if (writingDate === today) {
-          if (streak.lastWritingDate === yesterday || streak.lastWritingDate === today) {
+          if (
+            streak.lastWritingDate === yesterday ||
+            streak.lastWritingDate === today
+          ) {
             if (streak.lastWritingDate !== today) {
               newStreak.current = streak.current + 1;
             }
@@ -265,7 +325,10 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
             newStreak.current = 1;
           }
           newStreak.lastWritingDate = today;
-        } else if (writingDate === yesterday && streak.lastWritingDate !== yesterday) {
+        } else if (
+          writingDate === yesterday &&
+          streak.lastWritingDate !== yesterday
+        ) {
           newStreak.current = streak.current + 1;
           newStreak.lastWritingDate = yesterday;
         }
@@ -275,9 +338,14 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         }
 
         // Check if streak is broken
-        if (streak.lastWritingDate && streak.lastWritingDate !== today && streak.lastWritingDate !== yesterday) {
+        if (
+          streak.lastWritingDate &&
+          streak.lastWritingDate !== today &&
+          streak.lastWritingDate !== yesterday
+        ) {
           const lastWritingDateObj = parseISO(streak.lastWritingDate);
-          const daysSinceLastWriting = differenceInMinutes(new Date(), lastWritingDateObj) / (60 * 24);
+          const daysSinceLastWriting =
+            differenceInMinutes(new Date(), lastWritingDateObj) / (60 * 24);
 
           if (daysSinceLastWriting > 2) {
             newStreak.current = writingDate === today ? 1 : 0;
@@ -293,14 +361,15 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         const now = new Date();
 
         // Recent sessions for analysis
-        const recentSessions = sessions.filter(s => {
+        const recentSessions = sessions.filter((s) => {
           const sessionDate = parseISO(s.date);
           return differenceInMinutes(now, sessionDate) <= 30 * 24 * 60; // Last 30 days
         });
 
         // Peak hours insight
-        const hourlyStats: Record<number, { sessions: number; words: number }> = {};
-        recentSessions.forEach(session => {
+        const hourlyStats: Record<number, { sessions: number; words: number }> =
+          {};
+        recentSessions.forEach((session) => {
           const hour = session.startTime.getHours();
           if (!hourlyStats[hour]) {
             hourlyStats[hour] = { sessions: 0, words: 0 };
@@ -309,24 +378,27 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           hourlyStats[hour].words += session.wordsWritten;
         });
 
-        const peakHour = Object.entries(hourlyStats).reduce((peak, [hour, stats]) => {
-          const hourNum = parseInt(hour);
-          const productivity = stats.words / stats.sessions;
-          if (productivity > peak.productivity) {
-            return { hour: hourNum, productivity };
-          }
-          return peak;
-        }, { hour: 0, productivity: 0 });
+        const peakHour = Object.entries(hourlyStats).reduce(
+          (peak, [hour, stats]) => {
+            const hourNum = parseInt(hour);
+            const productivity = stats.words / stats.sessions;
+            if (productivity > peak.productivity) {
+              return { hour: hourNum, productivity };
+            }
+            return peak;
+          },
+          { hour: 0, productivity: 0 },
+        );
 
         if (peakHour.productivity > 0) {
           insights.push({
             id: generateId(),
-            type: 'peak_hours',
-            title: 'Peak Productivity Hour',
+            type: "peak_hours",
+            title: "Peak Productivity Hour",
             description: `You're most productive at ${peakHour.hour}:00 with an average of ${Math.round(peakHour.productivity)} words per session.`,
             value: `${peakHour.hour}:00`,
-            trend: 'stable',
-            period: 'monthly',
+            trend: "stable",
+            period: "monthly",
             date: now,
           });
         }
@@ -334,60 +406,70 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         // Streak analysis
         insights.push({
           id: generateId(),
-          type: 'streak_analysis',
-          title: 'Writing Streak',
+          type: "streak_analysis",
+          title: "Writing Streak",
           description: `Current streak: ${streak.current} days. Your longest streak was ${streak.longest} days.`,
           value: streak.current,
-          trend: streak.current > 0 ? 'up' : 'down',
-          period: 'daily',
+          trend: streak.current > 0 ? "up" : "down",
+          period: "daily",
           date: now,
         });
 
         // Goal achievement rate
-        const completedGoals = goals.filter(g => g.completedAt);
-        const achievementRate = goals.length > 0 ? (completedGoals.length / goals.length) * 100 : 0;
+        const completedGoals = goals.filter((g) => g.completedAt);
+        const achievementRate =
+          goals.length > 0 ? (completedGoals.length / goals.length) * 100 : 0;
 
         insights.push({
           id: generateId(),
-          type: 'goal_achievement',
-          title: 'Goal Achievement Rate',
+          type: "goal_achievement",
+          title: "Goal Achievement Rate",
           description: `You've completed ${completedGoals.length} out of ${goals.length} goals (${Math.round(achievementRate)}% success rate).`,
           value: `${Math.round(achievementRate)}%`,
-          trend: achievementRate >= 70 ? 'up' : achievementRate >= 40 ? 'stable' : 'down',
-          period: 'monthly',
+          trend:
+            achievementRate >= 70
+              ? "up"
+              : achievementRate >= 40
+                ? "stable"
+                : "down",
+          period: "monthly",
           date: now,
         });
 
         // Pace trend
-        const last7Days = recentSessions.filter(s => {
+        const last7Days = recentSessions.filter((s) => {
           const sessionDate = parseISO(s.date);
           return differenceInMinutes(now, sessionDate) <= 7 * 24 * 60;
         });
 
-        const prev7Days = sessions.filter(s => {
+        const prev7Days = sessions.filter((s) => {
           const sessionDate = parseISO(s.date);
           const daysDiff = differenceInMinutes(now, sessionDate) / (24 * 60);
           return daysDiff > 7 && daysDiff <= 14;
         });
 
-        const currentWeekAvg = last7Days.length > 0
-          ? last7Days.reduce((sum, s) => sum + s.wordsWritten, 0) / last7Days.length
-          : 0;
+        const currentWeekAvg =
+          last7Days.length > 0
+            ? last7Days.reduce((sum, s) => sum + s.wordsWritten, 0) /
+              last7Days.length
+            : 0;
 
-        const prevWeekAvg = prev7Days.length > 0
-          ? prev7Days.reduce((sum, s) => sum + s.wordsWritten, 0) / prev7Days.length
-          : 0;
+        const prevWeekAvg =
+          prev7Days.length > 0
+            ? prev7Days.reduce((sum, s) => sum + s.wordsWritten, 0) /
+              prev7Days.length
+            : 0;
 
         if (currentWeekAvg > 0 && prevWeekAvg > 0) {
           const change = ((currentWeekAvg - prevWeekAvg) / prevWeekAvg) * 100;
           insights.push({
             id: generateId(),
-            type: 'pace_trend',
-            title: 'Writing Pace Trend',
-            description: `Your average words per session ${change >= 0 ? 'increased' : 'decreased'} by ${Math.abs(Math.round(change))}% this week.`,
+            type: "pace_trend",
+            title: "Writing Pace Trend",
+            description: `Your average words per session ${change >= 0 ? "increased" : "decreased"} by ${Math.abs(Math.round(change))}% this week.`,
             value: Math.round(currentWeekAvg),
-            trend: change >= 5 ? 'up' : change <= -5 ? 'down' : 'stable',
-            period: 'weekly',
+            trend: change >= 5 ? "up" : change <= -5 ? "down" : "stable",
+            period: "weekly",
             date: now,
           });
         }
@@ -399,32 +481,43 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       // Data Retrieval
       getSessionsByDateRange: (startDate, endDate) => {
         const { sessions } = get();
-        return sessions.filter(s => s.date >= startDate && s.date <= endDate);
+        return sessions.filter((s) => s.date >= startDate && s.date <= endDate);
       },
 
       getWritingPaceData: () => {
         const { sessions } = get();
-        const completedSessions = sessions.filter(s => !s.isActive && s.duration > 0);
+        const completedSessions = sessions.filter(
+          (s) => !s.isActive && s.duration > 0,
+        );
 
-        const sessionsData = completedSessions.map(s => ({
+        const sessionsData = completedSessions.map((s) => ({
           date: s.date,
           wpm: Math.round(s.wordsWritten / (s.duration / 60)) || 0,
           duration: s.duration,
           wordsWritten: s.wordsWritten,
         }));
 
-        const averageWPM = sessionsData.length > 0
-          ? Math.round(sessionsData.reduce((sum, s) => sum + s.wpm, 0) / sessionsData.length)
-          : 0;
+        const averageWPM =
+          sessionsData.length > 0
+            ? Math.round(
+                sessionsData.reduce((sum, s) => sum + s.wpm, 0) /
+                  sessionsData.length,
+              )
+            : 0;
 
         const recentSessions = sessionsData.slice(-10);
-        const recentWPM = recentSessions.length > 0
-          ? Math.round(recentSessions.reduce((sum, s) => sum + s.wpm, 0) / recentSessions.length)
-          : 0;
+        const recentWPM =
+          recentSessions.length > 0
+            ? Math.round(
+                recentSessions.reduce((sum, s) => sum + s.wpm, 0) /
+                  recentSessions.length,
+              )
+            : 0;
 
-        const bestWPM = sessionsData.length > 0
-          ? Math.max(...sessionsData.map(s => s.wpm))
-          : 0;
+        const bestWPM =
+          sessionsData.length > 0
+            ? Math.max(...sessionsData.map((s) => s.wpm))
+            : 0;
 
         return {
           averageWPM,
@@ -438,17 +531,23 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         const stories = useStoryStore.getState().stories;
         const rates: ChapterCompletionRate[] = [];
 
-        stories.forEach(story => {
-          story.chapters.forEach(chapter => {
-            const targetWords = Math.round((story.targetWordCount || 50000) / story.chapters.length);
-            const completionPercentage = Math.min((chapter.wordCount / targetWords) * 100, 100);
+        stories.forEach((story) => {
+          story.chapters.forEach((chapter) => {
+            const targetWords = Math.round(
+              (story.targetWordCount || 50000) / story.chapters.length,
+            );
+            const completionPercentage = Math.min(
+              (chapter.wordCount / targetWords) * 100,
+              100,
+            );
 
             // Estimate time based on recent writing pace
             const paceData = get().getWritingPaceData();
             const remainingWords = Math.max(0, targetWords - chapter.wordCount);
-            const estimatedTimeToComplete = paceData.recentWPM > 0
-              ? remainingWords / (paceData.recentWPM * 60) // Convert to hours
-              : 0;
+            const estimatedTimeToComplete =
+              paceData.recentWPM > 0
+                ? remainingWords / (paceData.recentWPM * 60) // Convert to hours
+                : 0;
 
             rates.push({
               chapterId: chapter.id,
@@ -457,7 +556,8 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
               targetWords,
               currentWords: chapter.wordCount,
               completionPercentage: Math.round(completionPercentage),
-              estimatedTimeToComplete: Math.round(estimatedTimeToComplete * 10) / 10, // Round to 1 decimal
+              estimatedTimeToComplete:
+                Math.round(estimatedTimeToComplete * 10) / 10, // Round to 1 decimal
               lastUpdated: chapter.updatedAt,
             });
           });
@@ -481,7 +581,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           };
         }
 
-        sessions.forEach(session => {
+        sessions.forEach((session) => {
           if (!session.isActive && session.duration > 0) {
             const hour = session.startTime.getHours();
             const stats = hourlyStats[hour];
@@ -491,21 +591,26 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
 
             if (stats.sessionsCount > 0) {
               const totalMinutes = sessions
-                .filter(s => s.startTime.getHours() === hour && !s.isActive)
+                .filter((s) => s.startTime.getHours() === hour && !s.isActive)
                 .reduce((sum, s) => sum + s.duration, 0);
 
-              stats.averageWPM = totalMinutes > 0
-                ? Math.round(stats.wordsWritten / (totalMinutes / 60))
-                : 0;
+              stats.averageWPM =
+                totalMinutes > 0
+                  ? Math.round(stats.wordsWritten / (totalMinutes / 60))
+                  : 0;
             }
           }
         });
 
         // Calculate productivity scores (0-100 based on words written and session frequency)
-        const maxWords = Math.max(...Object.values(hourlyStats).map(s => s.wordsWritten));
-        const maxSessions = Math.max(...Object.values(hourlyStats).map(s => s.sessionsCount));
+        const maxWords = Math.max(
+          ...Object.values(hourlyStats).map((s) => s.wordsWritten),
+        );
+        const maxSessions = Math.max(
+          ...Object.values(hourlyStats).map((s) => s.sessionsCount),
+        );
 
-        Object.values(hourlyStats).forEach(stats => {
+        Object.values(hourlyStats).forEach((stats) => {
           if (maxWords > 0 && maxSessions > 0) {
             const wordScore = (stats.wordsWritten / maxWords) * 60;
             const sessionScore = (stats.sessionsCount / maxSessions) * 40;
@@ -519,30 +624,37 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       getTotalWordsWritten: () => {
         const { sessions } = get();
         return sessions
-          .filter(s => !s.isActive)
+          .filter((s) => !s.isActive)
           .reduce((total, s) => total + s.wordsWritten, 0);
       },
 
       getAverageSessionDuration: () => {
         const { sessions } = get();
-        const completedSessions = sessions.filter(s => !s.isActive && s.duration > 0);
+        const completedSessions = sessions.filter(
+          (s) => !s.isActive && s.duration > 0,
+        );
 
         if (completedSessions.length === 0) return 0;
 
         return Math.round(
-          completedSessions.reduce((sum, s) => sum + s.duration, 0) / completedSessions.length
+          completedSessions.reduce((sum, s) => sum + s.duration, 0) /
+            completedSessions.length,
         );
       },
 
       // Utility
       exportData: () => {
         const state = get();
-        return JSON.stringify({
-          sessions: state.sessions,
-          goals: state.goals,
-          streak: state.streak,
-          dailyStats: state.dailyStats,
-        }, null, 2);
+        return JSON.stringify(
+          {
+            sessions: state.sessions,
+            goals: state.goals,
+            streak: state.streak,
+            dailyStats: state.dailyStats,
+          },
+          null,
+          2,
+        );
       },
 
       importData: (data) => {
@@ -551,11 +663,15 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
           set({
             sessions: imported.sessions || [],
             goals: imported.goals || [],
-            streak: imported.streak || { current: 0, longest: 0, lastWritingDate: '' },
+            streak: imported.streak || {
+              current: 0,
+              longest: 0,
+              lastWritingDate: "",
+            },
             dailyStats: imported.dailyStats || {},
           });
         } catch (error) {
-          console.error('Failed to import analytics data:', error);
+          console.error("Failed to import analytics data:", error);
         }
       },
 
@@ -563,7 +679,7 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
         set({
           sessions: [],
           goals: [],
-          streak: { current: 0, longest: 0, lastWritingDate: '' },
+          streak: { current: 0, longest: 0, lastWritingDate: "" },
           dailyStats: {},
           insights: [],
           currentSession: null,
@@ -572,13 +688,13 @@ export const useAnalyticsStore = create<AnalyticsStore>()(
       },
     }),
     {
-      name: 'writers-analytics-storage',
+      name: "writers-analytics-storage",
       partialize: (state) => ({
         sessions: state.sessions,
         goals: state.goals,
         streak: state.streak,
         dailyStats: state.dailyStats,
       }),
-    }
-  )
+    },
+  ),
 );

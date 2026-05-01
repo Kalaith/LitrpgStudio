@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
   AlertTriangle,
@@ -18,17 +18,17 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronRight,
-  Wand2
-} from 'lucide-react';
-import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import { useStoryStore } from '../stores/storyStore';
-import { aiConsistencyService } from '../services/aiConsistencyService';
+  Wand2,
+} from "lucide-react";
+import { useEntityRegistryStore } from "../stores/entityRegistryStore";
+import { useUnifiedTimelineStore } from "../stores/unifiedTimelineStore";
+import { useStoryStore } from "../stores/storyStore";
+import { aiConsistencyService } from "../services/aiConsistencyService";
 import type {
   AIConsistencyIssue,
   WorldRule,
-  AIAnalysisContext
-} from '../services/aiConsistencyService';
+  AIAnalysisContext,
+} from "../services/aiConsistencyService";
 
 interface AIConsistencyPanelProps {
   content: string;
@@ -45,17 +45,17 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   chapterId,
   isEnabled = true,
   embedded = false,
-  className = ''
+  className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [autoAnalysis, setAutoAnalysis] = useState(!embedded);
   const [issues, setIssues] = useState<AIConsistencyIssue[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(
-    new Set(['critical', 'major', 'minor', 'suggestion'])
+    new Set(["critical", "major", "minor", "suggestion"]),
   );
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(['plot', 'character', 'world', 'timeline', 'logic'])
+    new Set(["plot", "character", "world", "timeline", "logic"]),
   );
   const [showSettings, setShowSettings] = useState(false);
   const [worldRules, setWorldRules] = useState<WorldRule[]>([]);
@@ -65,13 +65,16 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   const { stories, currentStory } = useStoryStore();
 
   // Get world context
-  const worldContext = useMemo(() => ({
-    entities: getAllEntities(),
-    relationships: getAllRelationships(),
-    timeline: getAllEvents(),
-    stories: stories,
-    rules: worldRules
-  }), [getAllEntities, getAllRelationships, getAllEvents, stories, worldRules]);
+  const worldContext = useMemo(
+    () => ({
+      entities: getAllEntities(),
+      relationships: getAllRelationships(),
+      timeline: getAllEvents(),
+      stories: stories,
+      rules: worldRules,
+    }),
+    [getAllEntities, getAllRelationships, getAllEvents, stories, worldRules],
+  );
 
   // Load world rules
   useEffect(() => {
@@ -98,13 +101,14 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
         targetContent: content,
         currentChapter: chapterId,
         currentStory: currentStory || undefined,
-        worldContext
+        worldContext,
       };
 
-      const detectedIssues = await aiConsistencyService.analyzeConsistency(analysisContext);
+      const detectedIssues =
+        await aiConsistencyService.analyzeConsistency(analysisContext);
       setIssues(detectedIssues);
     } catch (error) {
-      console.error('AI analysis failed:', error);
+      console.error("AI analysis failed:", error);
     } finally {
       setIsAnalyzing(false);
     }
@@ -112,16 +116,17 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
 
   // Filter issues by selected types and categories
   const filteredIssues = useMemo(() => {
-    return issues.filter(issue =>
-      selectedFilters.has(issue.type) &&
-      expandedCategories.has(issue.category)
+    return issues.filter(
+      (issue) =>
+        selectedFilters.has(issue.type) &&
+        expandedCategories.has(issue.category),
     );
   }, [issues, selectedFilters, expandedCategories]);
 
   // Group issues by category
   const groupedIssues = useMemo(() => {
     const groups: Record<string, AIConsistencyIssue[]> = {};
-    filteredIssues.forEach(issue => {
+    filteredIssues.forEach((issue) => {
       if (!groups[issue.category]) {
         groups[issue.category] = [];
       }
@@ -131,7 +136,7 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   }, [filteredIssues]);
 
   const toggleFilter = useCallback((filter: string) => {
-    setSelectedFilters(prev => {
+    setSelectedFilters((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(filter)) {
         newSet.delete(filter);
@@ -143,7 +148,7 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
   }, []);
 
   const toggleCategory = useCallback((category: string) => {
-    setExpandedCategories(prev => {
+    setExpandedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(category)) {
         newSet.delete(category);
@@ -154,48 +159,67 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
     });
   }, []);
 
-  const getIssueIcon = (type: AIConsistencyIssue['type']) => {
+  const getIssueIcon = (type: AIConsistencyIssue["type"]) => {
     switch (type) {
-      case 'critical': return AlertTriangle;
-      case 'major': return AlertTriangle;
-      case 'minor': return Info;
-      case 'suggestion': return Lightbulb;
-      default: return Info;
+      case "critical":
+        return AlertTriangle;
+      case "major":
+        return AlertTriangle;
+      case "minor":
+        return Info;
+      case "suggestion":
+        return Lightbulb;
+      default:
+        return Info;
     }
   };
 
-  const getIssueColor = (type: AIConsistencyIssue['type']) => {
+  const getIssueColor = (type: AIConsistencyIssue["type"]) => {
     switch (type) {
-      case 'critical': return 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
-      case 'major': return 'text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800';
-      case 'minor': return 'text-yellow-600 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
-      case 'suggestion': return 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
+      case "critical":
+        return "text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
+      case "major":
+        return "text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+      case "minor":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800";
+      case "suggestion":
+        return "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'plot': return TrendingUp;
-      case 'character': return Users;
-      case 'world': return MapPin;
-      case 'timeline': return Clock;
-      case 'logic': return Brain;
-      default: return Info;
+      case "plot":
+        return TrendingUp;
+      case "character":
+        return Users;
+      case "world":
+        return MapPin;
+      case "timeline":
+        return Clock;
+      case "logic":
+        return Brain;
+      default:
+        return Info;
     }
   };
 
-  const handleAutoFix = useCallback(async (issue: AIConsistencyIssue) => {
-    if (issue.autoFix) {
-      try {
-        await issue.autoFix();
-        // Refresh analysis after auto-fix
-        await runAnalysis();
-      } catch (error) {
-        console.error('Auto-fix failed:', error);
+  const handleAutoFix = useCallback(
+    async (issue: AIConsistencyIssue) => {
+      if (issue.autoFix) {
+        try {
+          await issue.autoFix();
+          // Refresh analysis after auto-fix
+          await runAnalysis();
+        } catch (error) {
+          console.error("Auto-fix failed:", error);
+        }
       }
-    }
-  }, [runAnalysis]);
+    },
+    [runAnalysis],
+  );
 
   if (!isEnabled) {
     return null;
@@ -217,9 +241,10 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
       initial={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 400 }}
       animate={embedded ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
       exit={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 400 }}
-      className={embedded
-        ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
-        : `fixed right-4 top-1/2 transform -translate-y-1/2 w-96 max-h-[80vh] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 flex flex-col ${className}`
+      className={
+        embedded
+          ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
+          : `fixed right-4 top-1/2 transform -translate-y-1/2 w-96 max-h-[80vh] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 flex flex-col ${className}`
       }
     >
       {/* Header */}
@@ -244,8 +269,8 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
             onClick={() => setAutoAnalysis(!autoAnalysis)}
             className={`p-1 rounded transition-colors ${
               autoAnalysis
-                ? 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                ? "text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30"
+                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             {autoAnalysis ? <Play size={14} /> : <Pause size={14} />}
@@ -272,7 +297,7 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
         {showSettings && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="border-b border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50"
           >
@@ -284,18 +309,26 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { key: 'critical', label: 'Critical', color: 'text-red-600' },
-                    { key: 'major', label: 'Major', color: 'text-orange-600' },
-                    { key: 'minor', label: 'Minor', color: 'text-yellow-600' },
-                    { key: 'suggestion', label: 'Suggestions', color: 'text-blue-600' }
-                  ].map(type => (
+                    {
+                      key: "critical",
+                      label: "Critical",
+                      color: "text-red-600",
+                    },
+                    { key: "major", label: "Major", color: "text-orange-600" },
+                    { key: "minor", label: "Minor", color: "text-yellow-600" },
+                    {
+                      key: "suggestion",
+                      label: "Suggestions",
+                      color: "text-blue-600",
+                    },
+                  ].map((type) => (
                     <button
                       key={type.key}
                       onClick={() => toggleFilter(type.key)}
                       className={`px-2 py-1 text-xs rounded transition-colors ${
                         selectedFilters.has(type.key)
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
+                          ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400"
                       }`}
                     >
                       {type.label}
@@ -307,7 +340,7 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
               {/* Manual Analysis */}
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Auto-analysis: {autoAnalysis ? 'On' : 'Off'}
+                  Auto-analysis: {autoAnalysis ? "On" : "Off"}
                 </span>
                 <button
                   onClick={runAnalysis}
@@ -347,7 +380,10 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
               const isExpanded = expandedCategories.has(category);
 
               return (
-                <div key={category} className="border border-gray-200 dark:border-gray-600 rounded-lg">
+                <div
+                  key={category}
+                  className="border border-gray-200 dark:border-gray-600 rounded-lg"
+                >
                   <button
                     onClick={() => toggleCategory(category)}
                     className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -361,17 +397,18 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
                         {categoryIssues.length}
                       </span>
                     </div>
-                    {isExpanded ?
-                      <ChevronDown size={16} className="text-gray-400" /> :
+                    {isExpanded ? (
+                      <ChevronDown size={16} className="text-gray-400" />
+                    ) : (
                       <ChevronRight size={16} className="text-gray-400" />
-                    }
+                    )}
                   </button>
 
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
+                        animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         className="border-t border-gray-200 dark:border-gray-600"
                       >
@@ -386,7 +423,10 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
                                 className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${getIssueColor(issue.type)}`}
                               >
                                 <div className="flex items-start space-x-2">
-                                  <Icon size={14} className="mt-0.5 flex-shrink-0" />
+                                  <Icon
+                                    size={14}
+                                    className="mt-0.5 flex-shrink-0"
+                                  />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                       <div className="text-sm font-medium">
@@ -403,11 +443,20 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
                                     {/* Evidence */}
                                     {issue.evidence.length > 0 && (
                                       <div className="text-xs space-y-1 mb-2">
-                                        <div className="font-medium">Evidence:</div>
+                                        <div className="font-medium">
+                                          Evidence:
+                                        </div>
                                         <ul className="list-disc list-inside space-y-0.5 opacity-75">
-                                          {issue.evidence.slice(0, 2).map((evidence, index) => (
-                                            <li key={index} className="truncate">{evidence}</li>
-                                          ))}
+                                          {issue.evidence
+                                            .slice(0, 2)
+                                            .map((evidence, index) => (
+                                              <li
+                                                key={index}
+                                                className="truncate"
+                                              >
+                                                {evidence}
+                                              </li>
+                                            ))}
                                         </ul>
                                       </div>
                                     )}
@@ -415,11 +464,15 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
                                     {/* Suggestions */}
                                     {issue.suggestions.length > 0 && (
                                       <div className="text-xs space-y-1 mb-2">
-                                        <div className="font-medium">Suggestions:</div>
+                                        <div className="font-medium">
+                                          Suggestions:
+                                        </div>
                                         <ul className="list-disc list-inside space-y-0.5 opacity-75">
-                                          {issue.suggestions.slice(0, 2).map((suggestion, index) => (
-                                            <li key={index}>{suggestion}</li>
-                                          ))}
+                                          {issue.suggestions
+                                            .slice(0, 2)
+                                            .map((suggestion, index) => (
+                                              <li key={index}>{suggestion}</li>
+                                            ))}
                                         </ul>
                                       </div>
                                     )}

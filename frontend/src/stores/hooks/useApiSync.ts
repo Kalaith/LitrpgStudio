@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { timelineApi } from '../../api/timeline';
-import { charactersApi } from '../../api/characters';
-import { seriesApi } from '../../api/series';
+import { useCallback, useEffect, useState } from "react";
+import { timelineApi } from "../../api/timeline";
+import { charactersApi } from "../../api/characters";
+import { seriesApi } from "../../api/series";
 
 interface SyncStatus {
   loading: boolean;
@@ -16,47 +16,50 @@ export function useApiSync(seriesId: string | null) {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     loading: false,
     error: null,
-    lastSync: null
+    lastSync: null,
   });
 
-  const syncTimeline = useCallback(async (localTimelineEvents: unknown[]) => {
-    if (!seriesId) return;
+  const syncTimeline = useCallback(
+    async (localTimelineEvents: unknown[]) => {
+      if (!seriesId) return;
 
-    try {
-      setSyncStatus(prev => ({ ...prev, loading: true, error: null }));
+      try {
+        setSyncStatus((prev) => ({ ...prev, loading: true, error: null }));
 
-      // Get remote timeline events
-      const response = await timelineApi.getTimeline(seriesId);
+        // Get remote timeline events
+        const response = await timelineApi.getTimeline(seriesId);
 
-      if (response.success) {
-        // For now, just log the sync opportunity
-        console.log('Timeline sync opportunity:', {
-          local: localTimelineEvents.length,
-          remote: response.data?.length || 0
-        });
+        if (response.success) {
+          // For now, just log the sync opportunity
+          console.log("Timeline sync opportunity:", {
+            local: localTimelineEvents.length,
+            remote: response.data?.length || 0,
+          });
 
+          setSyncStatus({
+            loading: false,
+            error: null,
+            lastSync: new Date(),
+          });
+
+          return response.data;
+        }
+      } catch (error) {
         setSyncStatus({
           loading: false,
-          error: null,
-          lastSync: new Date()
+          error: error instanceof Error ? error.message : "Sync failed",
+          lastSync: null,
         });
-
-        return response.data;
       }
-    } catch (error) {
-      setSyncStatus({
-        loading: false,
-        error: error instanceof Error ? error.message : 'Sync failed',
-        lastSync: null
-      });
-    }
-  }, [seriesId]);
+    },
+    [seriesId],
+  );
 
   const syncCharacters = useCallback(async () => {
     if (!seriesId) return;
 
     try {
-      setSyncStatus(prev => ({ ...prev, loading: true, error: null }));
+      setSyncStatus((prev) => ({ ...prev, loading: true, error: null }));
 
       const response = await charactersApi.getAll();
 
@@ -64,7 +67,7 @@ export function useApiSync(seriesId: string | null) {
         setSyncStatus({
           loading: false,
           error: null,
-          lastSync: new Date()
+          lastSync: new Date(),
         });
 
         return response.data;
@@ -72,15 +75,15 @@ export function useApiSync(seriesId: string | null) {
     } catch (error) {
       setSyncStatus({
         loading: false,
-        error: error instanceof Error ? error.message : 'Character sync failed',
-        lastSync: null
+        error: error instanceof Error ? error.message : "Character sync failed",
+        lastSync: null,
       });
     }
   }, [seriesId]);
 
   const syncSeries = useCallback(async () => {
     try {
-      setSyncStatus(prev => ({ ...prev, loading: true, error: null }));
+      setSyncStatus((prev) => ({ ...prev, loading: true, error: null }));
 
       const response = await seriesApi.getAll();
 
@@ -88,7 +91,7 @@ export function useApiSync(seriesId: string | null) {
         setSyncStatus({
           loading: false,
           error: null,
-          lastSync: new Date()
+          lastSync: new Date(),
         });
 
         return response.data;
@@ -96,8 +99,8 @@ export function useApiSync(seriesId: string | null) {
     } catch (error) {
       setSyncStatus({
         loading: false,
-        error: error instanceof Error ? error.message : 'Series sync failed',
-        lastSync: null
+        error: error instanceof Error ? error.message : "Series sync failed",
+        lastSync: null,
       });
     }
   }, []);
@@ -116,6 +119,6 @@ export function useApiSync(seriesId: string | null) {
     syncTimeline,
     syncCharacters,
     syncSeries,
-    isOnline: !syncStatus.error
+    isOnline: !syncStatus.error,
   };
 }

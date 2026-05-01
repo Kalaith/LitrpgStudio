@@ -1,12 +1,12 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import AuthGuard from './components/AuthGuard'
-import { AuthProvider } from './contexts/AuthContext'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import AuthGuard from "./components/AuthGuard";
+import { AuthProvider } from "./contexts/AuthContext";
 
-document.documentElement.classList.add('dark')
+document.documentElement.classList.add("dark");
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <AuthGuard>
@@ -14,4 +14,4 @@ createRoot(document.getElementById('root')!).render(
       </AuthGuard>
     </AuthProvider>
   </StrictMode>,
-)
+);

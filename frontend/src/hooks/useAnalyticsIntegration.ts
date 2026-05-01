@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { useStoryStore } from '../stores/storyStore';
-import { useAnalyticsStore } from '../stores/analyticsStore';
+import { useEffect, useRef } from "react";
+import { useStoryStore } from "../stores/storyStore";
+import { useAnalyticsStore } from "../stores/analyticsStore";
 
 /**
  * Hook to integrate analytics tracking with story changes
@@ -41,44 +41,59 @@ export const useGoalTracking = () => {
 
   useEffect(() => {
     // Update goal progress based on recent writing activity
-    goals.forEach(goal => {
+    goals.forEach((goal) => {
       if (!goal.isActive) return;
 
       // Calculate progress based on goal type
       let currentProgress = 0;
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
 
       switch (goal.type) {
-        case 'daily': {
+        case "daily": {
           // Count words written today
-          const todaySessions = sessions.filter(s => s.date === today && !s.isActive);
-          currentProgress = todaySessions.reduce((sum, s) => sum + s.wordsWritten, 0);
+          const todaySessions = sessions.filter(
+            (s) => s.date === today && !s.isActive,
+          );
+          currentProgress = todaySessions.reduce(
+            (sum, s) => sum + s.wordsWritten,
+            0,
+          );
           break;
         }
-        case 'weekly': {
+        case "weekly": {
           // Count words written this week
           const weekStart = new Date();
           weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Monday
-          const weekStartStr = weekStart.toISOString().split('T')[0];
+          const weekStartStr = weekStart.toISOString().split("T")[0];
 
-          const weekSessions = sessions.filter(s => s.date >= weekStartStr && !s.isActive);
-          currentProgress = weekSessions.reduce((sum, s) => sum + s.wordsWritten, 0);
+          const weekSessions = sessions.filter(
+            (s) => s.date >= weekStartStr && !s.isActive,
+          );
+          currentProgress = weekSessions.reduce(
+            (sum, s) => sum + s.wordsWritten,
+            0,
+          );
           break;
         }
-        case 'monthly': {
+        case "monthly": {
           // Count words written this month
           const monthStart = new Date();
           monthStart.setDate(1);
-          const monthStartStr = monthStart.toISOString().split('T')[0];
+          const monthStartStr = monthStart.toISOString().split("T")[0];
 
-          const monthSessions = sessions.filter(s => s.date >= monthStartStr && !s.isActive);
-          currentProgress = monthSessions.reduce((sum, s) => sum + s.wordsWritten, 0);
+          const monthSessions = sessions.filter(
+            (s) => s.date >= monthStartStr && !s.isActive,
+          );
+          currentProgress = monthSessions.reduce(
+            (sum, s) => sum + s.wordsWritten,
+            0,
+          );
           break;
         }
-        case 'project': {
+        case "project": {
           // Count words in specific project
           if (goal.storyId) {
-            const story = stories.find(s => s.id === goal.storyId);
+            const story = stories.find((s) => s.id === goal.storyId);
             currentProgress = story?.wordCount || 0;
           } else {
             // All projects

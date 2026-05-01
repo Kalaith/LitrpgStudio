@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,8 +18,8 @@ import {
   Globe,
   LibraryBig,
   ClipboardList,
-  Upload
-} from 'lucide-react';
+  Upload,
+} from "lucide-react";
 
 interface SidebarProps {
   activeView: string;
@@ -29,25 +29,27 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [expandedSections, setExpandedSections] = useState<
+    Record<string, boolean>
+  >({});
   const [pinnedItems, setPinnedItems] = useState<string[]>([]);
   const defaultExpandedSections: Record<string, boolean> = {
-    'Overview': true,
-    'Core Workflow': true,
-    'Publishing': true
+    Overview: true,
+    "Core Workflow": true,
+    Publishing: true,
   };
 
   // Initialize expanded sections and pinned items from localStorage
   useEffect(() => {
-    const savedExpanded = localStorage.getItem('sidebar-expanded-sections');
-    const savedPinned = localStorage.getItem('sidebar-pinned-items');
-    const savedCollapsed = localStorage.getItem('sidebar-collapsed');
+    const savedExpanded = localStorage.getItem("sidebar-expanded-sections");
+    const savedPinned = localStorage.getItem("sidebar-pinned-items");
+    const savedCollapsed = localStorage.getItem("sidebar-collapsed");
 
     if (savedExpanded) {
       const parsed = JSON.parse(savedExpanded);
       setExpandedSections({
         ...defaultExpandedSections,
-        ...parsed
+        ...parsed,
       });
     } else {
       setExpandedSections(defaultExpandedSections);
@@ -64,58 +66,58 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
 
   // Save state to localStorage
   useEffect(() => {
-    localStorage.setItem('sidebar-expanded-sections', JSON.stringify(expandedSections));
+    localStorage.setItem(
+      "sidebar-expanded-sections",
+      JSON.stringify(expandedSections),
+    );
   }, [expandedSections]);
 
   useEffect(() => {
-    localStorage.setItem('sidebar-pinned-items', JSON.stringify(pinnedItems));
+    localStorage.setItem("sidebar-pinned-items", JSON.stringify(pinnedItems));
   }, [pinnedItems]);
 
   useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
   }, [isCollapsed]);
 
   const navSections = [
     {
-      name: 'Overview',
-      items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' }
-      ]
+      name: "Overview",
+      items: [{ id: "dashboard", icon: LayoutDashboard, label: "Dashboard" }],
     },
     {
-      name: 'Core Workflow',
+      name: "Core Workflow",
       items: [
-        { id: 'import', icon: FileInput, label: 'Import' },
-        { id: 'canon_vault', icon: BookOpenText, label: 'Canon Vault' },
-        { id: 'editor', icon: SquarePen, label: 'Editor' },
-        { id: 'timeline', icon: Clock3, label: 'Timeline' },
-        { id: 'characters', icon: Users, label: 'Characters' },
-        { id: 'worldbuilding', icon: Globe, label: 'World Building' },
-        { id: 'series', icon: LibraryBig, label: 'Series Manager' }
-      ]
+        { id: "import", icon: FileInput, label: "Import" },
+        { id: "canon_vault", icon: BookOpenText, label: "Canon Vault" },
+        { id: "editor", icon: SquarePen, label: "Editor" },
+        { id: "timeline", icon: Clock3, label: "Timeline" },
+        { id: "characters", icon: Users, label: "Characters" },
+        { id: "worldbuilding", icon: Globe, label: "World Building" },
+        { id: "series", icon: LibraryBig, label: "Series Manager" },
+      ],
     },
     {
-      name: 'Publishing',
+      name: "Publishing",
       items: [
-        { id: 'templates', icon: ClipboardList, label: 'Templates' },
-        { id: 'export', icon: Upload, label: 'Export & Publish' }
-      ]
-    }
+        { id: "templates", icon: ClipboardList, label: "Templates" },
+        { id: "export", icon: Upload, label: "Export & Publish" },
+      ],
+    },
   ];
 
-
   const toggleSection = (sectionName: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [sectionName]: !prev[sectionName]
+      [sectionName]: !prev[sectionName],
     }));
   };
 
   const togglePin = (itemId: string) => {
-    setPinnedItems(prev =>
+    setPinnedItems((prev) =>
       prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId],
     );
   };
 
@@ -128,8 +130,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   };
 
   // Get all navigation items flattened for pinned section
-  const allNavItems = navSections.flatMap(section => section.items);
-  const pinnedNavItems = allNavItems.filter(item => pinnedItems.includes(item.id));
+  const allNavItems = navSections.flatMap((section) => section.items);
+  const pinnedNavItems = allNavItems.filter((item) =>
+    pinnedItems.includes(item.id),
+  );
 
   return (
     <>
@@ -137,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       <button
         onClick={toggleMobile}
         className="lg:hidden fixed top-3 left-3 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-shadow touch-manipulation"
-        aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
+        aria-label={isMobileOpen ? "Close menu" : "Open menu"}
       >
         {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -154,11 +158,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       <motion.aside
         initial={false}
         animate={{
-          width: isCollapsed ? '4rem' : '16rem',
+          width: isCollapsed ? "4rem" : "16rem",
         }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
         className={`
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           fixed lg:relative inset-y-0 left-0 z-40 lg:z-0
           w-80 lg:w-auto
           bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
@@ -183,13 +187,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
           </AnimatePresence>
 
           <div className="flex items-center space-x-1">
-
             <button
               onClick={toggleCollapse}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+              {isCollapsed ? (
+                <ChevronRight size={16} />
+              ) : (
+                <ChevronLeft size={16} />
+              )}
             </button>
           </div>
         </div>
@@ -203,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                 {!isCollapsed && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="px-4 pb-2"
                   >
@@ -219,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                   <div key={`pinned-${id}`} className="group relative">
                     <button
                       className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
-                        ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
+                        ${activeView === id ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium" : ""}`}
                       onClick={() => {
                         onViewChange(id);
                         setIsMobileOpen(false);
@@ -233,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                         {!isCollapsed && (
                           <motion.span
                             initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: 'auto' }}
+                            animate={{ opacity: 1, width: "auto" }}
                             exit={{ opacity: 0, width: 0 }}
                             className="flex-1 truncate"
                           >
@@ -263,7 +270,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
 
           {/* Regular Sections */}
           {navSections.map((section, sectionIndex) => (
-            <div key={section.name} className={sectionIndex > 0 || pinnedNavItems.length > 0 ? 'mt-6' : ''}>
+            <div
+              key={section.name}
+              className={
+                sectionIndex > 0 || pinnedNavItems.length > 0 ? "mt-6" : ""
+              }
+            >
               <div className="px-4 pb-2 flex items-center justify-between">
                 <AnimatePresence>
                   {!isCollapsed && (
@@ -282,9 +294,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                   <button
                     onClick={() => toggleSection(section.name)}
                     className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                    title={expandedSections[section.name] ? 'Collapse section' : 'Expand section'}
+                    title={
+                      expandedSections[section.name]
+                        ? "Collapse section"
+                        : "Expand section"
+                    }
                   >
-                    {expandedSections[section.name] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    {expandedSections[section.name] ? (
+                      <ChevronUp size={12} />
+                    ) : (
+                      <ChevronDown size={12} />
+                    )}
                   </button>
                 )}
               </div>
@@ -293,18 +313,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                 {(isCollapsed || expandedSections[section.name]) && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
                     className="space-y-1 overflow-hidden"
                   >
                     {section.items
-                      .filter(item => !pinnedItems.includes(item.id)) // Don't show pinned items in regular sections
+                      .filter((item) => !pinnedItems.includes(item.id)) // Don't show pinned items in regular sections
                       .map(({ id, icon: Icon, label }) => (
                         <div key={id} className="group relative">
                           <button
                             className={`w-full px-4 py-3 lg:py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-sm touch-manipulation
-                              ${activeView === id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium' : ''}`}
+                              ${activeView === id ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-l-3 border-primary-600 dark:border-primary-400 font-medium" : ""}`}
                             onClick={() => {
                               onViewChange(id);
                               setIsMobileOpen(false);
@@ -318,7 +338,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
                               {!isCollapsed && (
                                 <motion.span
                                   initial={{ opacity: 0, width: 0 }}
-                                  animate={{ opacity: 1, width: 'auto' }}
+                                  animate={{ opacity: 1, width: "auto" }}
                                   exit={{ opacity: 0, width: 0 }}
                                   className="flex-1 truncate"
                                 >

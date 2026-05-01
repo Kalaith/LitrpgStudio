@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { useCharacterStore } from '../stores/characterStore';
-import { useSeriesStore } from '../stores/seriesStore';
-import { useStoryStore } from '../stores/storyStore';
-import type { Character } from '../types/character';
-import type { Story } from '../types/story';
+import { useMemo } from "react";
+import { useCharacterStore } from "../stores/characterStore";
+import { useSeriesStore } from "../stores/seriesStore";
+import { useStoryStore } from "../stores/storyStore";
+import type { Character } from "../types/character";
+import type { Story } from "../types/story";
 
 export interface DashboardStats {
   totalCharacters: number;
@@ -38,23 +38,34 @@ const DEFAULT_DAILY_GOAL = 500;
 function buildStats(
   seriesCount: number,
   characters: Character[],
-  stories: Story[]
+  stories: Story[],
 ): DashboardStats {
   const totalCharacters = characters.length;
   const mainCharacters = characters.filter((char) =>
-    char.storyReferences?.some((ref) => ref.mentionType === 'main_character')
+    char.storyReferences?.some((ref) => ref.mentionType === "main_character"),
   ).length;
   const supportingCharacters = totalCharacters - mainCharacters;
 
-  const totalChapters = stories.reduce((sum, story) => sum + (story.chapters?.length ?? 0), 0);
+  const totalChapters = stories.reduce(
+    (sum, story) => sum + (story.chapters?.length ?? 0),
+    0,
+  );
   const totalWords = stories.reduce(
-    (sum, story) => sum + (story.chapters?.reduce((chapterSum, chapter) => chapterSum + (chapter.wordCount ?? 0), 0) ?? 0),
-    0
+    (sum, story) =>
+      sum +
+      (story.chapters?.reduce(
+        (chapterSum, chapter) => chapterSum + (chapter.wordCount ?? 0),
+        0,
+      ) ?? 0),
+    0,
   );
 
   const chaptersComplete = stories.reduce(
-    (sum, story) => sum + (story.chapters?.filter((chapter) => (chapter.wordCount ?? 0) > 0).length ?? 0),
-    0
+    (sum, story) =>
+      sum +
+      (story.chapters?.filter((chapter) => (chapter.wordCount ?? 0) > 0)
+        .length ?? 0),
+    0,
   );
 
   const wordsTarget = DEFAULT_WORD_TARGET;
@@ -72,7 +83,10 @@ function buildStats(
     supportingCharacters,
     upcomingEvents: 0,
     dailyGoal: DEFAULT_DAILY_GOAL,
-    dailyProgress: wordsTarget > 0 ? Math.min(100, Math.round((todayWords / DEFAULT_DAILY_GOAL) * 100)) : 0,
+    dailyProgress:
+      wordsTarget > 0
+        ? Math.min(100, Math.round((todayWords / DEFAULT_DAILY_GOAL) * 100))
+        : 0,
     storyProgress: {
       chaptersComplete,
       chaptersTotal: totalChapters,
@@ -90,7 +104,7 @@ export function useDashboardData() {
 
   const stats = useMemo(
     () => buildStats(seriesCount, characters, stories),
-    [seriesCount, characters, stories]
+    [seriesCount, characters, stories],
   );
 
   return {

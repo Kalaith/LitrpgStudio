@@ -1,4 +1,4 @@
-import type { StateStorage } from 'zustand/middleware';
+import type { StateStorage } from "zustand/middleware";
 
 interface ApiSyncOptions {
   seriesId?: string;
@@ -17,7 +17,13 @@ interface ApiSyncOptions {
  * Provides hybrid localStorage + API synchronization
  */
 export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
-  const { seriesId, endpoint, apiClient, syncOnLoad = true, syncOnSave = true } = options;
+  const {
+    seriesId,
+    endpoint,
+    apiClient,
+    syncOnLoad = true,
+    syncOnSave = true,
+  } = options;
 
   return {
     getItem: async (name: string): Promise<string | null> => {
@@ -32,7 +38,9 @@ export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
         // Attempt to sync with API in background
         if (seriesId) {
           try {
-            const response = await apiClient.get(`/series/${seriesId}/${endpoint}`);
+            const response = await apiClient.get(
+              `/series/${seriesId}/${endpoint}`,
+            );
             if (response.success && response.data) {
               // API data available - merge or replace localStorage
               const apiData = JSON.stringify(response.data);
@@ -40,13 +48,16 @@ export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
               return apiData;
             }
           } catch (error) {
-            console.warn(`API sync failed for ${endpoint}, falling back to localStorage:`, error);
+            console.warn(
+              `API sync failed for ${endpoint}, falling back to localStorage:`,
+              error,
+            );
           }
         }
 
         return localData;
       } catch (error) {
-        console.error('Storage getItem error:', error);
+        console.error("Storage getItem error:", error);
         return null;
       }
     },
@@ -68,16 +79,19 @@ export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
           // For now, we'll save the entire state
           await apiClient.post(`/series/${seriesId}/${endpoint}/sync`, {
             data,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
 
           console.log(`Successfully synced ${endpoint} to API`);
         } catch (error) {
-          console.warn(`API sync failed for ${endpoint}, data saved locally:`, error);
+          console.warn(
+            `API sync failed for ${endpoint}, data saved locally:`,
+            error,
+          );
           // Data is still safe in localStorage
         }
       } catch (error) {
-        console.error('Storage setItem error:', error);
+        console.error("Storage setItem error:", error);
       }
     },
 
@@ -93,16 +107,18 @@ export function createApiSyncStorage(options: ApiSyncOptions): StateStorage {
           }
         }
       } catch (error) {
-        console.error('Storage removeItem error:', error);
+        console.error("Storage removeItem error:", error);
       }
-    }
+    },
   };
 }
 
 /**
  * Simple API-aware storage that gracefully degrades to localStorage
  */
-export function createHybridStorage(options: Partial<ApiSyncOptions> = {}): StateStorage {
+export function createHybridStorage(
+  options: Partial<ApiSyncOptions> = {},
+): StateStorage {
   const { syncOnSave = false } = options;
 
   return {
@@ -110,7 +126,7 @@ export function createHybridStorage(options: Partial<ApiSyncOptions> = {}): Stat
       try {
         return localStorage.getItem(name);
       } catch (error) {
-        console.error('Storage getItem error:', error);
+        console.error("Storage getItem error:", error);
         return null;
       }
     },
@@ -124,7 +140,7 @@ export function createHybridStorage(options: Partial<ApiSyncOptions> = {}): Stat
           console.log(`Future: Would sync ${name} to API`);
         }
       } catch (error) {
-        console.error('Storage setItem error:', error);
+        console.error("Storage setItem error:", error);
       }
     },
 
@@ -136,8 +152,8 @@ export function createHybridStorage(options: Partial<ApiSyncOptions> = {}): Stat
           console.log(`Future: Would remove ${name} from API`);
         }
       } catch (error) {
-        console.error('Storage removeItem error:', error);
+        console.error("Storage removeItem error:", error);
       }
-    }
+    },
   };
 }

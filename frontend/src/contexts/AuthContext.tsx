@@ -1,6 +1,17 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
-import { buildApiUrl as buildApiEndpointUrl, setTokenProvider } from '../api/client';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { ReactNode } from "react";
+import {
+  buildApiUrl as buildApiEndpointUrl,
+  setTokenProvider,
+} from "../api/client";
 
 interface User {
   id: string;
@@ -10,10 +21,10 @@ interface User {
   role: string;
   is_verified?: boolean;
   is_guest?: boolean;
-  auth_type?: 'frontpage' | 'guest';
+  auth_type?: "frontpage" | "guest";
 }
 
-type AuthMode = 'frontpage' | 'guest' | null;
+type AuthMode = "frontpage" | "guest" | null;
 
 interface FrontpageStoredUser {
   id?: number | string;
@@ -61,8 +72,8 @@ interface AuthContextType {
   getAccessToken: () => Promise<string>;
 }
 
-const FRONTPAGE_AUTH_STORAGE_KEY = 'auth-storage';
-const GUEST_AUTH_STORAGE_KEY = 'writers-studio-guest-session';
+const FRONTPAGE_AUTH_STORAGE_KEY = "auth-storage";
+const GUEST_AUTH_STORAGE_KEY = "writers-studio-guest-session";
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
@@ -73,10 +84,10 @@ const AuthContext = createContext<AuthContextType>({
   refreshUserInfo: async () => undefined,
   loginWithRedirect: () => undefined,
   continueAsGuest: async () => undefined,
-  getLinkAccountUrl: () => '/signup',
+  getLinkAccountUrl: () => "/signup",
   logout: () => undefined,
   getAccessToken: async () => {
-    throw new Error('Not authenticated');
+    throw new Error("Not authenticated");
   },
 });
 
@@ -89,9 +100,11 @@ const readFrontpageToken = (): string | null => {
   }
 
   try {
-    const parsed = JSON.parse(authStorage) as { state?: { token?: string | null } };
+    const parsed = JSON.parse(authStorage) as {
+      state?: { token?: string | null };
+    };
     const token = parsed?.state?.token;
-    return typeof token === 'string' && token.trim() !== '' ? token : null;
+    return typeof token === "string" && token.trim() !== "" ? token : null;
   } catch {
     return null;
   }
@@ -104,7 +117,9 @@ const readFrontpageUser = (): FrontpageStoredUser | null => {
   }
 
   try {
-    const parsed = JSON.parse(authStorage) as { state?: { user?: FrontpageStoredUser | null } };
+    const parsed = JSON.parse(authStorage) as {
+      state?: { user?: FrontpageStoredUser | null };
+    };
     return parsed?.state?.user ?? null;
   } catch {
     return null;
@@ -137,20 +152,31 @@ const clearGuestSession = (): void => {
   localStorage.removeItem(GUEST_AUTH_STORAGE_KEY);
 };
 
-const withRedirectParam = (basePath: string): string => {
+const withRedirectParam = (
+  basePath: string,
+  redirectParams: Record<string, string> = {},
+): string => {
   const fallback = `${basePath}`;
 
   try {
-    const redirectUrl = window.location.href;
+    const redirectUrl = new URL(window.location.href);
+    for (const [key, value] of Object.entries(redirectParams)) {
+      redirectUrl.searchParams.set(key, value);
+    }
+
     const url = new URL(basePath, window.location.origin);
-    url.searchParams.set('redirect', redirectUrl);
+    url.searchParams.set("redirect", redirectUrl.toString());
     return url.toString();
   } catch {
     return fallback;
   }
 };
 
-const appendQueryParam = (urlValue: string, key: string, value: string): string => {
+const appendQueryParam = (
+  urlValue: string,
+  key: string,
+  value: string,
+): string => {
   try {
     const url = new URL(urlValue, window.location.origin);
     url.searchParams.set(key, value);
@@ -161,38 +187,45 @@ const appendQueryParam = (urlValue: string, key: string, value: string): string 
 };
 
 const getFrontpageLoginUrl = (): string => {
-  const configured = import.meta.env.VITE_WEBHATCHERY_LOGIN_URL || '/login';
+  const configured = import.meta.env.VITE_WEBHATCHERY_LOGIN_URL || "/login";
   return withRedirectParam(configured);
 };
 
-const getFrontpageSignupUrl = (): string => {
-  const configured = import.meta.env.VITE_WEBHATCHERY_SIGNUP_URL || '/signup';
-  return withRedirectParam(configured);
+const getFrontpageSignupUrl = (guestUserId?: string): string => {
+  const configured = import.meta.env.VITE_WEBHATCHERY_SIGNUP_URL || "/signup";
+  const url = withRedirectParam(
+    configured,
+    guestUserId ? { guest_user_id: guestUserId } : {},
+  );
+
+  return guestUserId
+    ? appendQueryParam(url, "guest_user_id", guestUserId)
+    : url;
 };
 
 const buildCurrentUserUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-  const version = import.meta.env.VITE_API_VERSION || 'v1';
-  return buildApiEndpointUrl(baseUrl, version, '/auth/current-user');
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  const version = import.meta.env.VITE_API_VERSION || "v1";
+  return buildApiEndpointUrl(baseUrl, version, "/auth/current-user");
 };
 
 const buildGuestSessionUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-  const version = import.meta.env.VITE_API_VERSION || 'v1';
-  return buildApiEndpointUrl(baseUrl, version, '/auth/guest-session');
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  const version = import.meta.env.VITE_API_VERSION || "v1";
+  return buildApiEndpointUrl(baseUrl, version, "/auth/guest-session");
 };
 
 const buildLinkGuestUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-  const version = import.meta.env.VITE_API_VERSION || 'v1';
-  return buildApiEndpointUrl(baseUrl, version, '/auth/link-guest');
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  const version = import.meta.env.VITE_API_VERSION || "v1";
+  return buildApiEndpointUrl(baseUrl, version, "/auth/link-guest");
 };
 
 const readGuestUserIdFromUrl = (): string | null => {
   try {
     const url = new URL(window.location.href);
-    const value = (url.searchParams.get('guest_user_id') || '').trim();
-    return value !== '' ? value : null;
+    const value = (url.searchParams.get("guest_user_id") || "").trim();
+    return value !== "" ? value : null;
   } catch {
     return null;
   }
@@ -201,31 +234,43 @@ const readGuestUserIdFromUrl = (): string | null => {
 const removeGuestUserIdFromUrl = (): void => {
   try {
     const url = new URL(window.location.href);
-    url.searchParams.delete('guest_user_id');
-    window.history.replaceState({}, '', url.toString());
+    url.searchParams.delete("guest_user_id");
+    window.history.replaceState({}, "", url.toString());
   } catch {
     // Ignore URL cleanup failures.
   }
 };
 
-const getStoredAuth = (): { token: string | null; mode: AuthMode; guestUser: User | null } => {
+const getStoredAuth = (): {
+  token: string | null;
+  mode: AuthMode;
+  guestUser: User | null;
+} => {
   const frontpageToken = readFrontpageToken();
   if (frontpageToken) {
-    return { token: frontpageToken, mode: 'frontpage', guestUser: null };
+    return { token: frontpageToken, mode: "frontpage", guestUser: null };
   }
 
   const guest = readGuestSession();
   if (guest?.token) {
-    return { token: guest.token, mode: 'guest', guestUser: guest.user };
+    return { token: guest.token, mode: "guest", guestUser: guest.user };
   }
 
   return { token: null, mode: null, guestUser: null };
 };
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(() => getStoredAuth().token);
-  const [authMode, setAuthMode] = useState<AuthMode>(() => getStoredAuth().mode);
-  const [user, setUser] = useState<User | null>(() => getStoredAuth().guestUser);
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [token, setToken] = useState<string | null>(
+    () => getStoredAuth().token,
+  );
+  const [authMode, setAuthMode] = useState<AuthMode>(
+    () => getStoredAuth().mode,
+  );
+  const [user, setUser] = useState<User | null>(
+    () => getStoredAuth().guestUser,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedGuestLinkRef = useRef(false);
@@ -234,7 +279,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const next = getStoredAuth();
     setToken(next.token);
     setAuthMode(next.mode);
-    if (next.mode === 'guest') {
+    if (next.mode === "guest") {
       setUser(next.guestUser);
     }
   }, []);
@@ -245,7 +290,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const existingToken = readFrontpageToken();
     if (existingToken) {
       setToken(existingToken);
-      setAuthMode('frontpage');
+      setAuthMode("frontpage");
       setUser(null);
       return;
     }
@@ -254,11 +299,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const getLinkAccountUrl = useCallback(() => {
-    const baseUrl = getFrontpageSignupUrl();
     if (user?.is_guest && user.id) {
-      return appendQueryParam(baseUrl, 'guest_user_id', user.id);
+      return getFrontpageSignupUrl(user.id);
     }
-    return baseUrl;
+    return getFrontpageSignupUrl();
   }, [user]);
 
   const continueAsGuest = useCallback(async (): Promise<void> => {
@@ -269,23 +313,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const existingSession = readGuestSession();
       if (existingSession?.token && existingSession?.user) {
         setToken(existingSession.token);
-        setAuthMode('guest');
+        setAuthMode("guest");
         setUser(existingSession.user);
         return;
       }
 
       const response = await fetch(buildGuestSessionUrl(), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       const raw = await response.text();
-      const result = raw ? (JSON.parse(raw) as AuthApiResponse<GuestSessionPayload>) : null;
+      const result = raw
+        ? (JSON.parse(raw) as AuthApiResponse<GuestSessionPayload>)
+        : null;
 
-      if (!response.ok || !result?.success || !result.data?.token || !result.data?.user) {
-        throw new Error(result?.message || result?.error || `Failed to create guest session (${response.status})`);
+      if (
+        !response.ok ||
+        !result?.success ||
+        !result.data?.token ||
+        !result.data?.user
+      ) {
+        throw new Error(
+          result?.message ||
+            result?.error ||
+            `Failed to create guest session (${response.status})`,
+        );
       }
 
       const guestSession: GuestStoredSession = {
@@ -293,20 +348,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         user: {
           ...result.data.user,
           is_guest: true,
-          auth_type: 'guest',
+          auth_type: "guest",
         },
       };
 
       saveGuestSession(guestSession);
       setToken(guestSession.token);
-      setAuthMode('guest');
+      setAuthMode("guest");
       setUser(guestSession.user);
     } catch (err) {
       clearGuestSession();
       setToken(null);
       setAuthMode(null);
       setUser(null);
-      setError(err instanceof Error ? err.message : 'Failed to create guest session');
+      setError(
+        err instanceof Error ? err.message : "Failed to create guest session",
+      );
       throw err;
     } finally {
       setIsLoading(false);
@@ -314,7 +371,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = useCallback(() => {
-    if (authMode === 'guest') {
+    if (authMode === "guest") {
       clearGuestSession();
       setToken(null);
       setAuthMode(null);
@@ -328,7 +385,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getAccessToken = useCallback(async (): Promise<string> => {
     if (!token) {
-      throw new Error('Not authenticated');
+      throw new Error("Not authenticated");
     }
     return token;
   }, [token]);
@@ -355,7 +412,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const response = await fetch(buildCurrentUserUrl(), {
-        method: 'GET',
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -365,36 +422,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const result = raw ? (JSON.parse(raw) as AuthApiResponse<User>) : null;
 
       if (!response.ok || !result?.success || !result.data) {
-        const authError = new Error(result?.message || result?.error || `Authentication check failed (${response.status})`) as Error & {
+        const authError = new Error(
+          result?.message ||
+            result?.error ||
+            `Authentication check failed (${response.status})`,
+        ) as Error & {
           status?: number;
         };
         authError.status = response.status;
         throw authError;
       }
 
-      const isGuest = Boolean(result.data.is_guest || authMode === 'guest');
-      const frontpageUser = authMode === 'frontpage' ? readFrontpageUser() : null;
+      const isGuest = Boolean(result.data.is_guest || authMode === "guest");
+      const frontpageUser =
+        authMode === "frontpage" ? readFrontpageUser() : null;
 
       setUser({
         ...result.data,
-        username: authMode === 'frontpage' ? (frontpageUser?.username || result.data.username) : result.data.username,
+        username:
+          authMode === "frontpage"
+            ? frontpageUser?.username || result.data.username
+            : result.data.username,
         display_name:
-          authMode === 'frontpage'
-            ? (frontpageUser?.display_name || frontpageUser?.username || result.data.display_name)
+          authMode === "frontpage"
+            ? frontpageUser?.display_name ||
+              frontpageUser?.username ||
+              result.data.display_name
             : result.data.display_name,
-        email: authMode === 'frontpage' ? (frontpageUser?.email || result.data.email) : result.data.email,
-        role: authMode === 'frontpage' ? (frontpageUser?.role || result.data.role) : result.data.role,
+        email:
+          authMode === "frontpage"
+            ? frontpageUser?.email || result.data.email
+            : result.data.email,
+        role:
+          authMode === "frontpage"
+            ? frontpageUser?.role || result.data.role
+            : result.data.role,
         is_guest: isGuest,
-        auth_type: isGuest ? 'guest' : 'frontpage',
+        auth_type: isGuest ? "guest" : "frontpage",
       });
     } catch (err) {
-      const status = typeof (err as { status?: unknown })?.status === 'number'
-        ? ((err as { status?: number }).status as number)
-        : null;
+      const status =
+        typeof (err as { status?: unknown })?.status === "number"
+          ? ((err as { status?: number }).status as number)
+          : null;
       const isAuthFailure = status === 401 || status === 403;
 
       if (isAuthFailure) {
-        if (authMode === 'guest') {
+        if (authMode === "guest") {
           clearGuestSession();
         }
         setToken(null);
@@ -404,7 +478,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Security: never grant app access unless backend validates current user.
       // On backend/config/network errors we keep token/mode for future retries, but user stays null.
       setUser(null);
-      setError(err instanceof Error ? err.message : 'Failed to validate session');
+      setError(
+        err instanceof Error ? err.message : "Failed to validate session",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -412,7 +488,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
-      if (event.key === FRONTPAGE_AUTH_STORAGE_KEY || event.key === GUEST_AUTH_STORAGE_KEY) {
+      if (
+        event.key === FRONTPAGE_AUTH_STORAGE_KEY ||
+        event.key === GUEST_AUTH_STORAGE_KEY
+      ) {
         if (authMode === null) {
           return;
         }
@@ -420,8 +499,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [authMode, syncTokenFromStorage]);
 
   useEffect(() => {
@@ -434,15 +513,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
-    if (authMode !== 'frontpage' || !token || !user || user.is_guest) {
+    if (authMode !== "frontpage" || !token || !user || user.is_guest) {
+      return;
+    }
+
+    const guestSession = readGuestSession();
+    if (!guestSession?.token || guestSession.user.id !== guestUserId) {
+      setError(
+        "Guest session proof is missing. Continue as guest again before linking.",
+      );
+      removeGuestUserIdFromUrl();
       return;
     }
 
     hasAttemptedGuestLinkRef.current = true;
 
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       // Hard safety rule: guest accounts cannot be linked to admin accounts.
-      setError('Guest accounts cannot be linked to admin accounts.');
+      setError("Guest accounts cannot be linked to admin accounts.");
       removeGuestUserIdFromUrl();
       return;
     }
@@ -450,23 +538,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     (async () => {
       try {
         const response = await fetch(buildLinkGuestUrl(), {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ guest_user_id: guestUserId }),
+          body: JSON.stringify({
+            guest_user_id: guestUserId,
+            guest_token: guestSession.token,
+          }),
         });
 
         const raw = await response.text();
-        const result = raw ? (JSON.parse(raw) as AuthApiResponse<LinkGuestPayload>) : null;
+        const result = raw
+          ? (JSON.parse(raw) as AuthApiResponse<LinkGuestPayload>)
+          : null;
         if (!response.ok || !result?.success || !result.data) {
-          throw new Error(result?.message || result?.error || `Failed to link guest data (${response.status})`);
+          throw new Error(
+            result?.message ||
+              result?.error ||
+              `Failed to link guest data (${response.status})`,
+          );
         }
 
         clearGuestSession();
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to link guest account data');
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to link guest account data",
+        );
       } finally {
         removeGuestUserIdFromUrl();
       }
@@ -499,7 +600,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       refreshUserInfo,
       token,
       user,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

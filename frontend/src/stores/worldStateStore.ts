@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type {
   WorldState,
   CharacterState,
@@ -11,8 +11,8 @@ import type {
   ConsistencyResult,
   ValidationRule,
   WorldStateSnapshot,
-  CharacterStatus
-} from '../types/worldState';
+  CharacterStatus,
+} from "../types/worldState";
 
 interface WorldStateStoreState {
   worldStates: Map<string, WorldState[]>; // storyId -> WorldState[]
@@ -23,50 +23,140 @@ interface WorldStateStoreState {
 
 interface WorldStateStoreActions {
   // World State Management
-  createWorldState: (storyId: string, chapterId?: string, chapterNumber?: number) => WorldState;
-  updateWorldState: (worldStateId: string, updates: Partial<WorldState>) => void;
+  createWorldState: (
+    storyId: string,
+    chapterId?: string,
+    chapterNumber?: number,
+  ) => WorldState;
+  updateWorldState: (
+    worldStateId: string,
+    updates: Partial<WorldState>,
+  ) => void;
   getWorldStateHistory: (storyId: string) => WorldState[];
   getCurrentWorldState: (storyId: string) => WorldState | null;
   setCurrentWorldState: (worldState: WorldState) => void;
   revertToWorldState: (worldStateId: string) => void;
 
   // Character State Management
-  updateCharacterState: (worldStateId: string, characterId: string, updates: Partial<CharacterState>) => void;
-  setCharacterLocation: (worldStateId: string, characterId: string, locationId: string) => void;
-  setCharacterStatus: (worldStateId: string, characterId: string, status: CharacterStatus) => void;
-  addCharacterFlag: (worldStateId: string, characterId: string, flag: string, value: boolean) => void;
-  updateCharacterRelationship: (worldStateId: string, characterId: string, targetId: string, strength: number) => void;
+  updateCharacterState: (
+    worldStateId: string,
+    characterId: string,
+    updates: Partial<CharacterState>,
+  ) => void;
+  setCharacterLocation: (
+    worldStateId: string,
+    characterId: string,
+    locationId: string,
+  ) => void;
+  setCharacterStatus: (
+    worldStateId: string,
+    characterId: string,
+    status: CharacterStatus,
+  ) => void;
+  addCharacterFlag: (
+    worldStateId: string,
+    characterId: string,
+    flag: string,
+    value: boolean,
+  ) => void;
+  updateCharacterRelationship: (
+    worldStateId: string,
+    characterId: string,
+    targetId: string,
+    strength: number,
+  ) => void;
 
   // Location State Management
-  updateLocationState: (worldStateId: string, locationId: string, updates: Partial<LocationState>) => void;
-  addLocationOccupant: (worldStateId: string, locationId: string, characterId: string) => void;
-  removeLocationOccupant: (worldStateId: string, locationId: string, characterId: string) => void;
-  setLocationProperty: (worldStateId: string, locationId: string, property: string, value: unknown) => void;
+  updateLocationState: (
+    worldStateId: string,
+    locationId: string,
+    updates: Partial<LocationState>,
+  ) => void;
+  addLocationOccupant: (
+    worldStateId: string,
+    locationId: string,
+    characterId: string,
+  ) => void;
+  removeLocationOccupant: (
+    worldStateId: string,
+    locationId: string,
+    characterId: string,
+  ) => void;
+  setLocationProperty: (
+    worldStateId: string,
+    locationId: string,
+    property: string,
+    value: unknown,
+  ) => void;
 
   // Item State Management
-  updateItemState: (worldStateId: string, itemId: string, updates: Partial<ItemState>) => void;
-  transferItem: (worldStateId: string, itemId: string, toCharacterId?: string, toLocationId?: string) => void;
+  updateItemState: (
+    worldStateId: string,
+    itemId: string,
+    updates: Partial<ItemState>,
+  ) => void;
+  transferItem: (
+    worldStateId: string,
+    itemId: string,
+    toCharacterId?: string,
+    toLocationId?: string,
+  ) => void;
   destroyItem: (worldStateId: string, itemId: string, reason: string) => void;
 
   // Event State Management
-  updateEventState: (worldStateId: string, eventId: string, updates: Partial<EventState>) => void;
-  addEventParticipant: (worldStateId: string, eventId: string, characterId: string) => void;
-  completeEvent: (worldStateId: string, eventId: string, consequences: string[]) => void;
+  updateEventState: (
+    worldStateId: string,
+    eventId: string,
+    updates: Partial<EventState>,
+  ) => void;
+  addEventParticipant: (
+    worldStateId: string,
+    eventId: string,
+    characterId: string,
+  ) => void;
+  completeEvent: (
+    worldStateId: string,
+    eventId: string,
+    consequences: string[],
+  ) => void;
 
   // World Properties
-  setWorldProperty: (worldStateId: string, key: string, value: unknown, reason: string) => void;
+  setWorldProperty: (
+    worldStateId: string,
+    key: string,
+    value: unknown,
+    reason: string,
+  ) => void;
   getWorldProperty: (worldStateId: string, key: string) => unknown;
-  removeWorldProperty: (worldStateId: string, key: string, reason: string) => void;
+  removeWorldProperty: (
+    worldStateId: string,
+    key: string,
+    reason: string,
+  ) => void;
 
   // Validation & Consistency
   addValidationRule: (rule: ValidationRule) => void;
   removeValidationRule: (ruleId: string) => void;
-  updateValidationRule: (ruleId: string, updates: Partial<ValidationRule>) => void;
-  runConsistencyCheck: (worldStateId: string, previousWorldStateId?: string) => ConsistencyResult[];
-  resolveConsistencyIssue: (worldStateId: string, issueId: string, resolution: string) => void;
+  updateValidationRule: (
+    ruleId: string,
+    updates: Partial<ValidationRule>,
+  ) => void;
+  runConsistencyCheck: (
+    worldStateId: string,
+    previousWorldStateId?: string,
+  ) => ConsistencyResult[];
+  resolveConsistencyIssue: (
+    worldStateId: string,
+    issueId: string,
+    resolution: string,
+  ) => void;
 
   // Snapshots
-  createSnapshot: (worldStateId: string, description: string, tags?: string[]) => void;
+  createSnapshot: (
+    worldStateId: string,
+    description: string,
+    tags?: string[],
+  ) => void;
   restoreFromSnapshot: (snapshotId: string) => void;
   deleteSnapshot: (snapshotId: string) => void;
 
@@ -104,10 +194,10 @@ export const useWorldStateStore = create<WorldStateStore>()(
             locations: [],
             items: [],
             events: [],
-            worldProperties: []
+            worldProperties: [],
           },
           changeLog: [],
-          consistencyChecks: []
+          consistencyChecks: [],
         };
 
         set((state) => {
@@ -117,7 +207,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
           return {
             worldStates: updatedWorldStates,
-            currentWorldState: newWorldState
+            currentWorldState: newWorldState,
           };
         });
 
@@ -129,21 +219,24 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const updatedStates = [...storyStates];
               updatedStates[stateIndex] = {
                 ...updatedStates[stateIndex],
                 ...updates,
-                timestamp: new Date()
+                timestamp: new Date(),
               };
               updatedWorldStates.set(storyId, updatedStates);
 
               return {
                 worldStates: updatedWorldStates,
-                currentWorldState: state.currentWorldState?.id === worldStateId
-                  ? updatedStates[stateIndex]
-                  : state.currentWorldState
+                currentWorldState:
+                  state.currentWorldState?.id === worldStateId
+                    ? updatedStates[stateIndex]
+                    : state.currentWorldState,
               };
             }
           }
@@ -167,19 +260,23 @@ export const useWorldStateStore = create<WorldStateStore>()(
       revertToWorldState: (worldStateId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const targetState = storyStates.find(ws => ws.id === worldStateId);
+          const targetState = storyStates.find((ws) => ws.id === worldStateId);
           if (targetState) {
             const newState = get().cloneWorldState(worldStateId);
             newState.id = generateId();
             newState.timestamp = new Date();
 
             const updatedWorldStates = new Map(state.worldStates);
-            const currentStoryStates = updatedWorldStates.get(targetState.storyId) || [];
-            updatedWorldStates.set(targetState.storyId, [...currentStoryStates, newState]);
+            const currentStoryStates =
+              updatedWorldStates.get(targetState.storyId) || [];
+            updatedWorldStates.set(targetState.storyId, [
+              ...currentStoryStates,
+              newState,
+            ]);
 
             set({
               worldStates: updatedWorldStates,
-              currentWorldState: newState
+              currentWorldState: newState,
             });
             break;
           }
@@ -195,10 +292,14 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(currentState.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
-              const characterIndex = worldState.state.characters.findIndex(c => c.characterId === characterId);
+              const characterIndex = worldState.state.characters.findIndex(
+                (c) => c.characterId === characterId,
+              );
 
               if (characterIndex !== -1) {
                 const updatedStates = [...storyStates];
@@ -207,7 +308,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
                 updatedCharacters[characterIndex] = {
                   ...oldCharacterState,
-                  ...updates
+                  ...updates,
                 };
 
                 // Log the change
@@ -215,23 +316,23 @@ export const useWorldStateStore = create<WorldStateStore>()(
                   id: generateId(),
                   timestamp: new Date(),
                   chapterNumber: worldState.chapterNumber,
-                  changeType: 'character',
+                  changeType: "character",
                   targetId: characterId,
-                  property: 'state',
+                  property: "state",
                   oldValue: oldCharacterState,
                   newValue: updatedCharacters[characterIndex],
-                  reason: 'Character state update',
-                  automatic: false
+                  reason: "Character state update",
+                  automatic: false,
                 };
 
                 updatedStates[stateIndex] = {
                   ...worldState,
                   state: {
                     ...worldState.state,
-                    characters: updatedCharacters
+                    characters: updatedCharacters,
                   },
                   changeLog: [...worldState.changeLog, change],
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 };
 
                 updatedWorldStates.set(storyId, updatedStates);
@@ -245,41 +346,49 @@ export const useWorldStateStore = create<WorldStateStore>()(
       },
 
       setCharacterLocation: (worldStateId, characterId, locationId) => {
-        get().updateCharacterState(worldStateId, characterId, { location: locationId });
+        get().updateCharacterState(worldStateId, characterId, {
+          location: locationId,
+        });
 
         // Update location occupancy
         set((state) => {
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
               const updatedStates = [...storyStates];
-              const updatedLocations = worldState.state.locations.map(location => {
-                // Remove character from all locations
-                const currentOccupants = location.currentOccupants.filter(id => id !== characterId);
+              const updatedLocations = worldState.state.locations.map(
+                (location) => {
+                  // Remove character from all locations
+                  const currentOccupants = location.currentOccupants.filter(
+                    (id) => id !== characterId,
+                  );
 
-                // Add character to new location
-                if (location.locationId === locationId) {
-                  return {
-                    ...location,
-                    currentOccupants: [...currentOccupants, characterId]
-                  };
-                } else {
-                  return {
-                    ...location,
-                    currentOccupants
-                  };
-                }
-              });
+                  // Add character to new location
+                  if (location.locationId === locationId) {
+                    return {
+                      ...location,
+                      currentOccupants: [...currentOccupants, characterId],
+                    };
+                  } else {
+                    return {
+                      ...location,
+                      currentOccupants,
+                    };
+                  }
+                },
+              );
 
               updatedStates[stateIndex] = {
                 ...worldState,
                 state: {
                   ...worldState.state,
-                  locations: updatedLocations
-                }
+                  locations: updatedLocations,
+                },
               };
 
               updatedWorldStates.set(storyId, updatedStates);
@@ -297,27 +406,43 @@ export const useWorldStateStore = create<WorldStateStore>()(
       addCharacterFlag: (worldStateId, characterId, flag, value) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const character = worldState.state.characters.find(c => c.characterId === characterId);
+            const character = worldState.state.characters.find(
+              (c) => c.characterId === characterId,
+            );
             if (character) {
               const updatedFlags = { ...character.flags, [flag]: value };
-              state.updateCharacterState(worldStateId, characterId, { flags: updatedFlags });
+              state.updateCharacterState(worldStateId, characterId, {
+                flags: updatedFlags,
+              });
               break;
             }
           }
         }
       },
 
-      updateCharacterRelationship: (worldStateId, characterId, targetId, strength) => {
+      updateCharacterRelationship: (
+        worldStateId,
+        characterId,
+        targetId,
+        strength,
+      ) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const character = worldState.state.characters.find(c => c.characterId === characterId);
+            const character = worldState.state.characters.find(
+              (c) => c.characterId === characterId,
+            );
             if (character) {
-              const updatedRelationships = { ...character.relationships, [targetId]: strength };
-              state.updateCharacterState(worldStateId, characterId, { relationships: updatedRelationships });
+              const updatedRelationships = {
+                ...character.relationships,
+                [targetId]: strength,
+              };
+              state.updateCharacterState(worldStateId, characterId, {
+                relationships: updatedRelationships,
+              });
               break;
             }
           }
@@ -330,10 +455,14 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
-              const locationIndex = worldState.state.locations.findIndex(l => l.locationId === locationId);
+              const locationIndex = worldState.state.locations.findIndex(
+                (l) => l.locationId === locationId,
+              );
 
               if (locationIndex !== -1) {
                 const updatedStates = [...storyStates];
@@ -341,16 +470,16 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
                 updatedLocations[locationIndex] = {
                   ...updatedLocations[locationIndex],
-                  ...updates
+                  ...updates,
                 };
 
                 updatedStates[stateIndex] = {
                   ...worldState,
                   state: {
                     ...worldState.state,
-                    locations: updatedLocations
+                    locations: updatedLocations,
                   },
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 };
 
                 updatedWorldStates.set(storyId, updatedStates);
@@ -366,12 +495,19 @@ export const useWorldStateStore = create<WorldStateStore>()(
       addLocationOccupant: (worldStateId, locationId, characterId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const location = worldState.state.locations.find(l => l.locationId === locationId);
+            const location = worldState.state.locations.find(
+              (l) => l.locationId === locationId,
+            );
             if (location && !location.currentOccupants.includes(characterId)) {
-              const updatedOccupants = [...location.currentOccupants, characterId];
-              state.updateLocationState(worldStateId, locationId, { currentOccupants: updatedOccupants });
+              const updatedOccupants = [
+                ...location.currentOccupants,
+                characterId,
+              ];
+              state.updateLocationState(worldStateId, locationId, {
+                currentOccupants: updatedOccupants,
+              });
               break;
             }
           }
@@ -381,12 +517,18 @@ export const useWorldStateStore = create<WorldStateStore>()(
       removeLocationOccupant: (worldStateId, locationId, characterId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const location = worldState.state.locations.find(l => l.locationId === locationId);
+            const location = worldState.state.locations.find(
+              (l) => l.locationId === locationId,
+            );
             if (location) {
-              const updatedOccupants = location.currentOccupants.filter(id => id !== characterId);
-              state.updateLocationState(worldStateId, locationId, { currentOccupants: updatedOccupants });
+              const updatedOccupants = location.currentOccupants.filter(
+                (id) => id !== characterId,
+              );
+              state.updateLocationState(worldStateId, locationId, {
+                currentOccupants: updatedOccupants,
+              });
               break;
             }
           }
@@ -396,12 +538,19 @@ export const useWorldStateStore = create<WorldStateStore>()(
       setLocationProperty: (worldStateId, locationId, property, value) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const location = worldState.state.locations.find(l => l.locationId === locationId);
+            const location = worldState.state.locations.find(
+              (l) => l.locationId === locationId,
+            );
             if (location) {
-              const updatedProperties = { ...location.properties, [property]: value };
-              state.updateLocationState(worldStateId, locationId, { properties: updatedProperties });
+              const updatedProperties = {
+                ...location.properties,
+                [property]: value,
+              };
+              state.updateLocationState(worldStateId, locationId, {
+                properties: updatedProperties,
+              });
               break;
             }
           }
@@ -414,10 +563,14 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
-              const itemIndex = worldState.state.items.findIndex(i => i.itemId === itemId);
+              const itemIndex = worldState.state.items.findIndex(
+                (i) => i.itemId === itemId,
+              );
 
               if (itemIndex !== -1) {
                 const updatedStates = [...storyStates];
@@ -425,16 +578,16 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
                 updatedItems[itemIndex] = {
                   ...updatedItems[itemIndex],
-                  ...updates
+                  ...updates,
                 };
 
                 updatedStates[stateIndex] = {
                   ...worldState,
                   state: {
                     ...worldState.state,
-                    items: updatedItems
+                    items: updatedItems,
                   },
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 };
 
                 updatedWorldStates.set(storyId, updatedStates);
@@ -449,22 +602,32 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
       transferItem: (worldStateId, itemId, toCharacterId, toLocationId) => {
         if (toCharacterId && toLocationId) {
-          console.error('Item cannot be transferred to both character and location');
+          console.error(
+            "Item cannot be transferred to both character and location",
+          );
           return;
         }
 
         const updates: Partial<ItemState> = toCharacterId
-          ? { location: 'character', ownerId: toCharacterId, locationId: undefined }
-          : { location: 'location', ownerId: undefined, locationId: toLocationId };
+          ? {
+              location: "character",
+              ownerId: toCharacterId,
+              locationId: undefined,
+            }
+          : {
+              location: "location",
+              ownerId: undefined,
+              locationId: toLocationId,
+            };
 
         get().updateItemState(worldStateId, itemId, updates);
       },
 
       destroyItem: (worldStateId, itemId, _reason) =>
         get().updateItemState(worldStateId, itemId, {
-          location: 'destroyed',
+          location: "destroyed",
           ownerId: undefined,
-          locationId: undefined
+          locationId: undefined,
         }),
 
       // Event State Management
@@ -473,10 +636,14 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
-              const eventIndex = worldState.state.events.findIndex(e => e.eventId === eventId);
+              const eventIndex = worldState.state.events.findIndex(
+                (e) => e.eventId === eventId,
+              );
 
               if (eventIndex !== -1) {
                 const updatedStates = [...storyStates];
@@ -484,16 +651,16 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
                 updatedEvents[eventIndex] = {
                   ...updatedEvents[eventIndex],
-                  ...updates
+                  ...updates,
                 };
 
                 updatedStates[stateIndex] = {
                   ...worldState,
                   state: {
                     ...worldState.state,
-                    events: updatedEvents
+                    events: updatedEvents,
                   },
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 };
 
                 updatedWorldStates.set(storyId, updatedStates);
@@ -509,12 +676,16 @@ export const useWorldStateStore = create<WorldStateStore>()(
       addEventParticipant: (worldStateId, eventId, characterId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const event = worldState.state.events.find(e => e.eventId === eventId);
+            const event = worldState.state.events.find(
+              (e) => e.eventId === eventId,
+            );
             if (event && !event.participants.includes(characterId)) {
               const updatedParticipants = [...event.participants, characterId];
-              state.updateEventState(worldStateId, eventId, { participants: updatedParticipants });
+              state.updateEventState(worldStateId, eventId, {
+                participants: updatedParticipants,
+              });
               break;
             }
           }
@@ -523,9 +694,11 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
       completeEvent: (worldStateId, eventId, consequences) =>
         get().updateEventState(worldStateId, eventId, {
-          status: 'completed',
+          status: "completed",
           consequences,
-          endChapter: get().worldStates.get('')?.find(ws => ws.id === worldStateId)?.chapterNumber
+          endChapter: get()
+            .worldStates.get("")
+            ?.find((ws) => ws.id === worldStateId)?.chapterNumber,
         }),
 
       // World Properties
@@ -534,25 +707,33 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
               const updatedStates = [...storyStates];
 
-              const existingPropIndex = worldState.state.worldProperties.findIndex(p => p.key === key);
+              const existingPropIndex =
+                worldState.state.worldProperties.findIndex(
+                  (p) => p.key === key,
+                );
               const updatedProperties = [...worldState.state.worldProperties];
 
               const newProperty: WorldProperty = {
                 key,
                 value,
                 type:
-                  typeof value === 'string' ? 'string' :
-                  typeof value === 'number' ? 'number' :
-                  typeof value === 'boolean' ? 'boolean' :
-                  'object',
+                  typeof value === "string"
+                    ? "string"
+                    : typeof value === "number"
+                      ? "number"
+                      : typeof value === "boolean"
+                        ? "boolean"
+                        : "object",
                 description: reason,
                 lastChanged: new Date(),
-                changeReason: reason
+                changeReason: reason,
               };
 
               if (existingPropIndex !== -1) {
@@ -565,9 +746,9 @@ export const useWorldStateStore = create<WorldStateStore>()(
                 ...worldState,
                 state: {
                   ...worldState.state,
-                  worldProperties: updatedProperties
+                  worldProperties: updatedProperties,
                 },
-                timestamp: new Date()
+                timestamp: new Date(),
               };
 
               updatedWorldStates.set(storyId, updatedStates);
@@ -582,9 +763,11 @@ export const useWorldStateStore = create<WorldStateStore>()(
       getWorldProperty: (worldStateId, key) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
-            const property = worldState.state.worldProperties.find(p => p.key === key);
+            const property = worldState.state.worldProperties.find(
+              (p) => p.key === key,
+            );
             return property?.value;
           }
         }
@@ -596,19 +779,23 @@ export const useWorldStateStore = create<WorldStateStore>()(
           const updatedWorldStates = new Map(state.worldStates);
 
           for (const [storyId, storyStates] of updatedWorldStates) {
-            const stateIndex = storyStates.findIndex(ws => ws.id === worldStateId);
+            const stateIndex = storyStates.findIndex(
+              (ws) => ws.id === worldStateId,
+            );
             if (stateIndex !== -1) {
               const worldState = storyStates[stateIndex];
               const updatedStates = [...storyStates];
-              const updatedProperties = worldState.state.worldProperties.filter(p => p.key !== key);
+              const updatedProperties = worldState.state.worldProperties.filter(
+                (p) => p.key !== key,
+              );
 
               updatedStates[stateIndex] = {
                 ...worldState,
                 state: {
                   ...worldState.state,
-                  worldProperties: updatedProperties
+                  worldProperties: updatedProperties,
                 },
-                timestamp: new Date()
+                timestamp: new Date(),
               };
 
               updatedWorldStates.set(storyId, updatedStates);
@@ -623,19 +810,21 @@ export const useWorldStateStore = create<WorldStateStore>()(
       // Validation & Consistency
       addValidationRule: (rule) =>
         set((state) => ({
-          validationRules: [...state.validationRules, rule]
+          validationRules: [...state.validationRules, rule],
         })),
 
       removeValidationRule: (ruleId) =>
         set((state) => ({
-          validationRules: state.validationRules.filter(rule => rule.id !== ruleId)
+          validationRules: state.validationRules.filter(
+            (rule) => rule.id !== ruleId,
+          ),
         })),
 
       updateValidationRule: (ruleId, updates) =>
         set((state) => ({
-          validationRules: state.validationRules.map(rule =>
-            rule.id === ruleId ? { ...rule, ...updates } : rule
-          )
+          validationRules: state.validationRules.map((rule) =>
+            rule.id === ruleId ? { ...rule, ...updates } : rule,
+          ),
         })),
 
       runConsistencyCheck: (worldStateId, previousWorldStateId) => {
@@ -648,10 +837,12 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
         for (const storyStates of state.worldStates.values()) {
           if (!targetWorldState) {
-            targetWorldState = storyStates.find(ws => ws.id === worldStateId) || null;
+            targetWorldState =
+              storyStates.find((ws) => ws.id === worldStateId) || null;
           }
           if (previousWorldStateId && !previousWorldState) {
-            previousWorldState = storyStates.find(ws => ws.id === previousWorldStateId) || null;
+            previousWorldState =
+              storyStates.find((ws) => ws.id === previousWorldStateId) || null;
           }
         }
 
@@ -659,26 +850,35 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
         // Run validation rules
         state.validationRules
-          .filter(rule => rule.enabled)
+          .filter((rule) => rule.enabled)
           .sort((a, b) => b.priority - a.priority)
-          .forEach(rule => {
+          .forEach((rule) => {
             try {
-              if (rule.condition(targetWorldState!, previousWorldState || undefined)) {
+              if (
+                rule.condition(
+                  targetWorldState!,
+                  previousWorldState || undefined,
+                )
+              ) {
                 results.push({
                   id: generateId(),
-                  type: 'error',
-                  category: (
-                    ['character', 'location', 'item', 'timeline', 'logic'].includes(rule.category)
-                      ? rule.category
-                      : 'logic'
-                  ) as ConsistencyResult['category'],
+                  type: "error",
+                  category: ([
+                    "character",
+                    "location",
+                    "item",
+                    "timeline",
+                    "logic",
+                  ].includes(rule.category)
+                    ? rule.category
+                    : "logic") as ConsistencyResult["category"],
                   description: rule.name,
                   details: rule.message,
                   affectedElements: [],
                   suggestedFix: rule.suggestedFix,
                   autoFixable: !!rule.autoFix,
                   severity: 3,
-                  detectedAt: new Date()
+                  detectedAt: new Date(),
                 });
               }
             } catch (error) {
@@ -691,26 +891,29 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
       resolveConsistencyIssue: (worldStateId, issueId, resolution) => {
         // Implementation for resolving consistency issues
-        console.log(`Resolving issue ${issueId} for world state ${worldStateId}: ${resolution}`);
+        console.log(
+          `Resolving issue ${issueId} for world state ${worldStateId}: ${resolution}`,
+        );
       },
 
       // Snapshots
       createSnapshot: (worldStateId, description, tags = []) => {
         const state = get();
         for (const [storyId, storyStates] of state.worldStates) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
             const snapshot: WorldStateSnapshot = {
               worldState: JSON.parse(JSON.stringify(worldState)), // Deep clone
               storyTitle: storyId, // Would need to lookup actual story title
-              chapterTitle: worldState.chapterId || `Chapter ${worldState.chapterNumber}`,
+              chapterTitle:
+                worldState.chapterId || `Chapter ${worldState.chapterNumber}`,
               createdAt: new Date(),
               description,
-              tags
+              tags,
             };
 
             set((currentState) => ({
-              snapshots: [...currentState.snapshots, snapshot]
+              snapshots: [...currentState.snapshots, snapshot],
             }));
             break;
           }
@@ -719,31 +922,43 @@ export const useWorldStateStore = create<WorldStateStore>()(
 
       restoreFromSnapshot: (snapshotId) => {
         const state = get();
-        const snapshot = state.snapshots.find(s => s.worldState.id === snapshotId);
+        const snapshot = state.snapshots.find(
+          (s) => s.worldState.id === snapshotId,
+        );
         if (snapshot) {
-          const restoredState = { ...snapshot.worldState, id: generateId(), timestamp: new Date() };
+          const restoredState = {
+            ...snapshot.worldState,
+            id: generateId(),
+            timestamp: new Date(),
+          };
 
           const updatedWorldStates = new Map(state.worldStates);
-          const storyStates = updatedWorldStates.get(restoredState.storyId) || [];
-          updatedWorldStates.set(restoredState.storyId, [...storyStates, restoredState]);
+          const storyStates =
+            updatedWorldStates.get(restoredState.storyId) || [];
+          updatedWorldStates.set(restoredState.storyId, [
+            ...storyStates,
+            restoredState,
+          ]);
 
           set({
             worldStates: updatedWorldStates,
-            currentWorldState: restoredState
+            currentWorldState: restoredState,
           });
         }
       },
 
       deleteSnapshot: (snapshotId) =>
         set((state) => ({
-          snapshots: state.snapshots.filter(s => s.worldState.id !== snapshotId)
+          snapshots: state.snapshots.filter(
+            (s) => s.worldState.id !== snapshotId,
+          ),
         })),
 
       // Utilities
       cloneWorldState: (worldStateId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
             return JSON.parse(JSON.stringify(worldState));
           }
@@ -759,19 +974,19 @@ export const useWorldStateStore = create<WorldStateStore>()(
       exportWorldState: (worldStateId) => {
         const state = get();
         for (const storyStates of state.worldStates.values()) {
-          const worldState = storyStates.find(ws => ws.id === worldStateId);
+          const worldState = storyStates.find((ws) => ws.id === worldStateId);
           if (worldState) {
             return JSON.stringify(worldState, null, 2);
           }
         }
-        return '';
+        return "";
       },
 
       importWorldState: (data) => {
         try {
           return JSON.parse(data) as WorldState;
         } catch {
-          throw new Error('Invalid world state data');
+          throw new Error("Invalid world state data");
         }
       },
 
@@ -780,16 +995,16 @@ export const useWorldStateStore = create<WorldStateStore>()(
           worldStates: new Map(),
           currentWorldState: null,
           validationRules: [],
-          snapshots: []
-        })
+          snapshots: [],
+        }),
     }),
     {
-      name: 'writers-world-state-storage',
+      name: "writers-world-state-storage",
       partialize: (state) => ({
         // Convert Map to Array for serialization
         worldStates: Array.from(state.worldStates.entries()),
         validationRules: state.validationRules,
-        snapshots: state.snapshots
+        snapshots: state.snapshots,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -799,7 +1014,7 @@ export const useWorldStateStore = create<WorldStateStore>()(
             : Array.from(state.worldStates.entries());
           state.worldStates = new Map(worldStateEntries);
         }
-      }
-    }
-  )
+      },
+    },
+  ),
 );

@@ -75,14 +75,14 @@ export interface FilterOptions {
 
 export interface SortOptions {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }
 
 // Consistency check types
 export interface ConsistencyIssue {
   id: string;
-  type: 'error' | 'warning' | 'info';
-  category: 'timeline' | 'character' | 'world' | 'plot';
+  type: "error" | "warning" | "info";
+  category: "timeline" | "character" | "world" | "plot";
   title: string;
   description: string;
   suggestions: string[];

@@ -11,13 +11,13 @@ export interface WritingSession {
   duration: number; // in minutes
   isActive: boolean;
   date: string; // YYYY-MM-DD format
-  sessionType?: 'new_chapter' | 'section' | 'continue';
+  sessionType?: "new_chapter" | "section" | "continue";
   sessionContext?: string;
 }
 
 export interface WritingGoal {
   id: string;
-  type: 'daily' | 'weekly' | 'monthly' | 'project';
+  type: "daily" | "weekly" | "monthly" | "project";
   target: number; // words
   current: number; // words achieved
   deadline?: Date;
@@ -65,12 +65,17 @@ export interface MonthlyWritingStats {
 
 export interface ProductivityInsight {
   id: string;
-  type: 'peak_hours' | 'streak_analysis' | 'goal_achievement' | 'pace_trend' | 'chapter_completion';
+  type:
+    | "peak_hours"
+    | "streak_analysis"
+    | "goal_achievement"
+    | "pace_trend"
+    | "chapter_completion";
   title: string;
   description: string;
   value: number | string;
-  trend: 'up' | 'down' | 'stable';
-  period: 'daily' | 'weekly' | 'monthly';
+  trend: "up" | "down" | "stable";
+  period: "daily" | "weekly" | "monthly";
   date: Date;
 }
 
@@ -121,8 +126,8 @@ export interface AnalyticsActions {
     storyId: string,
     chapterId?: string,
     wordTarget?: number,
-    sessionType?: 'new_chapter' | 'section' | 'continue',
-    sessionContext?: string
+    sessionType?: "new_chapter" | "section" | "continue",
+    sessionContext?: string,
   ) => void;
   endSession: () => void;
   updateSessionProgress: (currentWordCount: number) => void;
@@ -130,7 +135,7 @@ export interface AnalyticsActions {
   resumeSession: () => void;
 
   // Goal Management
-  createGoal: (goal: Omit<WritingGoal, 'id' | 'current' | 'createdAt'>) => void;
+  createGoal: (goal: Omit<WritingGoal, "id" | "current" | "createdAt">) => void;
   updateGoal: (goalId: string, updates: Partial<WritingGoal>) => void;
   deleteGoal: (goalId: string) => void;
   markGoalComplete: (goalId: string) => void;
@@ -143,7 +148,10 @@ export interface AnalyticsActions {
   generateInsights: () => ProductivityInsight[];
 
   // Data Retrieval
-  getSessionsByDateRange: (startDate: string, endDate: string) => WritingSession[];
+  getSessionsByDateRange: (
+    startDate: string,
+    endDate: string,
+  ) => WritingSession[];
   getWritingPaceData: () => WritingPaceData;
   getChapterCompletionRates: () => ChapterCompletionRate[];
   getTimeOfDayStats: () => TimeOfDayStats[];

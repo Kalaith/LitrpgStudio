@@ -1,22 +1,25 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, addDays, addWeeks, addMonths, differenceInDays } from 'date-fns';
-import { useAnalyticsStore } from '../stores/analyticsStore';
-import { useStoryStore } from '../stores/storyStore';
-import type { WritingGoal } from '../types/analytics';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  format,
+  addDays,
+  addWeeks,
+  addMonths,
+  differenceInDays,
+} from "date-fns";
+import { useAnalyticsStore } from "../stores/analyticsStore";
+import { useStoryStore } from "../stores/storyStore";
+import type { WritingGoal } from "../types/analytics";
 
 interface WritingGoalsProps {
   className?: string;
 }
 
-export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) => {
-  const {
-    goals,
-    createGoal,
-    updateGoal,
-    deleteGoal,
-    markGoalComplete,
-  } = useAnalyticsStore();
+export const WritingGoals: React.FC<WritingGoalsProps> = ({
+  className = "",
+}) => {
+  const { goals, createGoal, updateGoal, deleteGoal, markGoalComplete } =
+    useAnalyticsStore();
 
   const { stories } = useStoryStore();
 
@@ -24,15 +27,15 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
   const [editingGoal, setEditingGoal] = useState<WritingGoal | null>(null);
 
   const [newGoal, setNewGoal] = useState<{
-    type: WritingGoal['type'];
+    type: WritingGoal["type"];
     target: number;
     deadline: string;
     storyId: string;
   }>({
-    type: 'daily',
+    type: "daily",
     target: 500,
-    deadline: '',
-    storyId: '',
+    deadline: "",
+    storyId: "",
   });
 
   const handleCreateGoal = () => {
@@ -45,7 +48,7 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
     };
 
     createGoal(goalData);
-    setNewGoal({ type: 'daily', target: 500, deadline: '', storyId: '' });
+    setNewGoal({ type: "daily", target: 500, deadline: "", storyId: "" });
     setShowCreateForm(false);
   };
 
@@ -61,64 +64,74 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
   };
 
   const getGoalStatus = (goal: WritingGoal) => {
-    if (goal.completedAt) return 'completed';
-    if (!goal.isActive) return 'inactive';
+    if (goal.completedAt) return "completed";
+    if (!goal.isActive) return "inactive";
 
     if (goal.deadline) {
       const daysRemaining = differenceInDays(goal.deadline, new Date());
-      if (daysRemaining < 0) return 'overdue';
-      if (daysRemaining <= 1) return 'urgent';
+      if (daysRemaining < 0) return "overdue";
+      if (daysRemaining <= 1) return "urgent";
     }
 
     const progress = calculateGoalProgress(goal);
-    if (progress >= 100) return 'achieved';
-    if (progress >= 75) return 'on_track';
-    if (progress >= 50) return 'behind';
-    return 'started';
+    if (progress >= 100) return "achieved";
+    if (progress >= 75) return "on_track";
+    if (progress >= 50) return "behind";
+    return "started";
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-      case 'achieved':
-        return 'text-green-600 bg-green-50';
-      case 'on_track':
-        return 'text-blue-600 bg-blue-50';
-      case 'behind':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'urgent':
-      case 'overdue':
-        return 'text-red-600 bg-red-50';
-      case 'inactive':
-        return 'text-gray-600 bg-gray-50';
+      case "completed":
+      case "achieved":
+        return "text-green-600 bg-green-50";
+      case "on_track":
+        return "text-blue-600 bg-blue-50";
+      case "behind":
+        return "text-yellow-600 bg-yellow-50";
+      case "urgent":
+      case "overdue":
+        return "text-red-600 bg-red-50";
+      case "inactive":
+        return "text-gray-600 bg-gray-50";
       default:
-        return 'text-gray-600 bg-gray-50';
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   const getDefaultTarget = (type: string) => {
     switch (type) {
-      case 'daily': return 500;
-      case 'weekly': return 3500;
-      case 'monthly': return 15000;
-      case 'project': return 50000;
-      default: return 500;
+      case "daily":
+        return 500;
+      case "weekly":
+        return 3500;
+      case "monthly":
+        return 15000;
+      case "project":
+        return 50000;
+      default:
+        return 500;
     }
   };
 
   const getDefaultDeadline = (type: string) => {
     const now = new Date();
     switch (type) {
-      case 'daily': return format(addDays(now, 1), 'yyyy-MM-dd');
-      case 'weekly': return format(addWeeks(now, 1), 'yyyy-MM-dd');
-      case 'monthly': return format(addMonths(now, 1), 'yyyy-MM-dd');
-      case 'project': return format(addMonths(now, 6), 'yyyy-MM-dd');
-      default: return '';
+      case "daily":
+        return format(addDays(now, 1), "yyyy-MM-dd");
+      case "weekly":
+        return format(addWeeks(now, 1), "yyyy-MM-dd");
+      case "monthly":
+        return format(addMonths(now, 1), "yyyy-MM-dd");
+      case "project":
+        return format(addMonths(now, 6), "yyyy-MM-dd");
+      default:
+        return "";
     }
   };
 
-  const activeGoals = goals.filter(g => g.isActive);
-  const completedGoals = goals.filter(g => g.completedAt);
+  const activeGoals = goals.filter((g) => g.isActive);
+  const completedGoals = goals.filter((g) => g.completedAt);
 
   return (
     <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
@@ -150,7 +163,10 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
 
         <div className="bg-purple-50 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-purple-600">
-            {goals.length > 0 ? Math.round((completedGoals.length / goals.length) * 100) : 0}%
+            {goals.length > 0
+              ? Math.round((completedGoals.length / goals.length) * 100)
+              : 0}
+            %
           </div>
           <div className="text-sm text-gray-600">Success Rate</div>
         </div>
@@ -161,11 +177,13 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
         {showCreateForm && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="bg-gray-50 rounded-lg p-4 mb-6"
           >
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Create New Goal</h3>
+            <h3 className="text-lg font-medium text-gray-800 mb-4">
+              Create New Goal
+            </h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -175,7 +193,7 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                 <select
                   value={newGoal.type}
                   onChange={(e) => {
-                    const type = e.target.value as WritingGoal['type'];
+                    const type = e.target.value as WritingGoal["type"];
                     setNewGoal({
                       ...newGoal,
                       type,
@@ -199,7 +217,12 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                 <input
                   type="number"
                   value={newGoal.target}
-                  onChange={(e) => setNewGoal({ ...newGoal, target: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewGoal({
+                      ...newGoal,
+                      target: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="1"
                 />
@@ -212,7 +235,9 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                 <input
                   type="date"
                   value={newGoal.deadline}
-                  onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
+                  onChange={(e) =>
+                    setNewGoal({ ...newGoal, deadline: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -223,11 +248,13 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                 </label>
                 <select
                   value={newGoal.storyId}
-                  onChange={(e) => setNewGoal({ ...newGoal, storyId: e.target.value })}
+                  onChange={(e) =>
+                    setNewGoal({ ...newGoal, storyId: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Any story</option>
-                  {stories.map(story => (
+                  {stories.map((story) => (
                     <option key={story.id} value={story.id}>
                       {story.title}
                     </option>
@@ -257,10 +284,12 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
       {/* Goals List */}
       <div className="space-y-4">
         <AnimatePresence>
-          {goals.map(goal => {
+          {goals.map((goal) => {
             const status = getGoalStatus(goal);
             const progress = calculateGoalProgress(goal);
-            const relatedStory = goal.storyId ? stories.find(s => s.id === goal.storyId) : null;
+            const relatedStory = goal.storyId
+              ? stories.find((s) => s.id === goal.storyId)
+              : null;
 
             return (
               <motion.div
@@ -277,8 +306,10 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                         {goal.type}
                       </span>
 
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                        {status.replace('_', ' ')}
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}
+                      >
+                        {status.replace("_", " ")}
                       </span>
 
                       {relatedStory && (
@@ -291,19 +322,21 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                     <div className="mb-3">
                       <div className="flex justify-between text-sm text-gray-600 mb-1">
                         <span>Progress</span>
-                        <span>{goal.current} / {goal.target} words</span>
+                        <span>
+                          {goal.current} / {goal.target} words
+                        </span>
                       </div>
 
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <motion.div
                           className={`h-2 rounded-full ${
-                            status === 'completed' || status === 'achieved'
-                              ? 'bg-green-500'
-                              : status === 'on_track'
-                              ? 'bg-blue-500'
-                              : status === 'behind'
-                              ? 'bg-yellow-500'
-                              : 'bg-red-500'
+                            status === "completed" || status === "achieved"
+                              ? "bg-green-500"
+                              : status === "on_track"
+                                ? "bg-blue-500"
+                                : status === "behind"
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
                           }`}
                           initial={{ width: 0 }}
                           animate={{ width: `${Math.min(progress, 100)}%` }}
@@ -318,10 +351,11 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
 
                     {goal.deadline && (
                       <div className="text-sm text-gray-500">
-                        Deadline: {format(goal.deadline, 'MMM dd, yyyy')}
+                        Deadline: {format(goal.deadline, "MMM dd, yyyy")}
                         {differenceInDays(goal.deadline, new Date()) >= 0 && (
                           <span className="ml-2">
-                            ({differenceInDays(goal.deadline, new Date())} days remaining)
+                            ({differenceInDays(goal.deadline, new Date())} days
+                            remaining)
                           </span>
                         )}
                       </div>
@@ -329,7 +363,7 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                   </div>
 
                   <div className="flex items-center space-x-2 ml-4">
-                    {status === 'achieved' && !goal.completedAt && (
+                    {status === "achieved" && !goal.completedAt && (
                       <button
                         onClick={() => markGoalComplete(goal.id)}
                         className="text-green-600 hover:text-green-800 text-sm font-medium"
@@ -386,7 +420,9 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
               className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Edit Goal</h3>
+              <h3 className="text-lg font-medium text-gray-800 mb-4">
+                Edit Goal
+              </h3>
 
               <div className="space-y-4">
                 <div>
@@ -396,10 +432,12 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                   <input
                     type="number"
                     value={editingGoal.target}
-                    onChange={(e) => setEditingGoal({
-                      ...editingGoal,
-                      target: parseInt(e.target.value) || 0
-                    })}
+                    onChange={(e) =>
+                      setEditingGoal({
+                        ...editingGoal,
+                        target: parseInt(e.target.value) || 0,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
                   />
@@ -412,10 +450,12 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                   <input
                     type="number"
                     value={editingGoal.current}
-                    onChange={(e) => setEditingGoal({
-                      ...editingGoal,
-                      current: parseInt(e.target.value) || 0
-                    })}
+                    onChange={(e) =>
+                      setEditingGoal({
+                        ...editingGoal,
+                        current: parseInt(e.target.value) || 0,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="0"
                     max={editingGoal.target}
@@ -428,11 +468,19 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                   </label>
                   <input
                     type="date"
-                    value={editingGoal.deadline ? format(editingGoal.deadline, 'yyyy-MM-dd') : ''}
-                    onChange={(e) => setEditingGoal({
-                      ...editingGoal,
-                      deadline: e.target.value ? new Date(e.target.value) : undefined
-                    })}
+                    value={
+                      editingGoal.deadline
+                        ? format(editingGoal.deadline, "yyyy-MM-dd")
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setEditingGoal({
+                        ...editingGoal,
+                        deadline: e.target.value
+                          ? new Date(e.target.value)
+                          : undefined,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -442,10 +490,12 @@ export const WritingGoals: React.FC<WritingGoalsProps> = ({ className = '' }) =>
                     type="checkbox"
                     id="isActive"
                     checked={editingGoal.isActive}
-                    onChange={(e) => setEditingGoal({
-                      ...editingGoal,
-                      isActive: e.target.checked
-                    })}
+                    onChange={(e) =>
+                      setEditingGoal({
+                        ...editingGoal,
+                        isActive: e.target.checked,
+                      })
+                    }
                     className="mr-2"
                   />
                   <label htmlFor="isActive" className="text-sm text-gray-700">

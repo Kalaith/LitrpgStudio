@@ -7,8 +7,8 @@
  * @module utils/errors
  */
 
-import { useState, useCallback } from 'react';
-import { ERROR_MESSAGES } from '../constants';
+import { useState, useCallback } from "react";
+import { ERROR_MESSAGES } from "../constants";
 
 // =============================================================================
 // CUSTOM ERROR CLASSES
@@ -26,22 +26,23 @@ export class AppError extends Error {
   public readonly timestamp: Date;
   public readonly code?: string;
   public readonly context?: Record<string, unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly metadata?: Record<string, any>;
+  public readonly metadata?: Record<string, unknown>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(message: string, metadata?: Record<string, any>) {
+  constructor(message: string, metadata?: Record<string, unknown>) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
     this.timestamp = new Date();
     this.metadata = metadata;
-    this.code = typeof metadata?.code === 'string' ? metadata.code : undefined;
-    this.context = (metadata?.context as Record<string, unknown> | undefined) ?? undefined;
+    this.code = typeof metadata?.code === "string" ? metadata.code : undefined;
+    this.context =
+      (metadata?.context as Record<string, unknown> | undefined) ?? undefined;
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    const captureStackTrace = (Error as ErrorConstructor & {
-      captureStackTrace?: (targetObject: object) => void;
-    }).captureStackTrace;
+    const captureStackTrace = (
+      Error as ErrorConstructor & {
+        captureStackTrace?: (targetObject: object) => void;
+      }
+    ).captureStackTrace;
     if (captureStackTrace) {
       captureStackTrace(this);
     }
@@ -58,19 +59,16 @@ export class AppError extends Error {
  */
 export class ApiError extends AppError {
   public readonly status: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly response?: any;
+  public readonly response?: unknown;
 
   constructor(
     message: string,
     status: number = 500,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    response?: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>
+    response?: unknown,
+    metadata?: Record<string, unknown>,
   ) {
     super(message, metadata);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.response = response;
   }
@@ -93,11 +91,10 @@ export class ValidationError extends AppError {
   constructor(
     message: string,
     validationErrors?: Record<string, string[]>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>,
   ) {
     super(message, metadata);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
     this.validationErrors = validationErrors;
     this.fields = validationErrors;
   }
@@ -114,10 +111,12 @@ export class ValidationError extends AppError {
 export class NetworkError extends AppError {
   public readonly isOffline: boolean;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(message: string = ERROR_MESSAGES.NETWORK_ERROR, metadata?: Record<string, any>) {
+  constructor(
+    message: string = ERROR_MESSAGES.NETWORK_ERROR,
+    metadata?: Record<string, unknown>,
+  ) {
     super(message, metadata);
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
     const nav = (globalThis as { navigator?: Navigator }).navigator;
     this.isOffline = nav ? !nav.onLine : false;
   }
@@ -136,14 +135,13 @@ export class NotFoundError extends ApiError {
   public readonly resourceId?: string;
 
   constructor(
-    message: string = 'Resource not found',
+    message: string = "Resource not found",
     resourceType?: string,
     resourceId?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>,
   ) {
     super(message, 404, undefined, metadata);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
     this.resourceType = resourceType;
     this.resourceId = resourceId;
   }
@@ -161,13 +159,12 @@ export class UnauthorizedError extends ApiError {
   public readonly requiresLogin: boolean;
 
   constructor(
-    message: string = 'Unauthorized access',
+    message: string = "Unauthorized access",
     requiresLogin: boolean = true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>,
   ) {
     super(message, 401, undefined, metadata);
-    this.name = 'UnauthorizedError';
+    this.name = "UnauthorizedError";
     this.requiresLogin = requiresLogin;
   }
 }
@@ -190,13 +187,11 @@ export interface ErrorInfo {
   /** HTTP status code (if applicable) */
   status?: number;
   /** Additional error details */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  details?: any;
+  details?: unknown;
   /** Timestamp when error occurred */
   timestamp: Date;
   /** Error metadata */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // =============================================================================
@@ -273,10 +268,10 @@ export function handleError(error: unknown): ErrorInfo {
   }
 
   // Handle string errors
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return {
       message: error,
-      type: 'Error',
+      type: "Error",
       timestamp,
     };
   }
@@ -284,7 +279,7 @@ export function handleError(error: unknown): ErrorInfo {
   // Handle unknown error types
   return {
     message: ERROR_MESSAGES.GENERIC_ERROR,
-    type: 'UnknownError',
+    type: "UnknownError",
     details: error,
     timestamp,
   };
@@ -294,7 +289,7 @@ export function handleError(error: unknown): ErrorInfo {
 // TOAST UTILITY (for use with existing Toast component)
 // =============================================================================
 
-type ToastType = 'info' | 'success' | 'error' | 'warning';
+type ToastType = "info" | "success" | "error" | "warning";
 
 /**
  * Toast notification manager
@@ -304,39 +299,47 @@ type ToastType = 'info' | 'success' | 'error' | 'warning';
  * using a library like react-hot-toast.
  */
 class ToastManager {
-  private listeners: Array<(message: string, type: ToastType, duration: number) => void> = [];
+  private listeners: Array<
+    (message: string, type: ToastType, duration: number) => void
+  > = [];
 
   /**
    * Subscribe to toast notifications
    */
-  subscribe(listener: (message: string, type: ToastType, duration: number) => void) {
+  subscribe(
+    listener: (message: string, type: ToastType, duration: number) => void,
+  ) {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   /**
    * Show a toast notification
    */
-  private show(message: string, type: ToastType = 'info', duration: number = 3000) {
-    this.listeners.forEach(listener => listener(message, type, duration));
+  private show(
+    message: string,
+    type: ToastType = "info",
+    duration: number = 3000,
+  ) {
+    this.listeners.forEach((listener) => listener(message, type, duration));
   }
 
   success(message: string, duration?: number) {
-    this.show(message, 'success', duration);
+    this.show(message, "success", duration);
   }
 
   error(message: string, duration?: number) {
-    this.show(message, 'error', duration);
+    this.show(message, "error", duration);
   }
 
   info(message: string, duration?: number) {
-    this.show(message, 'info', duration);
+    this.show(message, "info", duration);
   }
 
   warning(message: string, duration?: number) {
-    this.show(message, 'warning', duration);
+    this.show(message, "warning", duration);
   }
 }
 
@@ -484,7 +487,7 @@ export interface RetryOptions {
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<T> {
   const {
     attempts = 3,
@@ -505,7 +508,8 @@ export async function withRetry<T>(
       lastError = error;
 
       // Check if we should retry this error
-      const shouldAttemptRetry = attempt < attempts && shouldRetry(error, attempt);
+      const shouldAttemptRetry =
+        attempt < attempts && shouldRetry(error, attempt);
 
       if (!shouldAttemptRetry) {
         throw error;
@@ -517,7 +521,9 @@ export async function withRetry<T>(
       }
 
       // Wait before retrying with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, Math.min(currentDelay, maxDelay)));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min(currentDelay, maxDelay)),
+      );
       currentDelay *= backoffMultiplier;
     }
   }
@@ -561,7 +567,9 @@ export function isNotFoundError(error: unknown): error is NotFoundError {
 /**
  * Check if an error is a 401 error
  */
-export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
+export function isUnauthorizedError(
+  error: unknown,
+): error is UnauthorizedError {
   return error instanceof UnauthorizedError;
 }
 
@@ -575,7 +583,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
   return ERROR_MESSAGES.GENERIC_ERROR;

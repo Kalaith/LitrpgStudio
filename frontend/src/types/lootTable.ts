@@ -12,8 +12,21 @@ export interface LootTable {
   updatedAt: Date;
 }
 
-export type LootCategory = 'monster' | 'treasure' | 'container' | 'environment' | 'quest' | 'shop' | 'random_event';
-export type LootTableType = 'simple' | 'weighted' | 'tiered' | 'conditional' | 'nested' | 'progressive';
+export type LootCategory =
+  | "monster"
+  | "treasure"
+  | "container"
+  | "environment"
+  | "quest"
+  | "shop"
+  | "random_event";
+export type LootTableType =
+  | "simple"
+  | "weighted"
+  | "tiered"
+  | "conditional"
+  | "nested"
+  | "progressive";
 
 export interface LootEntry {
   id: string;
@@ -30,7 +43,14 @@ export interface LootEntry {
   description: string;
 }
 
-export type LootEntryType = 'item' | 'currency' | 'experience' | 'table' | 'nothing' | 'effect' | 'custom';
+export type LootEntryType =
+  | "item"
+  | "currency"
+  | "experience"
+  | "table"
+  | "nothing"
+  | "effect"
+  | "custom";
 
 export interface ItemReference {
   itemId?: string;
@@ -59,14 +79,14 @@ export interface ProbabilityData {
   baseChance: number;
   scalingFactor: number;
   conditions: ProbabilityCondition[];
-  rollType: 'simple' | 'advantage' | 'disadvantage' | 'multiple';
+  rollType: "simple" | "advantage" | "disadvantage" | "multiple";
   rollModifier: number;
 }
 
 export interface ProbabilityCondition {
   condition: string;
   modifier: number;
-  type: 'additive' | 'multiplicative' | 'override';
+  type: "additive" | "multiplicative" | "override";
 }
 
 export interface LootCondition {
@@ -79,33 +99,33 @@ export interface LootCondition {
 }
 
 export type ConditionType =
-  | 'character_level'
-  | 'party_size'
-  | 'time_of_day'
-  | 'location'
-  | 'weather'
-  | 'season'
-  | 'difficulty'
-  | 'enemy_type'
-  | 'random_roll'
-  | 'character_stat'
-  | 'character_class'
-  | 'character_race'
-  | 'quest_status'
-  | 'reputation'
-  | 'custom';
+  | "character_level"
+  | "party_size"
+  | "time_of_day"
+  | "location"
+  | "weather"
+  | "season"
+  | "difficulty"
+  | "enemy_type"
+  | "random_roll"
+  | "character_stat"
+  | "character_class"
+  | "character_race"
+  | "quest_status"
+  | "reputation"
+  | "custom";
 
 export type ConditionOperator =
-  | 'equals'
-  | 'not_equals'
-  | 'greater_than'
-  | 'less_than'
-  | 'greater_equal'
-  | 'less_equal'
-  | 'contains'
-  | 'not_contains'
-  | 'in_range'
-  | 'not_in_range';
+  | "equals"
+  | "not_equals"
+  | "greater_than"
+  | "less_than"
+  | "greater_equal"
+  | "less_equal"
+  | "contains"
+  | "not_contains"
+  | "in_range"
+  | "not_in_range";
 
 export interface LootModifier {
   id: string;
@@ -118,18 +138,18 @@ export interface LootModifier {
 }
 
 export type ModifierType =
-  | 'quantity_bonus'
-  | 'quality_bonus'
-  | 'rarity_shift'
-  | 'additional_roll'
-  | 'reroll'
-  | 'upgrade'
-  | 'curse'
-  | 'blessing';
+  | "quantity_bonus"
+  | "quality_bonus"
+  | "rarity_shift"
+  | "additional_roll"
+  | "reroll"
+  | "upgrade"
+  | "curse"
+  | "blessing";
 
 export interface ModifierEffect {
   target: string;
-  operation: 'add' | 'multiply' | 'set' | 'reroll' | 'upgrade' | 'downgrade';
+  operation: "add" | "multiply" | "set" | "reroll" | "upgrade" | "downgrade";
   value: number;
   limit?: number;
 }
@@ -146,7 +166,13 @@ export interface LootTableMetadata {
   testResults: TestResult[];
 }
 
-export type DifficultyLevel = 'trivial' | 'easy' | 'normal' | 'hard' | 'extreme' | 'legendary';
+export type DifficultyLevel =
+  | "trivial"
+  | "easy"
+  | "normal"
+  | "hard"
+  | "extreme"
+  | "legendary";
 
 export interface LevelRange {
   min: number;
@@ -206,8 +232,13 @@ export interface BalanceAnalysis {
 }
 
 export interface BalanceIssue {
-  type: 'too_generous' | 'too_stingy' | 'rarity_imbalance' | 'outlier_items' | 'poor_distribution';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "too_generous"
+    | "too_stingy"
+    | "rarity_imbalance"
+    | "outlier_items"
+    | "poor_distribution";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   affectedEntries: string[];
   suggestedFix: string;
@@ -219,7 +250,14 @@ export interface ComparisonData {
   playerExpectations: Record<string, number>;
 }
 
-export type LootItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'artifact' | 'unique';
+export type LootItemRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "epic"
+  | "legendary"
+  | "artifact"
+  | "unique";
 
 export interface LootTableTemplate {
   id: string;
@@ -232,7 +270,7 @@ export interface LootTableTemplate {
 
 export interface TemplateCustomization {
   field: string;
-  type: 'text' | 'number' | 'select' | 'range' | 'boolean';
+  type: "text" | "number" | "select" | "range" | "boolean";
   label: string;
   description: string;
   defaultValue: unknown;
@@ -241,7 +279,7 @@ export interface TemplateCustomization {
 }
 
 export interface ValidationRule {
-  type: 'required' | 'min' | 'max' | 'pattern' | 'custom';
+  type: "required" | "min" | "max" | "pattern" | "custom";
   value?: unknown;
   message: string;
 }
@@ -259,7 +297,7 @@ export interface LootTableSet {
 export interface TableRelationship {
   parentTable: string;
   childTable: string;
-  type: 'nested' | 'sequential' | 'conditional' | 'alternative';
+  type: "nested" | "sequential" | "conditional" | "alternative";
   conditions: LootCondition[];
   probability: number;
 }
@@ -273,7 +311,12 @@ export interface SetMetadata {
 }
 
 export interface RandomizationEngine {
-  type: 'mersenne_twister' | 'xorshift' | 'linear_congruential' | 'crypto_random' | 'custom';
+  type:
+    | "mersenne_twister"
+    | "xorshift"
+    | "linear_congruential"
+    | "crypto_random"
+    | "custom";
   seed?: number;
   parameters: Record<string, unknown>;
 }
@@ -367,13 +410,13 @@ export interface ValidationResult {
 
 export interface ValidationIssue {
   type: string;
-  severity: 'info' | 'warning' | 'error';
+  severity: "info" | "warning" | "error";
   message: string;
   suggestedFix?: string;
 }
 
 export interface LootTableExport {
-  format: 'json' | 'xml' | 'csv' | 'yaml' | 'sql' | 'code';
+  format: "json" | "xml" | "csv" | "yaml" | "sql" | "code";
   options: ExportOptions;
   template?: string;
 }

@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '../constants';
+import { APP_CONFIG } from "../constants";
 
 // String utilities
 export const StringUtils = {
@@ -14,15 +14,15 @@ export const StringUtils = {
     return str
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   },
 
   stripHtml: (html: string): string => {
-    const tmp = document.createElement('div');
+    const tmp = document.createElement("div");
     tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
+    return tmp.textContent || tmp.innerText || "";
   },
 
   generateId: (): string => crypto.randomUUID(),
@@ -32,8 +32,11 @@ export const StringUtils = {
   },
 
   wordCount: (text: string): number => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  }
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+  },
 };
 
 // Number utilities
@@ -43,9 +46,9 @@ export const NumberUtils = {
   },
 
   formatNumber: (num: number, decimals: number = 0): string => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     }).format(num);
   },
 
@@ -55,45 +58,48 @@ export const NumberUtils = {
   },
 
   isValidNumber: (value: unknown): value is number => {
-    return typeof value === 'number' && !isNaN(value) && isFinite(value);
+    return typeof value === "number" && !isNaN(value) && isFinite(value);
   },
 
   roundTo: (num: number, decimals: number): number => {
     const factor = Math.pow(10, decimals);
     return Math.round(num * factor) / factor;
-  }
+  },
 };
 
 // Date utilities
 export const DateUtils = {
-  formatDate: (date: Date | string, format: 'short' | 'long' | 'time' = 'short'): string => {
-    const d = typeof date === 'string' ? new Date(date) : date;
+  formatDate: (
+    date: Date | string,
+    format: "short" | "long" | "time" = "short",
+  ): string => {
+    const d = typeof date === "string" ? new Date(date) : date;
 
     switch (format) {
-      case 'long':
-        return d.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
+      case "long":
+        return d.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         });
-      case 'time':
-        return d.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
+      case "time":
+        return d.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
         });
       default:
-        return d.toLocaleDateString('en-US');
+        return d.toLocaleDateString("en-US");
     }
   },
 
   isToday: (date: Date | string): boolean => {
-    const d = typeof date === 'string' ? new Date(date) : date;
+    const d = typeof date === "string" ? new Date(date) : date;
     const today = new Date();
     return d.toDateString() === today.toDateString();
   },
 
   daysSince: (date: Date | string): number => {
-    const d = typeof date === 'string' ? new Date(date) : date;
+    const d = typeof date === "string" ? new Date(date) : date;
     const now = new Date();
     const diffTime = now.getTime() - d.getTime();
     return Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -103,7 +109,7 @@ export const DateUtils = {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
-  }
+  },
 };
 
 // Array utilities
@@ -113,21 +119,28 @@ export const ArrayUtils = {
   },
 
   groupBy: <T, K extends keyof T>(array: T[], key: K): Record<string, T[]> => {
-    return array.reduce((groups, item) => {
-      const group = String(item[key]);
-      groups[group] = groups[group] || [];
-      groups[group].push(item);
-      return groups;
-    }, {} as Record<string, T[]>);
+    return array.reduce(
+      (groups, item) => {
+        const group = String(item[key]);
+        groups[group] = groups[group] || [];
+        groups[group].push(item);
+        return groups;
+      },
+      {} as Record<string, T[]>,
+    );
   },
 
-  sortBy: <T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] => {
+  sortBy: <T>(
+    array: T[],
+    key: keyof T,
+    direction: "asc" | "desc" = "asc",
+  ): T[] => {
     return [...array].sort((a, b) => {
       const aVal = a[key];
       const bVal = b[key];
 
-      if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+      if (aVal < bVal) return direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return direction === "asc" ? 1 : -1;
       return 0;
     });
   },
@@ -147,14 +160,17 @@ export const ArrayUtils = {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  }
+  },
 };
 
 // Object utilities
 export const ObjectUtils = {
-  pick: <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
+  pick: <T extends object, K extends keyof T>(
+    obj: T,
+    keys: K[],
+  ): Pick<T, K> => {
     const result = {} as Pick<T, K>;
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key in obj) {
         result[key] = obj[key];
       }
@@ -164,7 +180,7 @@ export const ObjectUtils = {
 
   omit: <T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> => {
     const result = { ...obj };
-    keys.forEach(key => {
+    keys.forEach((key) => {
       delete result[key];
     });
     return result;
@@ -176,14 +192,14 @@ export const ObjectUtils = {
 
   deepClone: <T extends object>(obj: T): T => {
     return JSON.parse(JSON.stringify(obj));
-  }
+  },
 };
 
 // File utilities
 export const FileUtils = {
   formatFileSize: (bytes: number): string => {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Bytes';
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    if (bytes === 0) return "0 Bytes";
 
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
@@ -194,22 +210,22 @@ export const FileUtils = {
   },
 
   getFileExtension: (filename: string): string => {
-    return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
+    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
   },
 
   downloadJson: (data: unknown, filename: string): void => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json'
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }
+  },
 };
 
 // Local storage utilities
@@ -218,16 +234,16 @@ export const StorageUtils = {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
   },
 
   get: <T>(key: string, defaultValue?: T): T | null => {
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue ?? null;
+      return item ? JSON.parse(item) : (defaultValue ?? null);
     } catch (error) {
-      console.error('Error reading from localStorage:', error);
+      console.error("Error reading from localStorage:", error);
       return defaultValue ?? null;
     }
   },
@@ -236,7 +252,7 @@ export const StorageUtils = {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error('Error removing from localStorage:', error);
+      console.error("Error removing from localStorage:", error);
     }
   },
 
@@ -244,15 +260,15 @@ export const StorageUtils = {
     try {
       localStorage.clear();
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      console.error("Error clearing localStorage:", error);
     }
-  }
+  },
 };
 
 // Debounce utility
 export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): ((...args: Parameters<T>) => void) => {
   let timeout: ReturnType<typeof setTimeout>;
 
@@ -265,7 +281,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 // Throttle utility
 export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
-  limit: number
+  limit: number,
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
 
@@ -273,7 +289,7 @@ export const throttle = <T extends (...args: unknown[]) => unknown>(
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 };
@@ -282,28 +298,32 @@ export const throttle = <T extends (...args: unknown[]) => unknown>(
 export const ColorUtils = {
   hexToRgb: (hex: string): { r: number; g: number; b: number } | null => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   },
 
   rgbToHex: (r: number, g: number, b: number): string => {
-    return `#${[r, g, b].map(x => {
-      const hex = x.toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('')}`;
+    return `#${[r, g, b]
+      .map((x) => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      })
+      .join("")}`;
   },
 
-  getContrastColor: (hex: string): 'black' | 'white' => {
+  getContrastColor: (hex: string): "black" | "white" => {
     const rgb = ColorUtils.hexToRgb(hex);
-    if (!rgb) return 'black';
+    if (!rgb) return "black";
 
     // Calculate luminance
     const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-    return luminance > 0.5 ? 'black' : 'white';
-  }
+    return luminance > 0.5 ? "black" : "white";
+  },
 };
 
 // Export all utilities as a single object for convenience
@@ -317,5 +337,5 @@ export const Utils = {
   Storage: StorageUtils,
   Color: ColorUtils,
   debounce,
-  throttle
+  throttle,
 };

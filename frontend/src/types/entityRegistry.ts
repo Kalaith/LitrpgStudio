@@ -17,5 +17,5 @@ export type {
   EntityChangeEvent,
   EntityAdapter,
   EntityFilter,
-  EntitySearchOptions
-} from './entityRegistryTypes';
+  EntitySearchOptions,
+} from "./entityRegistryTypes";

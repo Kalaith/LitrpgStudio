@@ -1,11 +1,13 @@
-import { apiClient, ApiResponse } from './client';
+import { apiClient, ApiResponse } from "./client";
 
 export interface DraftImportRequest {
   content: string;
-  format: 'markdown' | 'txt' | 'scrivener';
+  format: "markdown" | "txt" | "scrivener";
   bookTitle?: string;
   storyTitle?: string;
   seriesName?: string;
+  previewOnly?: boolean;
+  confirmChapters?: boolean;
 }
 
 export interface DraftImportChapterSummary {
@@ -39,7 +41,30 @@ export interface DraftImportResponse {
   };
 }
 
+export interface DraftImportPreviewResponse {
+  chapters: DraftImportChapterSummary[];
+  summary: {
+    chapter_count: number;
+    scene_count: number;
+    word_count: number;
+    format: string;
+  };
+  warnings: string[];
+  requires_confirmation: boolean;
+}
+
 export const importsApi = {
-  importDraft: (seriesId: string, payload: DraftImportRequest): Promise<ApiResponse<DraftImportResponse>> =>
+  previewDraft: (
+    seriesId: string,
+    payload: DraftImportRequest,
+  ): Promise<ApiResponse<DraftImportPreviewResponse>> =>
+    apiClient.post(`/series/${seriesId}/imports/draft`, {
+      ...payload,
+      previewOnly: true,
+    }),
+  importDraft: (
+    seriesId: string,
+    payload: DraftImportRequest,
+  ): Promise<ApiResponse<DraftImportResponse>> =>
     apiClient.post(`/series/${seriesId}/imports/draft`, payload),
 };

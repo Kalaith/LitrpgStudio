@@ -3,7 +3,7 @@ export interface CollaborationUser {
   name: string;
   email: string;
   avatar?: string;
-  role: 'owner' | 'editor' | 'reviewer' | 'viewer';
+  role: "owner" | "editor" | "reviewer" | "viewer";
   isOnline: boolean;
   lastActive: Date;
   currentView?: {
@@ -31,8 +31,8 @@ export interface CollaborationChange {
   id: string;
   userId: string;
   timestamp: Date;
-  type: 'create' | 'update' | 'delete' | 'comment';
-  target: 'story' | 'character' | 'timeline' | 'entity' | 'relationship';
+  type: "create" | "update" | "delete" | "comment";
+  target: "story" | "character" | "timeline" | "entity" | "relationship";
   targetId: string;
   oldValue?: unknown;
   newValue?: unknown;
@@ -45,7 +45,7 @@ export interface CollaborationComment {
   id: string;
   userId: string;
   timestamp: Date;
-  targetType: 'story' | 'character' | 'timeline' | 'entity';
+  targetType: "story" | "character" | "timeline" | "entity";
   targetId: string;
   position?: {
     start: number;
@@ -59,12 +59,12 @@ export interface CollaborationComment {
 
 export interface CollaborationConflict {
   id: string;
-  type: 'concurrent_edit' | 'permission_denied' | 'version_mismatch';
+  type: "concurrent_edit" | "permission_denied" | "version_mismatch";
   users: string[];
   targetType: string;
   targetId: string;
   changes: CollaborationChange[];
-  resolutionStrategy?: 'merge' | 'override' | 'manual';
+  resolutionStrategy?: "merge" | "override" | "manual";
   isResolved: boolean;
   resolvedBy?: string;
   resolvedAt?: Date;
@@ -83,7 +83,7 @@ export interface CollaborationSession {
 
 export interface ChangeTrackingOptions {
   enableRealTimeSync: boolean;
-  conflictResolution: 'auto' | 'manual' | 'owner_priority';
+  conflictResolution: "auto" | "manual" | "owner_priority";
   saveInterval: number; // milliseconds
   maxHistoryLength: number;
   enableComments: boolean;
@@ -93,10 +93,18 @@ export interface ChangeTrackingOptions {
 export class CollaborationService {
   private currentUser: CollaborationUser | null = null;
   private currentSession: CollaborationSession | null = null;
-  private changeListeners: Map<string, (change: CollaborationChange) => void> = new Map();
-  private presenceListeners: Map<string, (users: CollaborationUser[]) => void> = new Map();
-  private commentListeners: Map<string, (comment: CollaborationComment) => void> = new Map();
-  private conflictListeners: Map<string, (conflict: CollaborationConflict) => void> = new Map();
+  private changeListeners: Map<string, (change: CollaborationChange) => void> =
+    new Map();
+  private presenceListeners: Map<string, (users: CollaborationUser[]) => void> =
+    new Map();
+  private commentListeners: Map<
+    string,
+    (comment: CollaborationComment) => void
+  > = new Map();
+  private conflictListeners: Map<
+    string,
+    (conflict: CollaborationConflict) => void
+  > = new Map();
   private options: ChangeTrackingOptions;
   private connected = false;
   private pendingChanges: CollaborationChange[] = [];
@@ -105,12 +113,12 @@ export class CollaborationService {
   constructor(options: Partial<ChangeTrackingOptions> = {}) {
     this.options = {
       enableRealTimeSync: true,
-      conflictResolution: 'manual',
+      conflictResolution: "manual",
       saveInterval: 5000,
       maxHistoryLength: 1000,
       enableComments: true,
       enablePresenceIndicators: true,
-      ...options
+      ...options,
     };
 
     this.initializeSession();
@@ -119,10 +127,10 @@ export class CollaborationService {
   private initializeSession() {
     // Initialize mock collaboration session
     this.currentUser = {
-      id: 'user-1',
-      name: 'Current User',
-      email: 'user@example.com',
-      role: 'owner',
+      id: "user-1",
+      name: "Current User",
+      email: "user@example.com",
+      role: "owner",
       isOnline: true,
       lastActive: new Date(),
       permissions: {
@@ -134,49 +142,53 @@ export class CollaborationService {
         canExport: true,
         canDelete: true,
         allowedStoryIds: [],
-        allowedEntityTypes: []
-      }
+        allowedEntityTypes: [],
+      },
     };
 
     this.currentSession = {
-      id: 'session-1',
-      projectId: 'project-1',
+      id: "session-1",
+      projectId: "project-1",
       participants: [this.currentUser],
       changes: [],
       comments: [],
       conflicts: [],
       startedAt: new Date(),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
 
     this.connected = true;
   }
 
   // User Management
-  async inviteUser(email: string, role: CollaborationUser['role'], permissions: Partial<CollaborationPermissions>): Promise<CollaborationUser> {
+  async inviteUser(
+    email: string,
+    role: CollaborationUser["role"],
+    permissions: Partial<CollaborationPermissions>,
+  ): Promise<CollaborationUser> {
     if (!this.canManageCollaborators()) {
-      throw new Error('Insufficient permissions to invite users');
+      throw new Error("Insufficient permissions to invite users");
     }
 
     const newUser: CollaborationUser = {
       id: `user-${Date.now()}`,
-      name: email.split('@')[0],
+      name: email.split("@")[0],
       email,
       role,
       isOnline: false,
       lastActive: new Date(),
       permissions: {
-        canEditStory: role === 'owner' || role === 'editor',
-        canEditCharacters: role === 'owner' || role === 'editor',
-        canEditTimeline: role === 'owner' || role === 'editor',
-        canEditWorldBuilding: role === 'owner' || role === 'editor',
-        canManageCollaborators: role === 'owner',
-        canExport: role !== 'viewer',
-        canDelete: role === 'owner',
+        canEditStory: role === "owner" || role === "editor",
+        canEditCharacters: role === "owner" || role === "editor",
+        canEditTimeline: role === "owner" || role === "editor",
+        canEditWorldBuilding: role === "owner" || role === "editor",
+        canManageCollaborators: role === "owner",
+        canExport: role !== "viewer",
+        canDelete: role === "owner",
         allowedStoryIds: [],
         allowedEntityTypes: [],
-        ...permissions
-      }
+        ...permissions,
+      },
     };
 
     if (this.currentSession) {
@@ -189,19 +201,24 @@ export class CollaborationService {
 
   async removeUser(userId: string): Promise<void> {
     if (!this.canManageCollaborators() || !this.currentSession) {
-      throw new Error('Insufficient permissions or no active session');
+      throw new Error("Insufficient permissions or no active session");
     }
 
-    this.currentSession.participants = this.currentSession.participants.filter(u => u.id !== userId);
+    this.currentSession.participants = this.currentSession.participants.filter(
+      (u) => u.id !== userId,
+    );
     this.notifyPresenceChange();
   }
 
-  async updateUserPermissions(userId: string, permissions: Partial<CollaborationPermissions>): Promise<void> {
+  async updateUserPermissions(
+    userId: string,
+    permissions: Partial<CollaborationPermissions>,
+  ): Promise<void> {
     if (!this.canManageCollaborators() || !this.currentSession) {
-      throw new Error('Insufficient permissions or no active session');
+      throw new Error("Insufficient permissions or no active session");
     }
 
-    const user = this.currentSession.participants.find(u => u.id === userId);
+    const user = this.currentSession.participants.find((u) => u.id === userId);
     if (user) {
       user.permissions = { ...user.permissions, ...permissions };
       this.notifyPresenceChange();
@@ -210,15 +227,15 @@ export class CollaborationService {
 
   // Change Tracking
   async trackChange(
-    type: CollaborationChange['type'],
-    target: CollaborationChange['target'],
+    type: CollaborationChange["type"],
+    target: CollaborationChange["target"],
     targetId: string,
     oldValue: unknown,
     newValue: unknown,
-    description: string
+    description: string,
   ): Promise<CollaborationChange> {
     if (!this.currentUser || !this.currentSession) {
-      throw new Error('No active collaboration session');
+      throw new Error("No active collaboration session");
     }
 
     const change: CollaborationChange = {
@@ -232,13 +249,13 @@ export class CollaborationService {
       newValue,
       description,
       conflictsWith: [],
-      isResolved: true
+      isResolved: true,
     };
 
     // Check for conflicts
     const conflicts = await this.detectConflicts(change);
     if (conflicts.length > 0) {
-      change.conflictsWith = conflicts.map(c => c.id);
+      change.conflictsWith = conflicts.map((c) => c.id);
       change.isResolved = false;
 
       for (const conflict of conflicts) {
@@ -252,7 +269,9 @@ export class CollaborationService {
 
     // Trim history if too long
     if (this.currentSession.changes.length > this.options.maxHistoryLength) {
-      this.currentSession.changes = this.currentSession.changes.slice(-this.options.maxHistoryLength);
+      this.currentSession.changes = this.currentSession.changes.slice(
+        -this.options.maxHistoryLength,
+      );
     }
 
     this.notifyChange(change);
@@ -265,25 +284,28 @@ export class CollaborationService {
     return change;
   }
 
-  private async detectConflicts(change: CollaborationChange): Promise<CollaborationConflict[]> {
+  private async detectConflicts(
+    change: CollaborationChange,
+  ): Promise<CollaborationConflict[]> {
     if (!this.currentSession) return [];
 
     const conflicts: CollaborationConflict[] = [];
     const recentChanges = this.currentSession.changes.filter(
-      c => c.targetId === change.targetId &&
-           c.userId !== change.userId &&
-           Date.now() - c.timestamp.getTime() < 30000 // 30 seconds
+      (c) =>
+        c.targetId === change.targetId &&
+        c.userId !== change.userId &&
+        Date.now() - c.timestamp.getTime() < 30000, // 30 seconds
     );
 
     if (recentChanges.length > 0) {
       const conflict: CollaborationConflict = {
         id: `conflict-${Date.now()}`,
-        type: 'concurrent_edit',
-        users: [change.userId, ...recentChanges.map(c => c.userId)],
+        type: "concurrent_edit",
+        users: [change.userId, ...recentChanges.map((c) => c.userId)],
         targetType: change.target,
         targetId: change.targetId,
         changes: [change, ...recentChanges],
-        isResolved: false
+        isResolved: false,
       };
 
       conflicts.push(conflict);
@@ -295,14 +317,14 @@ export class CollaborationService {
 
   // Comments
   async addComment(
-    targetType: CollaborationComment['targetType'],
+    targetType: CollaborationComment["targetType"],
     targetId: string,
     content: string,
     position?: { start: number; end: number },
-    mentions: string[] = []
+    mentions: string[] = [],
   ): Promise<CollaborationComment> {
     if (!this.currentUser || !this.currentSession) {
-      throw new Error('No active collaboration session');
+      throw new Error("No active collaboration session");
     }
 
     const comment: CollaborationComment = {
@@ -315,7 +337,7 @@ export class CollaborationService {
       content,
       thread: [],
       isResolved: false,
-      mentions
+      mentions,
     };
 
     this.currentSession.comments.push(comment);
@@ -324,14 +346,19 @@ export class CollaborationService {
     return comment;
   }
 
-  async replyToComment(commentId: string, content: string): Promise<CollaborationComment> {
+  async replyToComment(
+    commentId: string,
+    content: string,
+  ): Promise<CollaborationComment> {
     if (!this.currentUser || !this.currentSession) {
-      throw new Error('No active collaboration session');
+      throw new Error("No active collaboration session");
     }
 
-    const parentComment = this.currentSession.comments.find(c => c.id === commentId);
+    const parentComment = this.currentSession.comments.find(
+      (c) => c.id === commentId,
+    );
     if (!parentComment) {
-      throw new Error('Comment not found');
+      throw new Error("Comment not found");
     }
 
     const reply: CollaborationComment = {
@@ -343,7 +370,7 @@ export class CollaborationService {
       content,
       thread: [],
       isResolved: false,
-      mentions: []
+      mentions: [],
     };
 
     parentComment.thread.push(reply);
@@ -355,7 +382,9 @@ export class CollaborationService {
   async resolveComment(commentId: string): Promise<void> {
     if (!this.currentSession) return;
 
-    const comment = this.currentSession.comments.find(c => c.id === commentId);
+    const comment = this.currentSession.comments.find(
+      (c) => c.id === commentId,
+    );
     if (comment) {
       comment.isResolved = true;
       this.notifyComment(comment);
@@ -363,7 +392,7 @@ export class CollaborationService {
   }
 
   // Presence Tracking
-  async updatePresence(view: CollaborationUser['currentView']): Promise<void> {
+  async updatePresence(view: CollaborationUser["currentView"]): Promise<void> {
     if (!this.currentUser) return;
 
     this.currentUser.currentView = view;
@@ -382,12 +411,14 @@ export class CollaborationService {
   // Conflict Resolution
   async resolveConflict(
     conflictId: string,
-    strategy: 'merge' | 'override' | 'manual',
-    selectedChanges?: string[]
+    strategy: "merge" | "override" | "manual",
+    selectedChanges?: string[],
   ): Promise<void> {
     if (!this.currentSession || !this.currentUser) return;
 
-    const conflict = this.currentSession.conflicts.find(c => c.id === conflictId);
+    const conflict = this.currentSession.conflicts.find(
+      (c) => c.id === conflictId,
+    );
     if (!conflict) return;
 
     conflict.resolutionStrategy = strategy;
@@ -412,19 +443,25 @@ export class CollaborationService {
     return () => this.changeListeners.delete(id);
   }
 
-  onPresenceChanged(callback: (users: CollaborationUser[]) => void): () => void {
+  onPresenceChanged(
+    callback: (users: CollaborationUser[]) => void,
+  ): () => void {
     const id = Math.random().toString(36);
     this.presenceListeners.set(id, callback);
     return () => this.presenceListeners.delete(id);
   }
 
-  onCommentAdded(callback: (comment: CollaborationComment) => void): () => void {
+  onCommentAdded(
+    callback: (comment: CollaborationComment) => void,
+  ): () => void {
     const id = Math.random().toString(36);
     this.commentListeners.set(id, callback);
     return () => this.commentListeners.delete(id);
   }
 
-  onConflictDetected(callback: (conflict: CollaborationConflict) => void): () => void {
+  onConflictDetected(
+    callback: (conflict: CollaborationConflict) => void,
+  ): () => void {
     const id = Math.random().toString(36);
     this.conflictListeners.set(id, callback);
     return () => this.conflictListeners.delete(id);
@@ -432,20 +469,22 @@ export class CollaborationService {
 
   // Utility Methods
   private notifyChange(change: CollaborationChange) {
-    this.changeListeners.forEach(callback => callback(change));
+    this.changeListeners.forEach((callback) => callback(change));
   }
 
   private notifyPresenceChange() {
     if (!this.currentSession) return;
-    this.presenceListeners.forEach(callback => callback(this.currentSession!.participants));
+    this.presenceListeners.forEach((callback) =>
+      callback(this.currentSession!.participants),
+    );
   }
 
   private notifyComment(comment: CollaborationComment) {
-    this.commentListeners.forEach(callback => callback(comment));
+    this.commentListeners.forEach((callback) => callback(comment));
   }
 
   private notifyConflict(conflict: CollaborationConflict) {
-    this.conflictListeners.forEach(callback => callback(conflict));
+    this.conflictListeners.forEach((callback) => callback(conflict));
   }
 
   private async syncChanges() {
@@ -482,17 +521,19 @@ export class CollaborationService {
 
     let comments = this.currentSession.comments;
     if (targetType) {
-      comments = comments.filter(c => c.targetType === targetType);
+      comments = comments.filter((c) => c.targetType === targetType);
     }
     if (targetId) {
-      comments = comments.filter(c => c.targetId === targetId);
+      comments = comments.filter((c) => c.targetId === targetId);
     }
 
-    return comments.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return comments.sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+    );
   }
 
   getConflicts(): CollaborationConflict[] {
-    return this.currentSession?.conflicts.filter(c => !c.isResolved) ?? [];
+    return this.currentSession?.conflicts.filter((c) => !c.isResolved) ?? [];
   }
 
   isConnected(): boolean {

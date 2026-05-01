@@ -1,14 +1,14 @@
 export interface ItemStat {
   name: string;
   value: number;
-  type: 'flat' | 'percentage';
+  type: "flat" | "percentage";
 }
 
 export interface ItemEffect {
   id: string;
   name: string;
   description: string;
-  type: 'passive' | 'active' | 'proc';
+  type: "passive" | "active" | "proc";
   trigger?: string;
   cooldown?: number;
 }
@@ -17,9 +17,9 @@ export interface Item {
   id: string;
   name: string;
   description: string;
-  type: 'weapon' | 'armor' | 'accessory' | 'consumable' | 'material' | 'quest';
+  type: "weapon" | "armor" | "accessory" | "consumable" | "material" | "quest";
   subType: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
+  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic";
   level: number;
   value: number;
   weight?: number;

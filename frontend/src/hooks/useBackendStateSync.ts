@@ -1,32 +1,32 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { appStateApi } from '../api/appState';
-import { useAuth } from '../contexts/AuthContext';
-import { useAnalyticsStore } from '../stores/analyticsStore';
-import { useCharacterStore } from '../stores/characterStore';
-import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useSeriesStore } from '../stores/seriesStore';
-import { useStoryStore } from '../stores/storyStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
+import { useCallback, useEffect, useRef } from "react";
+import { appStateApi } from "../api/appState";
+import { useAuth } from "../contexts/AuthContext";
+import { useAnalyticsStore } from "../stores/analyticsStore";
+import { useCharacterStore } from "../stores/characterStore";
+import { useEntityRegistryStore } from "../stores/entityRegistryStore";
+import { useSeriesStore } from "../stores/seriesStore";
+import { useStoryStore } from "../stores/storyStore";
+import { useUnifiedTimelineStore } from "../stores/unifiedTimelineStore";
+import { useWorldStateStore } from "../stores/worldStateStore";
 
 const SYNC_INTERVAL_MS = 3000;
 const SAVE_DEBOUNCE_MS = 750;
 
 const APP_STATE_KEYS = [
-  'sidebar-expanded-sections',
-  'sidebar-pinned-items',
-  'sidebar-collapsed',
+  "sidebar-expanded-sections",
+  "sidebar-pinned-items",
+  "sidebar-collapsed",
   // NOTE: writers-series-storage, writers-story-storage, writers-character-storage are intentionally
   // excluded here. Those stores are always loaded fresh from the backend API on startup.
   // Including them caused a race condition: the stale localStorage snapshot would overwrite the
   // freshly-fetched API data when rehydratePersistedStores() ran after fetchSeries().
-  'writers-analytics-storage',
-  'unified-timeline-store',
-  'entity-registry-store',
-  'writers-world-state-storage',
-  'userPreferences',
-  'recentFiles',
-  'analyticsData',
+  "writers-analytics-storage",
+  "unified-timeline-store",
+  "entity-registry-store",
+  "writers-world-state-storage",
+  "userPreferences",
+  "recentFiles",
+  "analyticsData",
 ] as const;
 
 const rehydratePersistedStores = async (): Promise<void> => {
@@ -45,9 +45,9 @@ const rehydratePersistedStores = async (): Promise<void> => {
       try {
         await rehydrate();
       } catch (error) {
-        console.warn('Store rehydrate failed:', error);
+        console.warn("Store rehydrate failed:", error);
       }
-    })
+    }),
   );
 };
 
@@ -55,7 +55,7 @@ const collectLocalAppState = (): Record<string, string> => {
   const state: Record<string, string> = {};
   for (const key of APP_STATE_KEYS) {
     const value = localStorage.getItem(key);
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       state[key] = value;
     }
   }
@@ -66,7 +66,7 @@ const applyRemoteAppState = (state: Record<string, string>): void => {
   for (const key of APP_STATE_KEYS) {
     if (Object.prototype.hasOwnProperty.call(state, key)) {
       const value = state[key];
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         localStorage.setItem(key, value);
       }
     }
@@ -87,10 +87,15 @@ export const useBackendStateSync = (): void => {
   const isSavingRef = useRef(false);
   const hasPendingSaveRef = useRef(false);
   const saveTimerRef = useRef<number | null>(null);
-  const lastSyncedSnapshotRef = useRef<string>('');
+  const lastSyncedSnapshotRef = useRef<string>("");
 
   const pushState = useCallback(async () => {
-    if (!isAuthenticated || isLoading || !isHydratedRef.current || isSavingRef.current) {
+    if (
+      !isAuthenticated ||
+      isLoading ||
+      !isHydratedRef.current ||
+      isSavingRef.current
+    ) {
       return;
     }
 
@@ -105,7 +110,7 @@ export const useBackendStateSync = (): void => {
       await appStateApi.save(state);
       lastSyncedSnapshotRef.current = serialized;
     } catch (error) {
-      console.warn('Failed to sync app state to backend:', error);
+      console.warn("Failed to sync app state to backend:", error);
     } finally {
       isSavingRef.current = false;
       if (hasPendingSaveRef.current) {
@@ -136,7 +141,7 @@ export const useBackendStateSync = (): void => {
   useEffect(() => {
     if (!isAuthenticated || isLoading) {
       isHydratedRef.current = false;
-      lastSyncedSnapshotRef.current = '';
+      lastSyncedSnapshotRef.current = "";
       return;
     }
 
@@ -166,7 +171,7 @@ export const useBackendStateSync = (): void => {
           schedulePushState();
         }
       } catch (error) {
-        console.warn('Failed to hydrate app state from backend:', error);
+        console.warn("Failed to hydrate app state from backend:", error);
         await rehydratePersistedStores();
         if (cancelled) {
           return;
@@ -206,14 +211,13 @@ export const useBackendStateSync = (): void => {
       void pushState();
     };
 
-    window.addEventListener('beforeunload', handlePageHide);
-    document.addEventListener('visibilitychange', handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
+    document.addEventListener("visibilitychange", handlePageHide);
 
     return () => {
       window.clearInterval(intervalId);
-      window.removeEventListener('beforeunload', handlePageHide);
-      document.removeEventListener('visibilitychange', handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
+      document.removeEventListener("visibilitychange", handlePageHide);
     };
   }, [isAuthenticated, isLoading, pushState, schedulePushState]);
 };
-

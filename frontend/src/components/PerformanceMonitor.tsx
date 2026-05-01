@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Activity,
   Zap,
@@ -13,15 +13,15 @@ import {
   AlertTriangle,
   X,
   Play,
-  Pause
-} from 'lucide-react';
-import { performanceOptimizer } from '../services/performanceOptimizer';
+  Pause,
+} from "lucide-react";
+import { performanceOptimizer } from "../services/performanceOptimizer";
 import type {
   PerformanceMetrics,
   OptimizationStrategy,
   LazyLoadConfig,
-  CacheStrategy
-} from '../services/performanceOptimizer';
+  CacheStrategy,
+} from "../services/performanceOptimizer";
 
 interface PerformanceMonitorProps {
   isVisible: boolean;
@@ -29,29 +29,33 @@ interface PerformanceMonitorProps {
   className?: string;
 }
 
-type PerformanceTab = 'metrics' | 'strategies' | 'config';
+type PerformanceTab = "metrics" | "strategies" | "config";
 
 const performanceTabs: Array<{
   key: PerformanceTab;
   label: string;
   icon: React.ComponentType<{ size?: number }>;
 }> = [
-  { key: 'metrics', label: 'Metrics', icon: BarChart3 },
-  { key: 'strategies', label: 'Optimization', icon: Zap },
-  { key: 'config', label: 'Config', icon: Settings }
+  { key: "metrics", label: "Metrics", icon: BarChart3 },
+  { key: "strategies", label: "Optimization", icon: Zap },
+  { key: "config", label: "Config", icon: Settings },
 ];
 
 export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   isVisible,
   onToggle,
-  className = ''
+  className = "",
 }) => {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [strategies, setStrategies] = useState<OptimizationStrategy[]>([]);
-  const [lazyLoadConfig, setLazyLoadConfig] = useState<LazyLoadConfig | null>(null);
-  const [cacheStrategy, setCacheStrategy] = useState<CacheStrategy | null>(null);
+  const [lazyLoadConfig, setLazyLoadConfig] = useState<LazyLoadConfig | null>(
+    null,
+  );
+  const [cacheStrategy, setCacheStrategy] = useState<CacheStrategy | null>(
+    null,
+  );
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [activeTab, setActiveTab] = useState<PerformanceTab>('metrics');
+  const [activeTab, setActiveTab] = useState<PerformanceTab>("metrics");
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Update data from performance optimizer
@@ -86,31 +90,39 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     }
   }, [updateData]);
 
-  const handleToggleStrategy = useCallback((strategyId: string, enabled: boolean) => {
-    if (enabled) {
-      performanceOptimizer.enableStrategy(strategyId);
-    } else {
-      performanceOptimizer.disableStrategy(strategyId);
-    }
-    setStrategies(performanceOptimizer.getStrategies());
-  }, []);
+  const handleToggleStrategy = useCallback(
+    (strategyId: string, enabled: boolean) => {
+      if (enabled) {
+        performanceOptimizer.enableStrategy(strategyId);
+      } else {
+        performanceOptimizer.disableStrategy(strategyId);
+      }
+      setStrategies(performanceOptimizer.getStrategies());
+    },
+    [],
+  );
 
-  const getMetricStatus = (value: number, thresholds: { good: number; warning: number }) => {
-    if (value <= thresholds.good) return 'good';
-    if (value <= thresholds.warning) return 'warning';
-    return 'critical';
+  const getMetricStatus = (
+    value: number,
+    thresholds: { good: number; warning: number },
+  ) => {
+    if (value <= thresholds.good) return "good";
+    if (value <= thresholds.warning) return "warning";
+    return "critical";
   };
-
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'good': return CheckCircle;
-      case 'warning': return AlertTriangle;
-      case 'critical': return AlertTriangle;
-      default: return Activity;
+      case "good":
+        return CheckCircle;
+      case "warning":
+        return AlertTriangle;
+      case "critical":
+        return AlertTriangle;
+      default:
+        return Activity;
     }
   };
-
 
   if (!isVisible) {
     return (
@@ -149,8 +161,8 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-1 rounded transition-colors ${
               autoRefresh
-                ? 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                ? "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30"
+                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             {autoRefresh ? <Play size={14} /> : <Pause size={14} />}
@@ -180,8 +192,8 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-xs font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'text-green-600 bg-green-50 border-b-2 border-green-600 dark:text-green-400 dark:bg-green-900/30'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                  ? "text-green-600 bg-green-50 border-b-2 border-green-600 dark:text-green-400 dark:bg-green-900/30"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
               <TabIcon size={14} />
@@ -193,7 +205,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'metrics' && metrics && (
+        {activeTab === "metrics" && metrics && (
           <div className="space-y-4">
             {/* Overall Performance Score */}
             <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
@@ -206,7 +218,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                 </span>
               </div>
               <div className="mt-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{ width: "85%" }}
+                ></div>
               </div>
             </div>
 
@@ -214,37 +229,55 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
             <div className="grid grid-cols-2 gap-3">
               {[
                 {
-                  label: 'Memory Usage',
+                  label: "Memory Usage",
                   value: `${metrics.memoryUsage.toFixed(1)} MB`,
-                  status: getMetricStatus(metrics.memoryUsage, { good: 50, warning: 100 }),
-                  icon: Cpu
+                  status: getMetricStatus(metrics.memoryUsage, {
+                    good: 50,
+                    warning: 100,
+                  }),
+                  icon: Cpu,
                 },
                 {
-                  label: 'Render Time',
+                  label: "Render Time",
                   value: `${metrics.renderTime.toFixed(1)}ms`,
-                  status: getMetricStatus(metrics.renderTime, { good: 16, warning: 33 }),
-                  icon: Cpu
+                  status: getMetricStatus(metrics.renderTime, {
+                    good: 16,
+                    warning: 33,
+                  }),
+                  icon: Cpu,
                 },
                 {
-                  label: 'Search Latency',
+                  label: "Search Latency",
                   value: `${metrics.searchLatency.toFixed(0)}ms`,
-                  status: getMetricStatus(metrics.searchLatency, { good: 100, warning: 200 }),
-                  icon: Search
+                  status: getMetricStatus(metrics.searchLatency, {
+                    good: 100,
+                    warning: 200,
+                  }),
+                  icon: Search,
                 },
                 {
-                  label: 'Cache Hit Rate',
+                  label: "Cache Hit Rate",
                   value: `${(performanceOptimizer.getCacheHitRate() * 100).toFixed(1)}%`,
-                  status: getMetricStatus(100 - performanceOptimizer.getCacheHitRate() * 100, { good: 20, warning: 50 }),
-                  icon: Database
-                }
+                  status: getMetricStatus(
+                    100 - performanceOptimizer.getCacheHitRate() * 100,
+                    { good: 20, warning: 50 },
+                  ),
+                  icon: Database,
+                },
               ].map((metric, index) => {
                 const StatusIcon = getStatusIcon(metric.status);
                 const MetricIcon = metric.icon;
                 return (
-                  <div key={index} className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <div
+                    key={index}
+                    className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <MetricIcon size={16} className="text-gray-500" />
-                      <StatusIcon size={14} className={`${metric.status === 'good' ? 'text-green-500' : metric.status === 'warning' ? 'text-yellow-500' : 'text-red-500'}`} />
+                      <StatusIcon
+                        size={14}
+                        className={`${metric.status === "good" ? "text-green-500" : metric.status === "warning" ? "text-yellow-500" : "text-red-500"}`}
+                      />
                     </div>
                     <div className="text-lg font-bold text-gray-900 dark:text-white">
                       {metric.value}
@@ -259,7 +292,9 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
             {/* Data Overview */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Data Overview</h4>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                Data Overview
+              </h4>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
                   <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
@@ -289,7 +324,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
           </div>
         )}
 
-        {activeTab === 'strategies' && (
+        {activeTab === "strategies" && (
           <div className="space-y-4">
             {/* Run Optimization Button */}
             <button
@@ -302,7 +337,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
               ) : (
                 <Zap size={16} />
               )}
-              <span>{isOptimizing ? 'Optimizing...' : 'Run Optimization'}</span>
+              <span>{isOptimizing ? "Optimizing..." : "Run Optimization"}</span>
             </button>
 
             {/* Strategy List */}
@@ -310,8 +345,11 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
               <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                 Optimization Strategies
               </h4>
-              {strategies.map(strategy => (
-                <div key={strategy.id} className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+              {strategies.map((strategy) => (
+                <div
+                  key={strategy.id}
+                  className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
@@ -327,14 +365,16 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                       </p>
                     </div>
                     <button
-                      onClick={() => handleToggleStrategy(strategy.id, !strategy.enabled)}
+                      onClick={() =>
+                        handleToggleStrategy(strategy.id, !strategy.enabled)
+                      }
                       className={`ml-3 px-3 py-1 text-xs rounded transition-colors ${
                         strategy.enabled
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
                       }`}
                     >
-                      {strategy.enabled ? 'Enabled' : 'Disabled'}
+                      {strategy.enabled ? "Enabled" : "Disabled"}
                     </button>
                   </div>
                 </div>
@@ -343,7 +383,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
           </div>
         )}
 
-        {activeTab === 'config' && lazyLoadConfig && cacheStrategy && (
+        {activeTab === "config" && lazyLoadConfig && cacheStrategy && (
           <div className="space-y-4">
             {/* Lazy Loading Config */}
             <div className="space-y-3">
@@ -359,7 +399,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                     type="number"
                     value={lazyLoadConfig.entitiesPerPage}
                     onChange={(e) => {
-                      const newConfig = { ...lazyLoadConfig, entitiesPerPage: parseInt(e.target.value) };
+                      const newConfig = {
+                        ...lazyLoadConfig,
+                        entitiesPerPage: parseInt(e.target.value),
+                      };
                       setLazyLoadConfig(newConfig);
                       performanceOptimizer.updateLazyLoadConfig(newConfig);
                     }}
@@ -374,7 +417,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                     type="number"
                     value={lazyLoadConfig.eventsPerPage}
                     onChange={(e) => {
-                      const newConfig = { ...lazyLoadConfig, eventsPerPage: parseInt(e.target.value) };
+                      const newConfig = {
+                        ...lazyLoadConfig,
+                        eventsPerPage: parseInt(e.target.value),
+                      };
                       setLazyLoadConfig(newConfig);
                       performanceOptimizer.updateLazyLoadConfig(newConfig);
                     }}
@@ -388,7 +434,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                   type="checkbox"
                   checked={lazyLoadConfig.enableVirtualization}
                   onChange={(e) => {
-                    const newConfig = { ...lazyLoadConfig, enableVirtualization: e.target.checked };
+                    const newConfig = {
+                      ...lazyLoadConfig,
+                      enableVirtualization: e.target.checked,
+                    };
                     setLazyLoadConfig(newConfig);
                     performanceOptimizer.updateLazyLoadConfig(newConfig);
                   }}
@@ -414,7 +463,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                     type="number"
                     value={cacheStrategy.maxSize}
                     onChange={(e) => {
-                      const newStrategy = { ...cacheStrategy, maxSize: parseInt(e.target.value) };
+                      const newStrategy = {
+                        ...cacheStrategy,
+                        maxSize: parseInt(e.target.value),
+                      };
                       setCacheStrategy(newStrategy);
                       performanceOptimizer.updateCacheStrategy(newStrategy);
                     }}
@@ -429,7 +481,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                     type="number"
                     value={cacheStrategy.ttl / 60000}
                     onChange={(e) => {
-                      const newStrategy = { ...cacheStrategy, ttl: parseInt(e.target.value) * 60000 };
+                      const newStrategy = {
+                        ...cacheStrategy,
+                        ttl: parseInt(e.target.value) * 60000,
+                      };
                       setCacheStrategy(newStrategy);
                       performanceOptimizer.updateCacheStrategy(newStrategy);
                     }}
@@ -445,7 +500,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                 <select
                   value={cacheStrategy.strategy}
                   onChange={(e) => {
-                    const newStrategy = { ...cacheStrategy, strategy: e.target.value as CacheStrategy['strategy'] };
+                    const newStrategy = {
+                      ...cacheStrategy,
+                      strategy: e.target.value as CacheStrategy["strategy"],
+                    };
                     setCacheStrategy(newStrategy);
                     performanceOptimizer.updateCacheStrategy(newStrategy);
                   }}

@@ -20,13 +20,9 @@ export class ApiError extends Error {
   public status: number;
   public response?: ErrorResponse;
 
-  constructor(
-    message: string,
-    status: number = 500,
-    response?: ErrorResponse
-  ) {
+  constructor(message: string, status: number = 500, response?: ErrorResponse) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.response = response;
   }
@@ -41,24 +37,28 @@ export function setTokenProvider(provider: TokenProvider | null): void {
 }
 
 export function resolveApiRootUrl(baseUrl: string, version: string): string {
-  const cleanBase = baseUrl.replace(/\/+$/, '');
-  const cleanVersion = version.replace(/^\/+|\/+$/g, '');
+  const cleanBase = baseUrl.replace(/\/+$/, "");
+  const cleanVersion = version.replace(/^\/+|\/+$/g, "");
   const versionedSuffix = `/api/${cleanVersion}`;
 
   if (cleanBase.endsWith(versionedSuffix)) {
     return cleanBase;
   }
 
-  if (cleanBase.endsWith('/api')) {
+  if (cleanBase.endsWith("/api")) {
     return `${cleanBase}/${cleanVersion}`;
   }
 
   return `${cleanBase}${versionedSuffix}`;
 }
 
-export function buildApiUrl(baseUrl: string, version: string, endpoint: string): string {
+export function buildApiUrl(
+  baseUrl: string,
+  version: string,
+  endpoint: string,
+): string {
   const root = resolveApiRootUrl(baseUrl, version);
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
   return `${root}/${cleanEndpoint}`;
 }
 
@@ -67,30 +67,30 @@ class ApiClient {
   private version: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-    this.version = import.meta.env.VITE_API_VERSION || 'v1';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    this.version = import.meta.env.VITE_API_VERSION || "v1";
   }
 
   private getUrl(endpoint: string): string {
     return buildApiUrl(this.baseUrl, this.version, endpoint);
   }
 
-  private async request<T = unknown>(
+  private async send<T = unknown>(
     endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+    options: RequestInit = {},
+  ): Promise<T> {
     const url = this.getUrl(endpoint);
 
     const headers = new Headers(options.headers);
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
 
     if (tokenProvider) {
       try {
         const token = await tokenProvider();
         if (token) {
-          headers.set('Authorization', `Bearer ${token}`);
+          headers.set("Authorization", `Bearer ${token}`);
         }
       } catch {
         // Ignore token provider errors and proceed without auth header.
@@ -98,14 +98,14 @@ class ApiClient {
     }
 
     const config: RequestInit = {
-      headers,
       ...options,
+      headers,
     };
 
-    if (import.meta.env.VITE_DEBUG_API === 'true') {
-      console.log(`API Request: ${config.method || 'GET'} ${url}`, {
+    if (import.meta.env.VITE_DEBUG_API === "true") {
+      console.log(`API Request: ${config.method || "GET"} ${url}`, {
         body: config.body,
-        headers: config.headers
+        headers: config.headers,
       });
     }
 
@@ -113,7 +113,7 @@ class ApiClient {
       const response = await fetch(url, config);
       const data = await response.json().catch(() => ({}));
 
-      if (import.meta.env.VITE_DEBUG_API === 'true') {
+      if (import.meta.env.VITE_DEBUG_API === "true") {
         console.log(`API Response: ${response.status}`, data);
       }
 
@@ -121,53 +121,84 @@ class ApiClient {
         throw new ApiError(
           data.error || data.message || `HTTP ${response.status}`,
           response.status,
-          data
+          data,
         );
       }
 
-      return data as ApiResponse<T>;
+      return data as T;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
       }
 
-      console.error('API Request failed:', error);
+      console.error("API Request failed:", error);
       throw new ApiError(
-        error instanceof Error ? error.message : 'Network error',
-        0
+        error instanceof Error ? error.message : "Network error",
+        0,
       );
     }
   }
 
-  // HTTP Methods
-  async get<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  private async request<T = unknown>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<ApiResponse<T>> {
+    return this.send<ApiResponse<T>>(endpoint, options);
   }
 
-  async post<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  private async rawRequest<T = unknown>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<T> {
+    return this.send<T>(endpoint, options);
+  }
+
+  // HTTP Methods
+  async get<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { method: "GET" });
+  }
+
+  async post<T = unknown>(
+    endpoint: string,
+    data?: unknown,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async rawGet<T = unknown>(endpoint: string): Promise<T> {
+    return this.rawRequest<T>(endpoint, { method: "GET" });
+  }
+
+  async rawPost<T = unknown>(endpoint: string, data?: unknown): Promise<T> {
+    return this.rawRequest<T>(endpoint, {
+      method: "POST",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async put<T = unknown>(
+    endpoint: string,
+    data?: unknown,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'PUT',
+      method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
   async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: "DELETE" });
   }
 
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await this.get('/health');
+      const response = await this.get("/health");
       // Backend returns {status: "healthy"} not {success: true}
-      return response.status === 'healthy' || response.success === true;
+      return response.status === "healthy" || response.success === true;
     } catch {
       return false;
     }

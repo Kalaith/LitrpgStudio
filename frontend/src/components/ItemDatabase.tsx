@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { itemsApi } from '../api/items';
-import type { Item } from '../types/itemDatabase';
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { itemsApi } from "../api/items";
+import type { Item } from "../types/itemDatabase";
 
 interface ItemDatabaseProps {
   onItemSelect?: (item: Item) => void;
@@ -9,13 +9,13 @@ interface ItemDatabaseProps {
   onItemDelete?: (itemId: string) => void;
 }
 
-type SortField = 'name' | 'level' | 'rarity' | 'type' | 'value';
-type SortDirection = 'asc' | 'desc';
+type SortField = "name" | "level" | "rarity" | "type" | "value";
+type SortDirection = "asc" | "desc";
 
 export default function ItemDatabase({
   onItemSelect,
   onItemSave,
-  onItemDelete
+  onItemDelete,
 }: ItemDatabaseProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -23,28 +23,52 @@ export default function ItemDatabase({
   const [error, setError] = useState<string | null>(null);
 
   // Filters and sorting
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<string>('');
-  const [filterRarity, setFilterRarity] = useState<string>('');
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("");
+  const [filterRarity, setFilterRarity] = useState<string>("");
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const rarityColors = {
-    common: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-300' },
-    uncommon: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-300' },
-    rare: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-300' },
-    epic: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-300' },
-    legendary: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-300' },
-    mythic: { bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-300' }
+    common: {
+      bg: "bg-gray-100",
+      text: "text-gray-800",
+      border: "border-gray-300",
+    },
+    uncommon: {
+      bg: "bg-green-100",
+      text: "text-green-800",
+      border: "border-green-300",
+    },
+    rare: {
+      bg: "bg-blue-100",
+      text: "text-blue-800",
+      border: "border-blue-300",
+    },
+    epic: {
+      bg: "bg-purple-100",
+      text: "text-purple-800",
+      border: "border-purple-300",
+    },
+    legendary: {
+      bg: "bg-yellow-100",
+      text: "text-yellow-800",
+      border: "border-yellow-300",
+    },
+    mythic: {
+      bg: "bg-pink-100",
+      text: "text-pink-800",
+      border: "border-pink-300",
+    },
   };
 
   const itemTypes = {
-    weapon: ['sword', 'axe', 'bow', 'staff', 'dagger', 'hammer', 'spear'],
-    armor: ['helmet', 'chest', 'legs', 'boots', 'gloves', 'shield'],
-    accessory: ['ring', 'necklace', 'earring', 'bracelet', 'belt'],
-    consumable: ['potion', 'food', 'scroll', 'gem'],
-    material: ['ore', 'herb', 'cloth', 'leather', 'crystal'],
-    quest: ['key', 'document', 'artifact', 'trophy']
+    weapon: ["sword", "axe", "bow", "staff", "dagger", "hammer", "spear"],
+    armor: ["helmet", "chest", "legs", "boots", "gloves", "shield"],
+    accessory: ["ring", "necklace", "earring", "bracelet", "belt"],
+    consumable: ["potion", "food", "scroll", "gem"],
+    material: ["ore", "herb", "cloth", "leather", "crystal"],
+    quest: ["key", "document", "artifact", "trophy"],
   };
 
   const loadItems = useCallback(async () => {
@@ -54,13 +78,17 @@ export default function ItemDatabase({
 
       const response = await itemsApi.getAll();
       if (!response.success) {
-        throw new Error(response.error ?? response.message ?? 'Failed to load items');
+        throw new Error(
+          response.error ?? response.message ?? "Failed to load items",
+        );
       }
 
       setItems(response.data ?? []);
     } catch (loadError) {
-      console.error('Failed to load items:', loadError);
-      setError(loadError instanceof Error ? loadError.message : 'Failed to load items');
+      console.error("Failed to load items:", loadError);
+      setError(
+        loadError instanceof Error ? loadError.message : "Failed to load items",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -92,18 +120,19 @@ export default function ItemDatabase({
 
     // Apply filters
     if (searchTerm) {
-      result = result.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     if (filterType) {
-      result = result.filter(item => item.type === filterType);
+      result = result.filter((item) => item.type === filterType);
     }
 
     if (filterRarity) {
-      result = result.filter(item => item.rarity === filterRarity);
+      result = result.filter((item) => item.rarity === filterRarity);
     }
 
     // Apply sorting
@@ -112,20 +141,27 @@ export default function ItemDatabase({
       let bValue: string | number = b[sortField];
 
       // Special handling for rarity sorting
-      if (sortField === 'rarity') {
-        const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
+      if (sortField === "rarity") {
+        const rarityOrder = [
+          "common",
+          "uncommon",
+          "rare",
+          "epic",
+          "legendary",
+          "mythic",
+        ];
         aValue = rarityOrder.indexOf(a.rarity);
         bValue = rarityOrder.indexOf(b.rarity);
       }
 
-      if (typeof aValue === 'string') {
+      if (typeof aValue === "string") {
         aValue = aValue.toLowerCase();
       }
-      if (typeof bValue === 'string') {
+      if (typeof bValue === "string") {
         bValue = bValue.toLowerCase();
       }
 
-      if (sortDirection === 'asc') {
+      if (sortDirection === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       }
 
@@ -139,11 +175,11 @@ export default function ItemDatabase({
     setError(null);
 
     const newItem: Partial<Item> = {
-      name: 'New Item',
-      description: 'A newly created item',
-      type: 'weapon',
-      subType: 'sword',
-      rarity: 'common',
+      name: "New Item",
+      description: "A newly created item",
+      type: "weapon",
+      subType: "sword",
+      rarity: "common",
       level: 1,
       value: 10,
       stats: [],
@@ -152,21 +188,27 @@ export default function ItemDatabase({
       enchantments: { slots: 0, used: 0, enchants: [] },
       stackable: false,
       sellable: true,
-      tradeable: true
+      tradeable: true,
     };
 
     try {
       const response = await itemsApi.create(newItem);
       if (!response.success || !response.data) {
-        throw new Error(response.error ?? response.message ?? 'Failed to create item');
+        throw new Error(
+          response.error ?? response.message ?? "Failed to create item",
+        );
       }
 
-      setItems(prev => [response.data!, ...prev]);
+      setItems((prev) => [response.data!, ...prev]);
       setSelectedItem(response.data);
       onItemSave?.(response.data);
     } catch (createError) {
-      console.error('Failed to create item:', createError);
-      setError(createError instanceof Error ? createError.message : 'Failed to create item');
+      console.error("Failed to create item:", createError);
+      setError(
+        createError instanceof Error
+          ? createError.message
+          : "Failed to create item",
+      );
     }
   };
 
@@ -176,20 +218,30 @@ export default function ItemDatabase({
     try {
       const response = await itemsApi.delete(itemId);
       if (!response.success) {
-        throw new Error(response.error ?? response.message ?? 'Failed to delete item');
+        throw new Error(
+          response.error ?? response.message ?? "Failed to delete item",
+        );
       }
 
       onItemDelete?.(itemId);
-      setItems(currentItems => currentItems.filter(item => item.id !== itemId));
+      setItems((currentItems) =>
+        currentItems.filter((item) => item.id !== itemId),
+      );
       setSelectedItem(null);
     } catch (deleteError) {
-      console.error('Failed to delete item:', deleteError);
-      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete item');
+      console.error("Failed to delete item:", deleteError);
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete item",
+      );
     }
   };
 
   const getRarityStyle = (rarity: string) => {
-    return rarityColors[rarity as keyof typeof rarityColors] || rarityColors.common;
+    return (
+      rarityColors[rarity as keyof typeof rarityColors] || rarityColors.common
+    );
   };
 
   const renderItemCard = (item: Item) => (
@@ -201,7 +253,7 @@ export default function ItemDatabase({
       className={`
         bg-white dark:bg-gray-800 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg
         border-2 ${getRarityStyle(item.rarity).border}
-        ${selectedItem?.id === item.id ? 'ring-2 ring-blue-500' : ''}
+        ${selectedItem?.id === item.id ? "ring-2 ring-blue-500" : ""}
       `}
       onClick={() => {
         setSelectedItem(item);
@@ -221,10 +273,12 @@ export default function ItemDatabase({
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className={`
+          <span
+            className={`
             px-2 py-1 text-xs font-medium rounded-full capitalize
             ${getRarityStyle(item.rarity).bg} ${getRarityStyle(item.rarity).text}
-          `}>
+          `}
+          >
             {item.rarity}
           </span>
           <span className="text-sm text-gray-500 mt-1">Lv.{item.level}</span>
@@ -240,8 +294,12 @@ export default function ItemDatabase({
           <div className="text-xs font-medium text-gray-500 mb-1">Stats:</div>
           <div className="flex flex-wrap gap-1">
             {item.stats.slice(0, 3).map((stat, index) => (
-              <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {stat.name}: +{stat.value}{stat.type === 'percentage' ? '%' : ''}
+              <span
+                key={index}
+                className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+              >
+                {stat.name}: +{stat.value}
+                {stat.type === "percentage" ? "%" : ""}
               </span>
             ))}
             {item.stats.length > 3 && (
@@ -270,8 +328,12 @@ export default function ItemDatabase({
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Item Database</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage items, equipment, and consumables</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              Item Database
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Manage items, equipment, and consumables
+            </p>
           </div>
           <button
             onClick={() => void handleCreateItem()}
@@ -302,8 +364,10 @@ export default function ItemDatabase({
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md"
             >
               <option value="">All Types</option>
-              {Object.keys(itemTypes).map(type => (
-                <option key={type} value={type} className="capitalize">{type}</option>
+              {Object.keys(itemTypes).map((type) => (
+                <option key={type} value={type} className="capitalize">
+                  {type}
+                </option>
               ))}
             </select>
           </div>
@@ -315,8 +379,10 @@ export default function ItemDatabase({
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md"
             >
               <option value="">All Rarities</option>
-              {Object.keys(rarityColors).map(rarity => (
-                <option key={rarity} value={rarity} className="capitalize">{rarity}</option>
+              {Object.keys(rarityColors).map((rarity) => (
+                <option key={rarity} value={rarity} className="capitalize">
+                  {rarity}
+                </option>
               ))}
             </select>
           </div>
@@ -325,7 +391,10 @@ export default function ItemDatabase({
             <select
               value={`${sortField}-${sortDirection}`}
               onChange={(e) => {
-                const [field, direction] = e.target.value.split('-') as [SortField, SortDirection];
+                const [field, direction] = e.target.value.split("-") as [
+                  SortField,
+                  SortDirection,
+                ];
                 setSortField(field);
                 setSortDirection(direction);
               }}
@@ -376,9 +445,8 @@ export default function ItemDatabase({
               <h3 className="text-xl font-semibold mb-2">No items found</h3>
               <p className="text-gray-400">
                 {searchTerm || filterType || filterRarity
-                  ? 'Try adjusting your search criteria'
-                  : 'Create your first item to get started'
-                }
+                  ? "Try adjusting your search criteria"
+                  : "Create your first item to get started"}
               </p>
             </div>
           )}
@@ -398,10 +466,12 @@ export default function ItemDatabase({
                 )}
                 <div>
                   <h3 className="text-lg font-semibold">{selectedItem.name}</h3>
-                  <span className={`
+                  <span
+                    className={`
                     px-2 py-1 text-xs font-medium rounded-full capitalize
                     ${getRarityStyle(selectedItem.rarity).bg} ${getRarityStyle(selectedItem.rarity).text}
-                  `}>
+                  `}
+                  >
                     {selectedItem.rarity}
                   </span>
                 </div>
@@ -417,13 +487,17 @@ export default function ItemDatabase({
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium mb-1">Description</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedItem.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedItem.description}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium">Type:</span>
-                  <div className="capitalize">{selectedItem.type} - {selectedItem.subType}</div>
+                  <div className="capitalize">
+                    {selectedItem.type} - {selectedItem.subType}
+                  </div>
                 </div>
                 <div>
                   <span className="font-medium">Level:</span>
@@ -449,7 +523,8 @@ export default function ItemDatabase({
                       <div key={index} className="flex justify-between text-sm">
                         <span>{stat.name}:</span>
                         <span className="font-medium text-blue-600">
-                          +{stat.value}{stat.type === 'percentage' ? '%' : ''}
+                          +{stat.value}
+                          {stat.type === "percentage" ? "%" : ""}
                         </span>
                       </div>
                     ))}
@@ -462,7 +537,10 @@ export default function ItemDatabase({
                   <h4 className="font-medium mb-2">Effects</h4>
                   <div className="space-y-2">
                     {selectedItem.effects.map((effect, index) => (
-                      <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded p-2">
+                      <div
+                        key={index}
+                        className="bg-gray-50 dark:bg-gray-700 rounded p-2"
+                      >
                         <div className="font-medium text-sm">{effect.name}</div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">
                           {effect.description}
@@ -511,4 +589,3 @@ export default function ItemDatabase({
     </div>
   );
 }
-

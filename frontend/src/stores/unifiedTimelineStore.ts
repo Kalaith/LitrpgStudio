@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type {
   TimelineEvent,
   TimelineView,
@@ -10,9 +10,9 @@ import type {
   EventConflict,
   ValidationIssue,
   TimelineTimestamp,
-  EventDependency
-} from '../types/unifiedTimeline';
-import type { EntityReference } from '../types/entityRegistry';
+  EventDependency,
+} from "../types/unifiedTimeline";
+import type { EntityReference } from "../types/entityRegistry";
 
 interface UnifiedTimelineState {
   // Data Storage
@@ -26,27 +26,37 @@ interface UnifiedTimelineState {
   editingEventId: string | null;
 
   // Event Management
-  addEvent: (event: Omit<TimelineEvent, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  addEvent: (
+    event: Omit<TimelineEvent, "id" | "createdAt" | "updatedAt">,
+  ) => string;
   updateEvent: (id: string, updates: Partial<TimelineEvent>) => void;
   removeEvent: (id: string) => void;
   duplicateEvent: (id: string) => string;
   moveEvent: (id: string, newTimestamp: TimelineTimestamp) => void;
 
   // Bulk Operations
-  addMultipleEvents: (events: Omit<TimelineEvent, 'id' | 'createdAt' | 'updatedAt'>[]) => string[];
+  addMultipleEvents: (
+    events: Omit<TimelineEvent, "id" | "createdAt" | "updatedAt">[],
+  ) => string[];
   removeMultipleEvents: (ids: string[]) => void;
   mergeEvents: (sourceId: string, targetId: string) => void;
 
   // View Management
-  createView: (view: Omit<TimelineView, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  createView: (
+    view: Omit<TimelineView, "id" | "createdAt" | "updatedAt">,
+  ) => string;
   updateView: (id: string, updates: Partial<TimelineView>) => void;
   removeView: (id: string) => void;
   setActiveView: (id: string | null) => void;
   duplicateView: (id: string, newName: string) => string;
 
   // Template Management
-  createTemplate: (template: Omit<TimelineTemplate, 'id'>) => string;
-  applyTemplate: (templateId: string, targetScope: TimelineScope, entityMappings?: Record<string, string>) => string[];
+  createTemplate: (template: Omit<TimelineTemplate, "id">) => string;
+  applyTemplate: (
+    templateId: string,
+    targetScope: TimelineScope,
+    entityMappings?: Record<string, string>,
+  ) => string[];
   removeTemplate: (id: string) => void;
 
   // Querying and Filtering
@@ -55,10 +65,18 @@ interface UnifiedTimelineState {
   getEventsByScope: (scope: TimelineScope) => TimelineEvent[];
   getEventsByType: (type: TimelineEventType) => TimelineEvent[];
   getEventsByEntity: (entityId: string) => TimelineEvent[];
-  getEventsByTimeRange: (start: TimelineTimestamp, end: TimelineTimestamp) => TimelineEvent[];
+  getEventsByTimeRange: (
+    start: TimelineTimestamp,
+    end: TimelineTimestamp,
+  ) => TimelineEvent[];
 
   // Relationship Management
-  addDependency: (fromEventId: string, toEventId: string, dependencyType: EventDependency['dependencyType'], description?: string) => void;
+  addDependency: (
+    fromEventId: string,
+    toEventId: string,
+    dependencyType: EventDependency["dependencyType"],
+    description?: string,
+  ) => void;
   removeDependency: (fromEventId: string, toEventId: string) => void;
   getDependentEvents: (eventId: string) => TimelineEvent[];
   getDependencyChain: (eventId: string) => TimelineEvent[];
@@ -71,35 +89,58 @@ interface UnifiedTimelineState {
   detectPlotHoles: () => ValidationIssue[];
 
   // Search and Discovery
-  searchEvents: (query: string, options?: {
-    scopes?: TimelineScope[];
-    types?: TimelineEventType[];
-    entities?: string[];
-    includeArchived?: boolean;
-  }) => TimelineEvent[];
+  searchEvents: (
+    query: string,
+    options?: {
+      scopes?: TimelineScope[];
+      types?: TimelineEventType[];
+      entities?: string[];
+      includeArchived?: boolean;
+    },
+  ) => TimelineEvent[];
   findSimilarEvents: (eventId: string, limit?: number) => TimelineEvent[];
   suggestRelatedEvents: (eventId: string) => TimelineEvent[];
 
   // Timeline Manipulation
   reorderEvents: (eventIds: string[], newOrder: number[]) => void;
-  insertEventBetween: (eventData: Omit<TimelineEvent, 'id' | 'createdAt' | 'updatedAt'>, beforeEventId: string, afterEventId: string) => string;
-  splitEvent: (eventId: string, splitPoint: TimelineTimestamp) => { firstPart: string; secondPart: string };
+  insertEventBetween: (
+    eventData: Omit<TimelineEvent, "id" | "createdAt" | "updatedAt">,
+    beforeEventId: string,
+    afterEventId: string,
+  ) => string;
+  splitEvent: (
+    eventId: string,
+    splitPoint: TimelineTimestamp,
+  ) => { firstPart: string; secondPart: string };
   combineEvents: (eventIds: string[]) => string;
 
   // Import/Export
-  exportTimeline: (viewId?: string, format?: 'json' | 'csv' | 'pdf') => string | TimelineEvent[];
+  exportTimeline: (
+    viewId?: string,
+    format?: "json" | "csv" | "pdf",
+  ) => string | TimelineEvent[];
   importEvents: (events: TimelineEvent[], replaceExisting?: boolean) => void;
 
   // Collaboration Features
-  addComment: (eventId: string, comment: string, type?: 'comment' | 'suggestion') => void;
+  addComment: (
+    eventId: string,
+    comment: string,
+    type?: "comment" | "suggestion",
+  ) => void;
   resolveComment: (commentId: string) => void;
-  createChangeRequest: (eventId: string, changes: Partial<TimelineEvent>, reason: string) => void;
+  createChangeRequest: (
+    eventId: string,
+    changes: Partial<TimelineEvent>,
+    reason: string,
+  ) => void;
 
   // Utility Functions
   generateEventId: () => string;
   getNextEventOrder: (scope: TimelineScope) => number;
   calculateEventDuration: (eventId: string) => number; // in minutes
-  getTimelineBounds: (scope?: TimelineScope) => { start: TimelineTimestamp; end: TimelineTimestamp } | null;
+  getTimelineBounds: (
+    scope?: TimelineScope,
+  ) => { start: TimelineTimestamp; end: TimelineTimestamp } | null;
 
   // Selection Management
   selectEvent: (id: string, addToSelection?: boolean) => void;
@@ -123,15 +164,17 @@ interface UnifiedTimelineState {
 const createEmptyMaps = () => ({
   events: new Map<string, TimelineEvent>(),
   views: new Map<string, TimelineView>(),
-  templates: new Map<string, TimelineTemplate>()
+  templates: new Map<string, TimelineTemplate>(),
 });
 
-const normalizeDependencies = (deps: TimelineEvent['dependencies']): EventDependency[] => {
+const normalizeDependencies = (
+  deps: TimelineEvent["dependencies"],
+): EventDependency[] => {
   if (!deps || deps.length === 0) return [];
   return deps.map((dep) =>
-    typeof dep === 'string'
-      ? { eventId: dep, dependencyType: 'must_happen_before' as const }
-      : dep
+    typeof dep === "string"
+      ? { eventId: dep, dependencyType: "must_happen_before" as const }
+      : dep,
   );
 };
 
@@ -151,7 +194,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           ...eventData,
           id,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         };
 
         set((state) => {
@@ -171,7 +214,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           const updatedEvent = {
             ...event,
             ...updates,
-            updatedAt: new Date()
+            updatedAt: new Date(),
           };
 
           const newEvents = new Map(state.events);
@@ -190,18 +233,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           newSelection.delete(id);
 
           // Clear editing if this event was being edited
-          const newEditingId = state.editingEventId === id ? null : state.editingEventId;
+          const newEditingId =
+            state.editingEventId === id ? null : state.editingEventId;
 
           // Remove dependencies involving this event
           for (const [eventId, event] of newEvents) {
             if (event.dependencies) {
               const normalizedDeps = normalizeDependencies(event.dependencies);
-              const newDependencies = normalizedDeps.filter(dep => dep.eventId !== id);
+              const newDependencies = normalizedDeps.filter(
+                (dep) => dep.eventId !== id,
+              );
               if (newDependencies.length !== normalizedDeps.length) {
                 newEvents.set(eventId, {
                   ...event,
                   dependencies: newDependencies,
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
                 });
               }
             }
@@ -210,21 +256,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           return {
             events: newEvents,
             selectedEventIds: newSelection,
-            editingEventId: newEditingId
+            editingEventId: newEditingId,
           };
         });
       },
 
       duplicateEvent: (id) => {
         const event = get().events.get(id);
-        if (!event) return '';
+        if (!event) return "";
 
         const duplicatedEvent = {
           ...event,
           name: `${event.name} (Copy)`,
           id: undefined as unknown as string,
           createdAt: undefined as unknown as Date,
-          updatedAt: undefined as unknown as Date
+          updatedAt: undefined as unknown as Date,
         };
 
         return get().addEvent(duplicatedEvent);
@@ -237,14 +283,14 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
       // Bulk Operations
       addMultipleEvents: (eventsData) => {
         const ids: string[] = [];
-        eventsData.forEach(eventData => {
+        eventsData.forEach((eventData) => {
           ids.push(get().addEvent(eventData));
         });
         return ids;
       },
 
       removeMultipleEvents: (ids) => {
-        ids.forEach(id => get().removeEvent(id));
+        ids.forEach((id) => get().removeEvent(id));
       },
 
       mergeEvents: (sourceId, targetId) => {
@@ -259,11 +305,14 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           description: `${targetEvent.description}\n\n--- Merged from "${sourceEvent.name}" ---\n${sourceEvent.description}`,
           involvedEntities: [
             ...targetEvent.involvedEntities,
-            ...sourceEvent.involvedEntities.filter(entity =>
-              !targetEvent.involvedEntities.some(existing => existing.id === entity.id)
-            )
+            ...sourceEvent.involvedEntities.filter(
+              (entity) =>
+                !targetEvent.involvedEntities.some(
+                  (existing) => existing.id === entity.id,
+                ),
+            ),
           ],
-          tags: Array.from(new Set([...targetEvent.tags, ...sourceEvent.tags]))
+          tags: Array.from(new Set([...targetEvent.tags, ...sourceEvent.tags])),
         };
 
         get().updateEvent(targetId, mergedEvent);
@@ -277,7 +326,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           ...viewData,
           id,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         };
 
         set((state) => {
@@ -297,7 +346,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           const updatedView = {
             ...view,
             ...updates,
-            updatedAt: new Date()
+            updatedAt: new Date(),
           };
 
           const newViews = new Map(state.views);
@@ -311,11 +360,12 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           const newViews = new Map(state.views);
           newViews.delete(id);
 
-          const newActiveViewId = state.activeViewId === id ? null : state.activeViewId;
+          const newActiveViewId =
+            state.activeViewId === id ? null : state.activeViewId;
 
           return {
             views: newViews,
-            activeViewId: newActiveViewId
+            activeViewId: newActiveViewId,
           };
         });
       },
@@ -326,14 +376,14 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
       duplicateView: (id, newName) => {
         const view = get().views.get(id);
-        if (!view) return '';
+        if (!view) return "";
 
         const duplicatedView = {
           ...view,
           name: newName,
           id: undefined as unknown as string,
           createdAt: undefined as unknown as Date,
-          updatedAt: undefined as unknown as Date
+          updatedAt: undefined as unknown as Date,
         };
 
         return get().createView(duplicatedView);
@@ -344,7 +394,7 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const id = `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const template: TimelineTemplate = {
           ...templateData,
-          id
+          id,
         };
 
         set((state) => {
@@ -370,19 +420,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
             scope: targetScope,
             timestamp: {
               isApproximate: false,
-              storyDay: Math.floor(templateEvent.relativePosition * 100) // Simple mapping
+              storyDay: Math.floor(templateEvent.relativePosition * 100), // Simple mapping
             },
-            involvedEntities: template.requiredEntities.map(entity =>
-              entityMappings[entity.id] ? { ...entity, id: entityMappings[entity.id] } : entity
+            involvedEntities: template.requiredEntities.map((entity) =>
+              entityMappings[entity.id]
+                ? { ...entity, id: entityMappings[entity.id] }
+                : entity,
             ),
             plotImpact: {
               importance: templateEvent.importance,
               plotThreads: [],
-              consequences: []
+              consequences: [],
             },
             tags: template.metadata.tags,
-            status: 'draft' as const,
-            isCanon: false
+            status: "draft" as const,
+            isCanon: false,
           };
 
           const eventId = get().addEvent(eventData);
@@ -410,25 +462,27 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         let events = Array.from(get().events.values());
 
         // Apply view filters
-        if (view.scope !== 'global') {
-          events = events.filter(event => event.scope === view.scope);
+        if (view.scope !== "global") {
+          events = events.filter((event) => event.scope === view.scope);
         }
 
         if (view.entityFilter && view.entityFilter.length > 0) {
-          events = events.filter(event =>
-            event.involvedEntities.some(entity =>
-              view.entityFilter!.some(filter => filter.id === entity.id)
-            )
+          events = events.filter((event) =>
+            event.involvedEntities.some((entity) =>
+              view.entityFilter!.some((filter) => filter.id === entity.id),
+            ),
           );
         }
 
         if (view.typeFilter && view.typeFilter.length > 0) {
-          events = events.filter(event => view.typeFilter!.includes(event.type));
+          events = events.filter((event) =>
+            view.typeFilter!.includes(event.type),
+          );
         }
 
         if (view.tagFilter && view.tagFilter.length > 0) {
-          events = events.filter(event =>
-            view.tagFilter!.some(tag => event.tags.includes(tag))
+          events = events.filter((event) =>
+            view.tagFilter!.some((tag) => event.tags.includes(tag)),
           );
         }
 
@@ -443,13 +497,13 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         // Sort events
         events.sort((a, b) => {
           switch (view.sortBy) {
-            case 'chronological': {
+            case "chronological": {
               // Simple chronological sort by story day
               const aDays = a.timestamp.storyDay || 0;
               const bDays = b.timestamp.storyDay || 0;
               return aDays - bDays;
             }
-            case 'importance': {
+            case "importance": {
               const aImportance = a.plotImpact?.importance || 1;
               const bImportance = b.plotImpact?.importance || 1;
               return bImportance - aImportance;
@@ -463,16 +517,20 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
       },
 
       getEventsByScope: (scope) => {
-        return Array.from(get().events.values()).filter(event => event.scope === scope);
+        return Array.from(get().events.values()).filter(
+          (event) => event.scope === scope,
+        );
       },
 
       getEventsByType: (type) => {
-        return Array.from(get().events.values()).filter(event => event.type === type);
+        return Array.from(get().events.values()).filter(
+          (event) => event.type === type,
+        );
       },
 
       getEventsByEntity: (entityId) => {
-        return Array.from(get().events.values()).filter(event =>
-          event.involvedEntities.some(entity => entity.id === entityId)
+        return Array.from(get().events.values()).filter((event) =>
+          event.involvedEntities.some((entity) => entity.id === entityId),
         );
       },
 
@@ -489,13 +547,16 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const dependency: EventDependency = {
           eventId: toEventId,
           dependencyType,
-          description
+          description,
         };
 
-        const newDependencies = [...normalizeDependencies(fromEvent.dependencies), dependency];
+        const newDependencies = [
+          ...normalizeDependencies(fromEvent.dependencies),
+          dependency,
+        ];
 
         get().updateEvent(fromEventId, {
-          dependencies: newDependencies
+          dependencies: newDependencies,
         });
       },
 
@@ -503,17 +564,21 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const fromEvent = get().events.get(fromEventId);
         if (!fromEvent || !fromEvent.dependencies) return;
 
-        const newDependencies = normalizeDependencies(fromEvent.dependencies).filter(dep => dep.eventId !== toEventId);
+        const newDependencies = normalizeDependencies(
+          fromEvent.dependencies,
+        ).filter((dep) => dep.eventId !== toEventId);
 
         get().updateEvent(fromEventId, {
-          dependencies: newDependencies
+          dependencies: newDependencies,
         });
       },
 
       getDependentEvents: (eventId) => {
         const allEvents = Array.from(get().events.values());
-        return allEvents.filter(event =>
-          normalizeDependencies(event.dependencies).some(dep => dep.eventId === eventId)
+        return allEvents.filter((event) =>
+          normalizeDependencies(event.dependencies).some(
+            (dep) => dep.eventId === eventId,
+          ),
         );
       },
 
@@ -532,28 +597,28 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         // Basic validation
         if (!event.name.trim()) {
           issues.push({
-            type: 'timeline_inconsistency',
-            severity: 'error',
-            message: 'Event name cannot be empty'
+            type: "timeline_inconsistency",
+            severity: "error",
+            message: "Event name cannot be empty",
           });
         }
 
         if (!event.involvedEntities.length) {
           issues.push({
-            type: 'timeline_inconsistency',
-            severity: 'warning',
-            message: 'Event has no involved entities'
+            type: "timeline_inconsistency",
+            severity: "warning",
+            message: "Event has no involved entities",
           });
         }
 
         // Check dependencies
         if (event.dependencies) {
-          normalizeDependencies(event.dependencies).forEach(dep => {
+          normalizeDependencies(event.dependencies).forEach((dep) => {
             if (!get().events.has(dep.eventId)) {
               issues.push({
-                type: 'timeline_inconsistency',
-                severity: 'error',
-                message: `Dependency references non-existent event: ${dep.eventId}`
+                type: "timeline_inconsistency",
+                severity: "error",
+                message: `Dependency references non-existent event: ${dep.eventId}`,
               });
             }
           });
@@ -576,14 +641,16 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
       },
 
       analyzeTimeline: (viewId) => {
-        const events = viewId ? get().getEventsInView(viewId) : Array.from(get().events.values());
+        const events = viewId
+          ? get().getEventsInView(viewId)
+          : Array.from(get().events.values());
 
         const analysis: TimelineAnalysis = {
           totalEvents: events.length,
           timeSpan: {
             start: { isApproximate: false, storyDay: 0 },
             end: { isApproximate: false, storyDay: 100 },
-            duration: { days: 100, approximate: true }
+            duration: { days: 100, approximate: true },
           },
           eventsByType: {} as Record<TimelineEventType, number>,
           eventsByScope: {} as Record<TimelineScope, number>,
@@ -592,19 +659,22 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           gaps: [],
           inconsistencies: [],
           averageEventsPerChapter: 0,
-          mostActiveCharacter: { id: '', type: 'character', name: '' },
-          mostChangedLocation: '',
+          mostActiveCharacter: { id: "", type: "character", name: "" },
+          mostChangedLocation: "",
           plotThreadCoverage: {},
-          generatedAt: new Date()
+          generatedAt: new Date(),
         };
 
         // Calculate statistics
-        events.forEach(event => {
-          analysis.eventsByType[event.type] = (analysis.eventsByType[event.type] || 0) + 1;
-          analysis.eventsByScope[event.scope] = (analysis.eventsByScope[event.scope] || 0) + 1;
+        events.forEach((event) => {
+          analysis.eventsByType[event.type] =
+            (analysis.eventsByType[event.type] || 0) + 1;
+          analysis.eventsByScope[event.scope] =
+            (analysis.eventsByScope[event.scope] || 0) + 1;
 
           const importance = event.plotImpact?.importance || 1;
-          analysis.eventsByImportance[importance] = (analysis.eventsByImportance[importance] || 0) + 1;
+          analysis.eventsByImportance[importance] =
+            (analysis.eventsByImportance[importance] || 0) + 1;
         });
 
         return analysis;
@@ -621,29 +691,34 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
         // Apply scope filter
         if (options.scopes && options.scopes.length > 0) {
-          events = events.filter(event => options.scopes!.includes(event.scope));
+          events = events.filter((event) =>
+            options.scopes!.includes(event.scope),
+          );
         }
 
         // Apply type filter
         if (options.types && options.types.length > 0) {
-          events = events.filter(event => options.types!.includes(event.type));
+          events = events.filter((event) =>
+            options.types!.includes(event.type),
+          );
         }
 
         // Apply entity filter
         if (options.entities && options.entities.length > 0) {
-          events = events.filter(event =>
-            event.involvedEntities.some(entity =>
-              options.entities!.includes(entity.id)
-            )
+          events = events.filter((event) =>
+            event.involvedEntities.some((entity) =>
+              options.entities!.includes(entity.id),
+            ),
           );
         }
 
         // Apply text search
         const queryLower = query.toLowerCase();
-        events = events.filter(event =>
-          event.name.toLowerCase().includes(queryLower) ||
-          event.description.toLowerCase().includes(queryLower) ||
-          event.tags.some(tag => tag.toLowerCase().includes(queryLower))
+        events = events.filter(
+          (event) =>
+            event.name.toLowerCase().includes(queryLower) ||
+            event.description.toLowerCase().includes(queryLower) ||
+            event.tags.some((tag) => tag.toLowerCase().includes(queryLower)),
         );
 
         return events;
@@ -653,11 +728,12 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const event = get().events.get(eventId);
         if (!event) return [];
 
-        const allEvents = Array.from(get().events.values())
-          .filter(e => e.id !== eventId);
+        const allEvents = Array.from(get().events.values()).filter(
+          (e) => e.id !== eventId,
+        );
 
         // Simple similarity scoring
-        const similarities = allEvents.map(other => {
+        const similarities = allEvents.map((other) => {
           let score = 0;
 
           // Same type
@@ -667,13 +743,17 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           if (other.scope === event.scope) score += 2;
 
           // Shared entities
-          const sharedEntities = event.involvedEntities.filter(entity =>
-            other.involvedEntities.some(otherEntity => otherEntity.id === entity.id)
+          const sharedEntities = event.involvedEntities.filter((entity) =>
+            other.involvedEntities.some(
+              (otherEntity) => otherEntity.id === entity.id,
+            ),
           );
           score += sharedEntities.length * 2;
 
           // Shared tags
-          const sharedTags = event.tags.filter(tag => other.tags.includes(tag));
+          const sharedTags = event.tags.filter((tag) =>
+            other.tags.includes(tag),
+          );
           score += sharedTags.length;
 
           // Similar importance
@@ -685,10 +765,10 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         });
 
         return similarities
-          .filter(s => s.score > 0)
+          .filter((s) => s.score > 0)
           .sort((a, b) => b.score - a.score)
           .slice(0, limit)
-          .map(s => s.event);
+          .map((s) => s.event);
       },
 
       suggestRelatedEvents: (eventId) => {
@@ -738,25 +818,29 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         const event = get().events.get(eventId);
         if (!event?.duration) return 0;
 
-        return (event.duration.days || 0) * 24 * 60 +
-               (event.duration.hours || 0) * 60 +
-               (event.duration.minutes || 0);
+        return (
+          (event.duration.days || 0) * 24 * 60 +
+          (event.duration.hours || 0) * 60 +
+          (event.duration.minutes || 0)
+        );
       },
 
       getTimelineBounds: (scope) => {
-        const events = scope ? get().getEventsByScope(scope) : Array.from(get().events.values());
+        const events = scope
+          ? get().getEventsByScope(scope)
+          : Array.from(get().events.values());
         if (!events.length) return null;
 
         // Simple bounds calculation using story days
         const storyDays = events
-          .map(e => e.timestamp.storyDay || 0)
-          .filter(d => d > 0);
+          .map((e) => e.timestamp.storyDay || 0)
+          .filter((d) => d > 0);
 
         if (!storyDays.length) return null;
 
         return {
           start: { isApproximate: false, storyDay: Math.min(...storyDays) },
-          end: { isApproximate: false, storyDay: Math.max(...storyDays) }
+          end: { isApproximate: false, storyDay: Math.max(...storyDays) },
         };
       },
 
@@ -769,19 +853,24 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           eventsByScope: {} as Record<TimelineScope, number>,
           eventsByType: {} as Record<TimelineEventType, number>,
           mostActiveEntity: null as EntityReference | null,
-          averageEventsPerDay: 0
+          averageEventsPerDay: 0,
         };
 
         // Count by scope and type
-        events.forEach(event => {
-          stats.eventsByScope[event.scope] = (stats.eventsByScope[event.scope] || 0) + 1;
-          stats.eventsByType[event.type] = (stats.eventsByType[event.type] || 0) + 1;
+        events.forEach((event) => {
+          stats.eventsByScope[event.scope] =
+            (stats.eventsByScope[event.scope] || 0) + 1;
+          stats.eventsByType[event.type] =
+            (stats.eventsByType[event.type] || 0) + 1;
         });
 
         // Find most active entity
-        const entityCounts = new Map<string, { entity: EntityReference; count: number }>();
-        events.forEach(event => {
-          event.involvedEntities.forEach(entity => {
+        const entityCounts = new Map<
+          string,
+          { entity: EntityReference; count: number }
+        >();
+        events.forEach((event) => {
+          event.involvedEntities.forEach((entity) => {
             const current = entityCounts.get(entity.id);
             if (current) {
               current.count++;
@@ -802,8 +891,10 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
         // Calculate average events per day
         const bounds = get().getTimelineBounds();
         if (bounds) {
-          const totalDays = (bounds.end.storyDay || 0) - (bounds.start.storyDay || 0) + 1;
-          stats.averageEventsPerDay = totalDays > 0 ? events.length / totalDays : 0;
+          const totalDays =
+            (bounds.end.storyDay || 0) - (bounds.start.storyDay || 0) + 1;
+          stats.averageEventsPerDay =
+            totalDays > 0 ? events.length / totalDays : 0;
         }
 
         return stats;
@@ -821,18 +912,20 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
       splitEvent: (_eventId, _splitPoint) => {
         // TODO: Implement event splitting
-        return { firstPart: '', secondPart: '' };
+        return { firstPart: "", secondPart: "" };
       },
 
       combineEvents: (_eventIds) => {
         // TODO: Implement event combination
-        return '';
+        return "";
       },
 
-      exportTimeline: (viewId, format = 'json') => {
-        const events = viewId ? get().getEventsInView(viewId) : Array.from(get().events.values());
+      exportTimeline: (viewId, format = "json") => {
+        const events = viewId
+          ? get().getEventsInView(viewId)
+          : Array.from(get().events.values());
 
-        if (format === 'json') {
+        if (format === "json") {
           return JSON.stringify(events, null, 2);
         }
 
@@ -845,12 +938,12 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
           set({ events: new Map() });
         }
 
-        events.forEach(event => {
+        events.forEach((event) => {
           get().addEvent(event);
         });
       },
 
-      addComment: (_eventId, _comment, _type = 'comment') => {
+      addComment: (_eventId, _comment, _type = "comment") => {
         // TODO: Implement comment system
       },
 
@@ -860,10 +953,10 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
 
       createChangeRequest: (_eventId, _changes, _reason) => {
         // TODO: Implement change request system
-      }
+      },
     }),
     {
-      name: 'unified-timeline-store',
+      name: "unified-timeline-store",
       storage: {
         getItem: (name) => {
           const str = localStorage.getItem(name);
@@ -876,9 +969,9 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
                 events: new Map(parsed.state.events || []),
                 views: new Map(parsed.state.views || []),
                 templates: new Map(parsed.state.templates || []),
-                selectedEventIds: new Set(parsed.state.selectedEventIds || [])
+                selectedEventIds: new Set(parsed.state.selectedEventIds || []),
               },
-              version: parsed.version
+              version: parsed.version,
             };
           } catch {
             return null;
@@ -891,14 +984,14 @@ export const useUnifiedTimelineStore = create<UnifiedTimelineState>()(
               events: Array.from(value.state.events.entries()),
               views: Array.from(value.state.views.entries()),
               templates: Array.from(value.state.templates.entries()),
-              selectedEventIds: Array.from(value.state.selectedEventIds)
+              selectedEventIds: Array.from(value.state.selectedEventIds),
             },
-            version: value.version
+            version: value.version,
           };
           localStorage.setItem(name, JSON.stringify(serializedState));
         },
-        removeItem: (name) => localStorage.removeItem(name)
-      }
-    }
-  )
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+    },
+  ),
 );

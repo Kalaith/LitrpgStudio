@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCharacterStore } from '../stores/characterStore';
-import type { Character, CharacterStats } from '../types/character';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCharacterStore } from "../stores/characterStore";
+import type { Character, CharacterStats } from "../types/character";
 
 interface ProgressionSimulatorProps {
   character: Character;
@@ -20,7 +20,7 @@ interface SimulationResult {
 
 interface ProgressionSettings {
   experienceRate: number; // XP per chapter
-  levelingCurve: 'linear' | 'exponential' | 'logarithmic';
+  levelingCurve: "linear" | "exponential" | "logarithmic";
   statGrowthRate: number;
   skillUnlockRate: number;
   customMilestones: Milestone[];
@@ -44,22 +44,24 @@ interface Milestone {
   };
 }
 
-type ProgressionView = 'simulator' | 'settings' | 'milestones';
+type ProgressionView = "simulator" | "settings" | "milestones";
 
 export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
   character,
-  storyLength = 50
+  storyLength = 50,
 }) => {
   const [settings, setSettings] = useState<ProgressionSettings>({
     experienceRate: 1000,
-    levelingCurve: 'exponential',
+    levelingCurve: "exponential",
     statGrowthRate: 1.5,
     skillUnlockRate: 0.3,
-    customMilestones: []
+    customMilestones: [],
   });
 
-  const [activeView, setActiveView] = useState<ProgressionView>('simulator');
-  const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
+  const [activeView, setActiveView] = useState<ProgressionView>("simulator");
+  const [simulationResults, setSimulationResults] = useState<
+    SimulationResult[]
+  >([]);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
 
   const { updateCharacter } = useCharacterStore();
@@ -70,7 +72,9 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
     setSimulationResults(results);
   }, [character, storyLength, settings]);
 
-  const currentResult = simulationResults.find(r => r.chapter === selectedChapter) || simulationResults[0];
+  const currentResult =
+    simulationResults.find((r) => r.chapter === selectedChapter) ||
+    simulationResults[0];
 
   const handleApplyProgression = () => {
     if (currentResult) {
@@ -80,15 +84,15 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
         stats: currentResult.stats,
         skills: [
           ...character.skills,
-          ...currentResult.skillsUnlocked.map(skill => ({
+          ...currentResult.skillsUnlocked.map((skill) => ({
             id: crypto.randomUUID(),
             name: skill,
             level: 1,
             experience: 0,
             description: `Unlocked at level ${currentResult.level}`,
-            category: 'Combat' as const
-          }))
-        ]
+            category: "Combat" as const,
+          })),
+        ],
       });
     }
   };
@@ -107,19 +111,21 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
         </div>
 
         <div className="flex gap-2">
-          {(['simulator', 'settings', 'milestones'] as ProgressionView[]).map(view => (
-            <button
-              key={view}
-              onClick={() => setActiveView(view)}
-              className={`px-4 py-2 rounded-lg capitalize transition-colors ${
-                activeView === view
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              {view}
-            </button>
-          ))}
+          {(["simulator", "settings", "milestones"] as ProgressionView[]).map(
+            (view) => (
+              <button
+                key={view}
+                onClick={() => setActiveView(view)}
+                className={`px-4 py-2 rounded-lg capitalize transition-colors ${
+                  activeView === view
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                {view}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -131,7 +137,7 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
         >
-          {activeView === 'simulator' && (
+          {activeView === "simulator" && (
             <SimulatorView
               results={simulationResults}
               selectedChapter={selectedChapter}
@@ -142,7 +148,7 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
             />
           )}
 
-          {activeView === 'settings' && (
+          {activeView === "settings" && (
             <SettingsView
               settings={settings}
               onSettingsChange={setSettings}
@@ -150,11 +156,14 @@ export const ProgressionSimulator: React.FC<ProgressionSimulatorProps> = ({
             />
           )}
 
-          {activeView === 'milestones' && (
+          {activeView === "milestones" && (
             <MilestonesView
               milestones={settings.customMilestones}
               onMilestonesChange={(milestones: Milestone[]) =>
-                setSettings(prev => ({ ...prev, customMilestones: milestones }))
+                setSettings((prev) => ({
+                  ...prev,
+                  customMilestones: milestones,
+                }))
               }
             />
           )}
@@ -172,7 +181,14 @@ const SimulatorView: React.FC<{
   currentResult: SimulationResult | undefined;
   onApplyProgression: () => void;
   character: Character;
-}> = ({ results, selectedChapter, onChapterSelect, currentResult, onApplyProgression, character }) => (
+}> = ({
+  results,
+  selectedChapter,
+  onChapterSelect,
+  currentResult,
+  onApplyProgression,
+  character,
+}) => (
   <div className="space-y-6">
     {/* Chapter Slider */}
     <div className="space-y-4">
@@ -209,11 +225,15 @@ const SimulatorView: React.FC<{
         {/* Current State Display */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Level & Experience</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              Level & Experience
+            </h3>
             <div className="space-y-2">
               <div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Level</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Level
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {currentResult.level} → {currentResult.level + 1}
                   </span>
@@ -221,7 +241,9 @@ const SimulatorView: React.FC<{
                 <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
                   <div
                     className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(currentResult.experience % 1000) / 10}%` }}
+                    style={{
+                      width: `${(currentResult.experience % 1000) / 10}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -232,20 +254,24 @@ const SimulatorView: React.FC<{
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Stats Comparison</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              Stats Comparison
+            </h3>
             <div className="space-y-2">
               {Object.entries(currentResult.stats).map(([stat, value]) => {
-                const originalValue = character.stats[stat as keyof CharacterStats] as number || 0;
+                const originalValue =
+                  (character.stats[stat as keyof CharacterStats] as number) ||
+                  0;
                 const improvement = value - originalValue;
 
                 return (
                   <div key={stat} className="flex justify-between items-center">
                     <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                      {stat.replace(/([A-Z])/g, ' $1').trim()}
+                      {stat.replace(/([A-Z])/g, " $1").trim()}
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {typeof value === 'number' ? value : 0}
+                        {typeof value === "number" ? value : 0}
                       </span>
                       {improvement > 0 && (
                         <span className="text-xs text-green-600 dark:text-green-400">
@@ -260,7 +286,9 @@ const SimulatorView: React.FC<{
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Unlocks</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              Unlocks
+            </h3>
             <div className="space-y-3">
               {currentResult.skillsUnlocked.length > 0 && (
                 <div>
@@ -268,11 +296,16 @@ const SimulatorView: React.FC<{
                     Skills
                   </div>
                   <div className="space-y-1">
-                    {currentResult.skillsUnlocked.slice(-3).map((skill, index) => (
-                      <div key={index} className="text-xs text-blue-600 dark:text-blue-400">
-                        • {skill}
-                      </div>
-                    ))}
+                    {currentResult.skillsUnlocked
+                      .slice(-3)
+                      .map((skill, index) => (
+                        <div
+                          key={index}
+                          className="text-xs text-blue-600 dark:text-blue-400"
+                        >
+                          • {skill}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -283,11 +316,16 @@ const SimulatorView: React.FC<{
                     Features
                   </div>
                   <div className="space-y-1">
-                    {currentResult.featuresUnlocked.slice(-3).map((feature, index) => (
-                      <div key={index} className="text-xs text-green-600 dark:text-green-400">
-                        • {feature}
-                      </div>
-                    ))}
+                    {currentResult.featuresUnlocked
+                      .slice(-3)
+                      .map((feature, index) => (
+                        <div
+                          key={index}
+                          className="text-xs text-green-600 dark:text-green-400"
+                        >
+                          • {feature}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -298,11 +336,16 @@ const SimulatorView: React.FC<{
                     Milestones
                   </div>
                   <div className="space-y-1">
-                    {currentResult.milestones.slice(-2).map((milestone, index) => (
-                      <div key={index} className="text-xs text-purple-600 dark:text-purple-400">
-                        🏆 {milestone}
-                      </div>
-                    ))}
+                    {currentResult.milestones
+                      .slice(-2)
+                      .map((milestone, index) => (
+                        <div
+                          key={index}
+                          className="text-xs text-purple-600 dark:text-purple-400"
+                        >
+                          🏆 {milestone}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -312,9 +355,14 @@ const SimulatorView: React.FC<{
 
         {/* Progression Chart */}
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Progression Chart</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+            Progression Chart
+          </h3>
           <div className="h-48 w-full">
-            <ProgressionChart results={results} selectedChapter={selectedChapter} />
+            <ProgressionChart
+              results={results}
+              selectedChapter={selectedChapter}
+            />
           </div>
         </div>
       </>
@@ -331,7 +379,9 @@ const SettingsView: React.FC<{
   <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Experience Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Experience Settings
+        </h3>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -340,10 +390,12 @@ const SettingsView: React.FC<{
           <input
             type="number"
             value={settings.experienceRate}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              experienceRate: parseInt(e.target.value) || 1000
-            })}
+            onChange={(e) =>
+              onSettingsChange({
+                ...settings,
+                experienceRate: parseInt(e.target.value) || 1000,
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             min="100"
             max="10000"
@@ -357,10 +409,13 @@ const SettingsView: React.FC<{
           </label>
           <select
             value={settings.levelingCurve}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              levelingCurve: e.target.value as ProgressionSettings['levelingCurve']
-            })}
+            onChange={(e) =>
+              onSettingsChange({
+                ...settings,
+                levelingCurve: e.target
+                  .value as ProgressionSettings["levelingCurve"],
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="linear">Linear</option>
@@ -371,7 +426,9 @@ const SettingsView: React.FC<{
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Growth Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Growth Settings
+        </h3>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -383,10 +440,12 @@ const SettingsView: React.FC<{
             max="3"
             step="0.1"
             value={settings.statGrowthRate}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              statGrowthRate: parseFloat(e.target.value)
-            })}
+            onChange={(e) =>
+              onSettingsChange({
+                ...settings,
+                statGrowthRate: parseFloat(e.target.value),
+              })
+            }
             className="w-full"
           />
         </div>
@@ -401,10 +460,12 @@ const SettingsView: React.FC<{
             max="1"
             step="0.1"
             value={settings.skillUnlockRate}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              skillUnlockRate: parseFloat(e.target.value)
-            })}
+            onChange={(e) =>
+              onSettingsChange({
+                ...settings,
+                skillUnlockRate: parseFloat(e.target.value),
+              })
+            }
             className="w-full"
           />
         </div>
@@ -413,7 +474,9 @@ const SettingsView: React.FC<{
 
     {/* Preview Current Settings */}
     <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-      <h4 className="font-medium text-gray-900 dark:text-white mb-2">Settings Preview</h4>
+      <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+        Settings Preview
+      </h4>
       <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
         <p>• Each chapter grants ~{settings.experienceRate} experience</p>
         <p>• Stats grow {settings.statGrowthRate}x faster than base rate</p>
@@ -431,14 +494,16 @@ const MilestonesView: React.FC<{
 }> = ({ milestones, onMilestonesChange }) => (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Custom Milestones</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Custom Milestones
+      </h3>
       <button
         onClick={() => {
           const newMilestone: Milestone = {
             id: crypto.randomUUID(),
-            name: 'New Milestone',
-            description: 'Achievement description',
-            triggerLevel: 5
+            name: "New Milestone",
+            description: "Achievement description",
+            triggerLevel: 5,
           };
           onMilestonesChange([...milestones, newMilestone]);
         }}
@@ -450,7 +515,10 @@ const MilestonesView: React.FC<{
 
     <div className="space-y-4">
       {milestones.map((milestone, index) => (
-        <div key={milestone.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+        <div
+          key={milestone.id}
+          className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+        >
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
               <input
@@ -465,7 +533,11 @@ const MilestonesView: React.FC<{
               />
             </div>
             <button
-              onClick={() => onMilestonesChange(milestones.filter(m => m.id !== milestone.id))}
+              onClick={() =>
+                onMilestonesChange(
+                  milestones.filter((m) => m.id !== milestone.id),
+                )
+              }
               className="text-red-500 hover:text-red-700 text-sm"
             >
               Remove
@@ -491,12 +563,12 @@ const MilestonesView: React.FC<{
               </label>
               <input
                 type="number"
-                value={milestone.triggerLevel || ''}
+                value={milestone.triggerLevel || ""}
                 onChange={(e) => {
                   const updated = [...milestones];
                   updated[index] = {
                     ...milestone,
-                    triggerLevel: parseInt(e.target.value) || undefined
+                    triggerLevel: parseInt(e.target.value) || undefined,
                   };
                   onMilestonesChange(updated);
                 }}
@@ -511,12 +583,12 @@ const MilestonesView: React.FC<{
               </label>
               <input
                 type="number"
-                value={milestone.triggerChapter || ''}
+                value={milestone.triggerChapter || ""}
                 onChange={(e) => {
                   const updated = [...milestones];
                   updated[index] = {
                     ...milestone,
-                    triggerChapter: parseInt(e.target.value) || undefined
+                    triggerChapter: parseInt(e.target.value) || undefined,
                   };
                   onMilestonesChange(updated);
                 }}
@@ -544,16 +616,27 @@ const ProgressionChart: React.FC<{
 }> = ({ results, selectedChapter }) => {
   if (results.length === 0) return null;
 
-  const maxLevel = Math.max(...results.map(r => r.level));
-  const maxExperience = Math.max(...results.map(r => r.experience));
+  const maxLevel = Math.max(...results.map((r) => r.level));
+  const maxExperience = Math.max(...results.map((r) => r.experience));
 
   return (
     <div className="relative h-full w-full">
       <svg viewBox="0 0 800 200" className="w-full h-full">
         {/* Background grid */}
         <defs>
-          <pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
+          <pattern
+            id="grid"
+            width="40"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 40 0 L 0 0 0 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+              opacity="0.1"
+            />
           </pattern>
         </defs>
         <rect width="800" height="200" fill="url(#grid)" />
@@ -563,9 +646,12 @@ const ProgressionChart: React.FC<{
           fill="none"
           stroke="#3b82f6"
           strokeWidth="2"
-          points={results.map((r, i) =>
-            `${(i / (results.length - 1)) * 780 + 10},${190 - (r.level / maxLevel) * 170}`
-          ).join(' ')}
+          points={results
+            .map(
+              (r, i) =>
+                `${(i / (results.length - 1)) * 780 + 10},${190 - (r.level / maxLevel) * 170}`,
+            )
+            .join(" ")}
         />
 
         {/* Experience line */}
@@ -574,9 +660,12 @@ const ProgressionChart: React.FC<{
           stroke="#10b981"
           strokeWidth="2"
           opacity="0.7"
-          points={results.map((r, i) =>
-            `${(i / (results.length - 1)) * 780 + 10},${190 - (r.experience / maxExperience) * 170}`
-          ).join(' ')}
+          points={results
+            .map(
+              (r, i) =>
+                `${(i / (results.length - 1)) * 780 + 10},${190 - (r.experience / maxExperience) * 170}`,
+            )
+            .join(" ")}
         />
 
         {/* Selected chapter indicator */}
@@ -614,7 +703,7 @@ const ProgressionChart: React.FC<{
 function runProgressionSimulation(
   character: Character,
   storyLength: number,
-  settings: ProgressionSettings
+  settings: ProgressionSettings,
 ): SimulationResult[] {
   const results: SimulationResult[] = [];
 
@@ -627,7 +716,10 @@ function runProgressionSimulation(
     currentExperience += settings.experienceRate;
 
     // Calculate required experience for next level
-    const requiredExp = calculateRequiredExperience(currentLevel, settings.levelingCurve);
+    const requiredExp = calculateRequiredExperience(
+      currentLevel,
+      settings.levelingCurve,
+    );
 
     // Handle level ups
     while (currentExperience >= requiredExp) {
@@ -637,24 +729,48 @@ function runProgressionSimulation(
       // Increase stats based on growth rate
       currentStats = {
         ...currentStats,
-        strength: Math.round(currentStats.strength + (1 * settings.statGrowthRate)),
-        dexterity: Math.round(currentStats.dexterity + (1 * settings.statGrowthRate)),
-        constitution: Math.round(currentStats.constitution + (1 * settings.statGrowthRate)),
-        intelligence: Math.round(currentStats.intelligence + (1 * settings.statGrowthRate)),
-        wisdom: Math.round(currentStats.wisdom + (1 * settings.statGrowthRate)),
-        charisma: Math.round(currentStats.charisma + (1 * settings.statGrowthRate))
+        strength: Math.round(
+          currentStats.strength + 1 * settings.statGrowthRate,
+        ),
+        dexterity: Math.round(
+          currentStats.dexterity + 1 * settings.statGrowthRate,
+        ),
+        constitution: Math.round(
+          currentStats.constitution + 1 * settings.statGrowthRate,
+        ),
+        intelligence: Math.round(
+          currentStats.intelligence + 1 * settings.statGrowthRate,
+        ),
+        wisdom: Math.round(currentStats.wisdom + 1 * settings.statGrowthRate),
+        charisma: Math.round(
+          currentStats.charisma + 1 * settings.statGrowthRate,
+        ),
       };
 
       // Recalculate derived stats
-      currentStats.hitPoints = Math.max(1, currentStats.constitution * 10 + currentLevel * 5);
-      currentStats.manaPoints = Math.max(0, currentStats.intelligence * 8 + currentLevel * 3);
-      currentStats.armorClass = 10 + Math.floor((currentStats.dexterity - 10) / 2);
+      currentStats.hitPoints = Math.max(
+        1,
+        currentStats.constitution * 10 + currentLevel * 5,
+      );
+      currentStats.manaPoints = Math.max(
+        0,
+        currentStats.intelligence * 8 + currentLevel * 3,
+      );
+      currentStats.armorClass =
+        10 + Math.floor((currentStats.dexterity - 10) / 2);
     }
 
     // Determine skills unlocked
-    const skillsUnlocked = generateSkillsForLevel(currentLevel, settings.skillUnlockRate);
+    const skillsUnlocked = generateSkillsForLevel(
+      currentLevel,
+      settings.skillUnlockRate,
+    );
     const featuresUnlocked = generateFeaturesForLevel(currentLevel);
-    const milestones = checkMilestones(currentLevel, chapter, settings.customMilestones);
+    const milestones = checkMilestones(
+      currentLevel,
+      chapter,
+      settings.customMilestones,
+    );
 
     results.push({
       level: currentLevel,
@@ -663,20 +779,23 @@ function runProgressionSimulation(
       stats: { ...currentStats },
       skillsUnlocked,
       featuresUnlocked,
-      milestones
+      milestones,
     });
   }
 
   return results;
 }
 
-function calculateRequiredExperience(level: number, curve: ProgressionSettings['levelingCurve']): number {
+function calculateRequiredExperience(
+  level: number,
+  curve: ProgressionSettings["levelingCurve"],
+): number {
   switch (curve) {
-    case 'linear':
+    case "linear":
       return 1000 * level;
-    case 'exponential':
+    case "exponential":
       return Math.floor(1000 * Math.pow(1.2, level - 1));
-    case 'logarithmic':
+    case "logarithmic":
       return Math.floor(1000 * Math.log(level + 1) * 500);
     default:
       return 1000 * level;
@@ -685,25 +804,43 @@ function calculateRequiredExperience(level: number, curve: ProgressionSettings['
 
 function generateSkillsForLevel(level: number, rate: number): string[] {
   const skills = [
-    'Sword Mastery', 'Shield Block', 'Fireball', 'Healing Light', 'Stealth', 'Lockpicking',
-    'Archery', 'Dual Wielding', 'Berserker Rage', 'Meditation', 'Crafting', 'Alchemy',
-    'Intimidation', 'Persuasion', 'Acrobatics', 'Climb', 'Swimming', 'Survival'
+    "Sword Mastery",
+    "Shield Block",
+    "Fireball",
+    "Healing Light",
+    "Stealth",
+    "Lockpicking",
+    "Archery",
+    "Dual Wielding",
+    "Berserker Rage",
+    "Meditation",
+    "Crafting",
+    "Alchemy",
+    "Intimidation",
+    "Persuasion",
+    "Acrobatics",
+    "Climb",
+    "Swimming",
+    "Survival",
   ];
 
   const skillsToUnlock = Math.floor(level * rate);
-  const availableSkills = skills.slice(0, Math.min(skillsToUnlock, skills.length));
+  const availableSkills = skills.slice(
+    0,
+    Math.min(skillsToUnlock, skills.length),
+  );
 
   return availableSkills;
 }
 
 function generateFeaturesForLevel(level: number): string[] {
   const features: { [key: number]: string[] } = {
-    5: ['Extra Attack'],
-    10: ['Action Surge'],
-    15: ['Improved Critical'],
-    20: ['Legendary Actions'],
-    25: ['Mythic Powers'],
-    30: ['Divine Ascension']
+    5: ["Extra Attack"],
+    10: ["Action Surge"],
+    15: ["Improved Critical"],
+    20: ["Legendary Actions"],
+    25: ["Mythic Powers"],
+    30: ["Divine Ascension"],
   };
 
   const unlockedFeatures: string[] = [];
@@ -716,13 +853,18 @@ function generateFeaturesForLevel(level: number): string[] {
   return unlockedFeatures;
 }
 
-function checkMilestones(level: number, chapter: number, milestones: Milestone[]): string[] {
+function checkMilestones(
+  level: number,
+  chapter: number,
+  milestones: Milestone[],
+): string[] {
   return milestones
-    .filter(milestone =>
-      (milestone.triggerLevel && level >= milestone.triggerLevel) ||
-      (milestone.triggerChapter && chapter >= milestone.triggerChapter)
+    .filter(
+      (milestone) =>
+        (milestone.triggerLevel && level >= milestone.triggerLevel) ||
+        (milestone.triggerChapter && chapter >= milestone.triggerChapter),
     )
-    .map(milestone => milestone.name);
+    .map((milestone) => milestone.name);
 }
 
 export default ProgressionSimulator;

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useStoryStore } from '../stores/storyStore';
-import WorldBuildingTools from '../components/WorldBuildingTools';
-import { motion } from 'framer-motion';
-import type { WorldDetails } from '../types/story';
+import { useState, useEffect } from "react";
+import { useStoryStore } from "../stores/storyStore";
+import WorldBuildingTools from "../components/WorldBuildingTools";
+import { motion } from "framer-motion";
+import type { WorldDetails } from "../types/story";
 
-type IssueType = 'error' | 'warning' | 'info';
+type IssueType = "error" | "warning" | "info";
 
 interface ConsistencyIssue {
   type: IssueType;
@@ -21,11 +21,21 @@ interface ConsistencyReport {
 }
 
 export default function WorldBuildingView() {
-  const { stories, currentStory, setCurrentStory, fetchStories, fetchStoryById, updateStory } = useStoryStore();
-  const [consistencyReport, setConsistencyReport] = useState<ConsistencyReport | null>(null);
+  const {
+    stories,
+    currentStory,
+    setCurrentStory,
+    fetchStories,
+    fetchStoryById,
+    updateStory,
+  } = useStoryStore();
+  const [consistencyReport, setConsistencyReport] =
+    useState<ConsistencyReport | null>(null);
 
   // Ensure stories are loaded
-  useEffect(() => { fetchStories(); }, []);
+  useEffect(() => {
+    fetchStories();
+  }, []);
 
   // Auto-select first story if nothing is current
   useEffect(() => {
@@ -36,7 +46,7 @@ export default function WorldBuildingView() {
 
   const handleStoryChange = (storyId: string) => {
     if (!storyId) return;
-    const story = stories.find(s => s.id === storyId);
+    const story = stories.find((s) => s.id === storyId);
     if (story) {
       setCurrentStory(story);
       fetchStoryById(storyId);
@@ -64,39 +74,51 @@ export default function WorldBuildingView() {
     const world = currentStory.worldBuilding;
 
     // Check for missing information
-    if (!world.name) issues.push({ type: 'warning', message: 'World name is not defined' });
-    if (!world.description) issues.push({ type: 'warning', message: 'World description is missing' });
-    if (!world.magicSystem) issues.push({ type: 'info', message: 'Magic system not documented' });
+    if (!world.name)
+      issues.push({ type: "warning", message: "World name is not defined" });
+    if (!world.description)
+      issues.push({ type: "warning", message: "World description is missing" });
+    if (!world.magicSystem)
+      issues.push({ type: "info", message: "Magic system not documented" });
 
     // Check character consistency
-    const allCharacters = [currentStory.mainCharacter, ...(currentStory.supportingCharacters || [])];
-    allCharacters.forEach(character => {
-      if (character && character.backstory.includes('unknown land')) {
+    const allCharacters = [
+      currentStory.mainCharacter,
+      ...(currentStory.supportingCharacters || []),
+    ];
+    allCharacters.forEach((character) => {
+      if (character && character.backstory.includes("unknown land")) {
         issues.push({
-          type: 'error',
+          type: "error",
           message: `Character "${character.name}" references "unknown land" - location may need to be defined`,
-          character: character.name
+          character: character.name,
         });
       }
     });
 
     // Check timeline consistency
     if (currentStory.timeline.length > 1) {
-      const timelineEvents = [...currentStory.timeline].sort((a, b) => a.date.localeCompare(b.date));
+      const timelineEvents = [...currentStory.timeline].sort((a, b) =>
+        a.date.localeCompare(b.date),
+      );
       for (let i = 1; i < timelineEvents.length; i++) {
         const prev = timelineEvents[i - 1];
         const curr = timelineEvents[i];
 
-        if (prev.charactersInvolved.some(char => curr.charactersInvolved.includes(char))) {
+        if (
+          prev.charactersInvolved.some((char) =>
+            curr.charactersInvolved.includes(char),
+          )
+        ) {
           // Check for character conflicts in timeline
-          const conflictChars = prev.charactersInvolved.filter(char =>
-            curr.charactersInvolved.includes(char)
+          const conflictChars = prev.charactersInvolved.filter((char) =>
+            curr.charactersInvolved.includes(char),
           );
 
           issues.push({
-            type: 'warning',
-            message: `Timeline events "${prev.title}" and "${curr.title}" both involve: ${conflictChars.join(', ')}`,
-            events: [prev.title, curr.title]
+            type: "warning",
+            message: `Timeline events "${prev.title}" and "${curr.title}" both involve: ${conflictChars.join(", ")}`,
+            events: [prev.title, curr.title],
           });
         }
       }
@@ -107,11 +129,11 @@ export default function WorldBuildingView() {
       issuesCount: issues.length,
       issues,
       suggestions: [
-        'Consider adding more detailed location descriptions',
-        'Define relationships between factions',
-        'Document the magic system rules',
-        'Create a world map to visualize spatial relationships'
-      ]
+        "Consider adding more detailed location descriptions",
+        "Define relationships between factions",
+        "Document the magic system rules",
+        "Create a world map to visualize spatial relationships",
+      ],
     });
   };
 
@@ -120,22 +142,26 @@ export default function WorldBuildingView() {
       <div className="flex-1 p-6">
         <div className="text-center py-12">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {stories.length === 0 ? 'No stories available' : 'No story selected'}
+            {stories.length === 0
+              ? "No stories available"
+              : "No story selected"}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {stories.length === 0
-              ? 'Create a story first to build its world'
-              : 'Select a story to build its world'}
+              ? "Create a story first to build its world"
+              : "Select a story to build its world"}
           </p>
           {stories.length > 0 && (
             <select
               value=""
-              onChange={e => handleStoryChange(e.target.value)}
+              onChange={(e) => handleStoryChange(e.target.value)}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
             >
               <option value="">Select a story…</option>
-              {stories.map(s => (
-                <option key={s.id} value={s.id}>{s.title}</option>
+              {stories.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
               ))}
             </select>
           )}
@@ -157,23 +183,20 @@ export default function WorldBuildingView() {
 
           <div className="flex gap-3 items-center flex-wrap">
             <select
-              value={currentStory?.id ?? ''}
-              onChange={e => handleStoryChange(e.target.value)}
+              value={currentStory?.id ?? ""}
+              onChange={(e) => handleStoryChange(e.target.value)}
               className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
             >
-              {stories.map(s => (
-                <option key={s.id} value={s.id}>{s.title}</option>
+              {stories.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
               ))}
             </select>
-            <button
-              onClick={runConsistencyCheck}
-              className="btn-secondary"
-            >
+            <button onClick={runConsistencyCheck} className="btn-secondary">
               Check Consistency
             </button>
-            <button className="btn-primary">
-              Export World Bible
-            </button>
+            <button className="btn-primary">Export World Bible</button>
           </div>
         </div>
       </div>
@@ -200,19 +223,28 @@ export default function WorldBuildingView() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-red-600">
-                  {consistencyReport.issues.filter((i) => i.type === 'error').length}
+                  {
+                    consistencyReport.issues.filter((i) => i.type === "error")
+                      .length
+                  }
                 </div>
                 <div className="text-sm text-red-600">Errors</div>
               </div>
               <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-yellow-600">
-                  {consistencyReport.issues.filter((i) => i.type === 'warning').length}
+                  {
+                    consistencyReport.issues.filter((i) => i.type === "warning")
+                      .length
+                  }
                 </div>
                 <div className="text-sm text-yellow-600">Warnings</div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
                 <div className="text-2xl font-bold text-blue-600">
-                  {consistencyReport.issues.filter((i) => i.type === 'info').length}
+                  {
+                    consistencyReport.issues.filter((i) => i.type === "info")
+                      .length
+                  }
                 </div>
                 <div className="text-sm text-blue-600">Info</div>
               </div>
@@ -227,26 +259,44 @@ export default function WorldBuildingView() {
                       key={index}
                       className={`
                         flex items-start space-x-3 p-3 rounded
-                        ${issue.type === 'error' ? 'bg-red-50 dark:bg-red-900/20' :
-                          issue.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20' :
-                          'bg-blue-50 dark:bg-blue-900/20'}
+                        ${
+                          issue.type === "error"
+                            ? "bg-red-50 dark:bg-red-900/20"
+                            : issue.type === "warning"
+                              ? "bg-yellow-50 dark:bg-yellow-900/20"
+                              : "bg-blue-50 dark:bg-blue-900/20"
+                        }
                       `}
                     >
-                      <div className={`
+                      <div
+                        className={`
                         flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold
-                        ${issue.type === 'error' ? 'bg-red-500 text-white' :
-                          issue.type === 'warning' ? 'bg-yellow-500 text-white' :
-                          'bg-blue-500 text-white'}
-                      `}>
-                        {issue.type === 'error' ? '!' : issue.type === 'warning' ? '⚠' : 'ℹ'}
+                        ${
+                          issue.type === "error"
+                            ? "bg-red-500 text-white"
+                            : issue.type === "warning"
+                              ? "bg-yellow-500 text-white"
+                              : "bg-blue-500 text-white"
+                        }
+                      `}
+                      >
+                        {issue.type === "error"
+                          ? "!"
+                          : issue.type === "warning"
+                            ? "⚠"
+                            : "ℹ"}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm">{issue.message}</p>
                         {issue.character && (
-                          <p className="text-xs text-gray-500 mt-1">Character: {issue.character}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Character: {issue.character}
+                          </p>
                         )}
                         {issue.events && (
-                          <p className="text-xs text-gray-500 mt-1">Events: {issue.events.join(', ')}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Events: {issue.events.join(", ")}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -258,11 +308,16 @@ export default function WorldBuildingView() {
             <div>
               <h4 className="font-semibold mb-3">Suggestions</h4>
               <ul className="space-y-1">
-                {consistencyReport.suggestions.map((suggestion: string, index: number) => (
-                  <li key={index} className="text-sm text-gray-600 dark:text-gray-400">
-                    • {suggestion}
-                  </li>
-                ))}
+                {consistencyReport.suggestions.map(
+                  (suggestion: string, index: number) => (
+                    <li
+                      key={index}
+                      className="text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      • {suggestion}
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
           </motion.div>

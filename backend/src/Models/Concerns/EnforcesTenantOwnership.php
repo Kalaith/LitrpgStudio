@@ -31,5 +31,14 @@ trait EnforcesTenantOwnership
             }
         });
     }
-}
 
+    protected function performInsert(Builder $query): bool
+    {
+        $userId = TenantContext::getUserId();
+        if ($userId !== null && empty($this->owner_user_id)) {
+            $this->setAttribute('owner_user_id', $userId);
+        }
+
+        return parent::performInsert($query);
+    }
+}

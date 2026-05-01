@@ -1,18 +1,18 @@
-import { apiClient, ApiResponse } from './client';
+import { apiClient, ApiResponse } from "./client";
 
 export type CanonEntryType =
-  | 'character'
-  | 'location'
-  | 'faction'
-  | 'item'
-  | 'rule'
-  | 'system'
-  | 'custom';
+  | "character"
+  | "location"
+  | "faction"
+  | "item"
+  | "rule"
+  | "system"
+  | "custom";
 
 export interface CanonCustomField {
   id?: string;
   name: string;
-  type: 'text' | 'number' | 'select';
+  type: "text" | "number" | "select";
   value: string | number | null;
   options?: string[];
 }
@@ -66,33 +66,53 @@ export interface CanonCustomType {
 
 const toQueryString = (params: Record<string, string | undefined>): string => {
   const query = Object.entries(params)
-    .filter(([, value]) => value && value.trim() !== '')
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`)
-    .join('&');
+    .filter(([, value]) => value && value.trim() !== "")
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`,
+    )
+    .join("&");
 
-  return query ? `?${query}` : '';
+  return query ? `?${query}` : "";
 };
 
 export const canonVaultApi = {
   getEntries: (
     seriesId: string,
-    options?: { q?: string; type?: CanonEntryType | ''; includeBacklinks?: boolean }
+    options?: {
+      q?: string;
+      type?: CanonEntryType | "";
+      includeBacklinks?: boolean;
+    },
   ): Promise<ApiResponse<CanonEntriesResponse>> => {
     const query = toQueryString({
       q: options?.q,
       type: options?.type,
-      include_backlinks: options?.includeBacklinks === false ? 'false' : 'true',
+      include_backlinks: options?.includeBacklinks === false ? "false" : "true",
     });
     return apiClient.get(`/series/${seriesId}/canon-vault/entries${query}`);
   },
 
-  createEntry: (seriesId: string, entry: Partial<CanonEntry>): Promise<ApiResponse<CanonEntry>> =>
+  createEntry: (
+    seriesId: string,
+    entry: Partial<CanonEntry>,
+  ): Promise<ApiResponse<CanonEntry>> =>
     apiClient.post(`/series/${seriesId}/canon-vault/entries`, entry),
 
-  updateEntry: (seriesId: string, entryId: string, updates: Partial<CanonEntry>): Promise<ApiResponse<CanonEntry>> =>
-    apiClient.put(`/series/${seriesId}/canon-vault/entries/${entryId}`, updates),
+  updateEntry: (
+    seriesId: string,
+    entryId: string,
+    updates: Partial<CanonEntry>,
+  ): Promise<ApiResponse<CanonEntry>> =>
+    apiClient.put(
+      `/series/${seriesId}/canon-vault/entries/${entryId}`,
+      updates,
+    ),
 
-  deleteEntry: (seriesId: string, entryId: string): Promise<ApiResponse<void>> =>
+  deleteEntry: (
+    seriesId: string,
+    entryId: string,
+  ): Promise<ApiResponse<void>> =>
     apiClient.delete(`/series/${seriesId}/canon-vault/entries/${entryId}`),
 
   getCustomTypes: (seriesId: string): Promise<ApiResponse<CanonCustomType[]>> =>
@@ -100,7 +120,10 @@ export const canonVaultApi = {
 
   createCustomType: (
     seriesId: string,
-    payload: Pick<CanonCustomType, 'name' | 'description' | 'field_definitions'>
+    payload: Pick<
+      CanonCustomType,
+      "name" | "description" | "field_definitions"
+    >,
   ): Promise<ApiResponse<CanonCustomType>> =>
     apiClient.post(`/series/${seriesId}/canon-vault/custom-types`, payload),
 };

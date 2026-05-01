@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -23,12 +23,10 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             ×
           </button>
         </div>
-        <div className="p-4">
-          {children}
-        </div>
+        <div className="p-4">{children}</div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

@@ -1,4 +1,4 @@
-import { apiClient, type ApiResponse } from './client';
+import { apiClient, type ApiResponse } from "./client";
 
 export interface AppStateData {
   version: number;
@@ -7,8 +7,10 @@ export interface AppStateData {
 }
 
 export const appStateApi = {
-  get: (): Promise<ApiResponse<AppStateData>> => apiClient.get('/app-state'),
-  save: (state: Record<string, string>, version = 1): Promise<ApiResponse<AppStateData>> =>
-    apiClient.put('/app-state', { state, version }),
+  get: (): Promise<ApiResponse<AppStateData>> => apiClient.get("/app-state"),
+  save: (
+    state: Record<string, string>,
+    version = 1,
+  ): Promise<ApiResponse<AppStateData>> =>
+    apiClient.put("/app-state", { state, version }),
 };
-

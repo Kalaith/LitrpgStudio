@@ -1,25 +1,25 @@
 // Unified Timeline System - Consolidates all timeline implementations
-import type { EntityReference } from './entityRegistry';
+import type { EntityReference } from "./entityRegistry";
 
 export type TimelineEventType =
-  | 'story_event'      // Main story events
-  | 'character_arc'    // Character development moments
-  | 'world_change'     // World state changes
-  | 'series_event'     // Cross-series events
-  | 'writing_milestone' // Writing progress markers
-  | 'plot_point'       // Key plot developments
-  | 'chapter_boundary' // Chapter start/end markers
-  | 'flashback'        // Flashback events
-  | 'foreshadowing'    // Foreshadowing elements
-  | 'custom';          // User-defined events
+  | "story_event" // Main story events
+  | "character_arc" // Character development moments
+  | "world_change" // World state changes
+  | "series_event" // Cross-series events
+  | "writing_milestone" // Writing progress markers
+  | "plot_point" // Key plot developments
+  | "chapter_boundary" // Chapter start/end markers
+  | "flashback" // Flashback events
+  | "foreshadowing" // Foreshadowing elements
+  | "custom"; // User-defined events
 
 export type TimelineScope =
-  | 'story'           // Single story timeline
-  | 'series'          // Multi-book series timeline
-  | 'character'       // Character-specific timeline
-  | 'world'           // World history timeline
-  | 'writing'         // Writing process timeline
-  | 'global';         // All events combined
+  | "story" // Single story timeline
+  | "series" // Multi-book series timeline
+  | "character" // Character-specific timeline
+  | "world" // World history timeline
+  | "writing" // Writing process timeline
+  | "global"; // All events combined
 
 export interface TimelineEvent {
   id: string;
@@ -87,7 +87,7 @@ export interface TimelineEvent {
   conflicts?: EventConflict[];
 
   // Status and Validation
-  status: 'draft' | 'confirmed' | 'published' | 'archived';
+  status: "draft" | "confirmed" | "published" | "archived";
   isCanon: boolean;
   validationIssues?: ValidationIssue[];
 
@@ -147,26 +147,38 @@ export interface WorldStateChange {
   oldState?: string;
   newState: string;
   description: string;
-  permanence: 'temporary' | 'permanent' | 'unknown';
+  permanence: "temporary" | "permanent" | "unknown";
 }
 
 export interface EventDependency {
   eventId: string;
-  dependencyType: 'must_happen_before' | 'must_happen_after' | 'must_happen_during' | 'cannot_happen_with';
+  dependencyType:
+    | "must_happen_before"
+    | "must_happen_after"
+    | "must_happen_during"
+    | "cannot_happen_with";
   description?: string;
 }
 
 export interface EventConflict {
   eventId: string;
-  conflictType: 'timeline_conflict' | 'character_conflict' | 'world_state_conflict' | 'plot_conflict';
+  conflictType:
+    | "timeline_conflict"
+    | "character_conflict"
+    | "world_state_conflict"
+    | "plot_conflict";
   description: string;
-  severity: 'minor' | 'major' | 'critical';
+  severity: "minor" | "major" | "critical";
   suggestedResolution?: string;
 }
 
 export interface ValidationIssue {
-  type: 'timeline_inconsistency' | 'character_impossibility' | 'world_contradiction' | 'plot_hole';
-  severity: 'warning' | 'error' | 'critical';
+  type:
+    | "timeline_inconsistency"
+    | "character_impossibility"
+    | "world_contradiction"
+    | "plot_hole";
+  severity: "warning" | "error" | "critical";
   message: string;
   suggestion?: string;
   relatedEvents?: string[];
@@ -189,16 +201,16 @@ export interface TimelineView {
   };
 
   // Display Configuration
-  displayMode: 'linear' | 'branching' | 'circular' | 'gantt' | 'calendar';
-  zoomLevel: 'years' | 'months' | 'days' | 'hours' | 'scenes';
-  groupBy?: 'entity' | 'type' | 'story' | 'character' | 'none';
-  sortBy: 'chronological' | 'importance' | 'entity' | 'custom';
+  displayMode: "linear" | "branching" | "circular" | "gantt" | "calendar";
+  zoomLevel: "years" | "months" | "days" | "hours" | "scenes";
+  groupBy?: "entity" | "type" | "story" | "character" | "none";
+  sortBy: "chronological" | "importance" | "entity" | "custom";
 
   // Visual Configuration
-  colorScheme: 'type' | 'entity' | 'importance' | 'story' | 'custom';
+  colorScheme: "type" | "entity" | "importance" | "story" | "custom";
   showDependencies: boolean;
   showConflicts: boolean;
-  showDetails: 'none' | 'minimal' | 'full';
+  showDetails: "none" | "minimal" | "full";
 
   // Interactivity
   allowEditing: boolean;
@@ -239,16 +251,21 @@ export interface TimelineGap {
   start: TimelineTimestamp;
   end: TimelineTimestamp;
   duration: TimelineDuration;
-  severity: 'minor' | 'notable' | 'major';
+  severity: "minor" | "notable" | "major";
   description: string;
   affectedEntities: EntityReference[];
   suggestions: string[];
 }
 
 export interface TimelineInconsistency {
-  type: 'character_location' | 'character_ability' | 'world_state' | 'plot_logic' | 'temporal';
+  type:
+    | "character_location"
+    | "character_ability"
+    | "world_state"
+    | "plot_logic"
+    | "temporal";
   description: string;
-  severity: 'warning' | 'error' | 'critical';
+  severity: "warning" | "error" | "critical";
   affectedEvents: string[];
   possibleResolutions: string[];
 }
@@ -258,7 +275,11 @@ export interface TimelineTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'story_structure' | 'character_arc' | 'world_building' | 'genre_specific';
+  category:
+    | "story_structure"
+    | "character_arc"
+    | "world_building"
+    | "genre_specific";
 
   // Template Events
   templateEvents: TemplateEvent[];
@@ -271,7 +292,7 @@ export interface TimelineTemplate {
   metadata: {
     author: string;
     tags: string[];
-    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    difficulty: "beginner" | "intermediate" | "advanced";
     genre: string[];
   };
 }
@@ -293,7 +314,14 @@ export interface TemplateEvent {
 
 // Export Configuration
 export interface TimelineExport {
-  format: 'json' | 'csv' | 'pdf' | 'html' | 'markdown' | 'gantt_chart' | 'story_bible';
+  format:
+    | "json"
+    | "csv"
+    | "pdf"
+    | "html"
+    | "markdown"
+    | "gantt_chart"
+    | "story_bible";
   view: TimelineView;
   includeRelationships: boolean;
   includeAnalysis: boolean;
@@ -320,7 +348,7 @@ export interface TimelineComment {
   eventId: string;
   author: string;
   content: string;
-  type: 'comment' | 'suggestion' | 'question' | 'approval';
+  type: "comment" | "suggestion" | "question" | "approval";
   createdAt: Date;
   resolved: boolean;
   replies?: TimelineComment[];
@@ -330,10 +358,10 @@ export interface ChangeRequest {
   id: string;
   eventId: string;
   requestedBy: string;
-  changeType: 'modify' | 'delete' | 'move';
+  changeType: "modify" | "delete" | "move";
   proposedChanges: Partial<TimelineEvent>;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   createdAt: Date;
   reviewedBy?: string;
   reviewedAt?: Date;
@@ -343,7 +371,7 @@ export interface Approval {
   id: string;
   eventId: string;
   approvedBy: string;
-  approvalType: 'content' | 'timeline_position' | 'canon_status';
+  approvalType: "content" | "timeline_position" | "canon_status";
   notes?: string;
   createdAt: Date;
 }

@@ -1,21 +1,21 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
   Info,
   CheckCircle,
   X,
   Settings,
-  Zap
-} from 'lucide-react';
-import { useEntityRegistryStore } from '../stores/entityRegistryStore';
-import { useUnifiedTimelineStore } from '../stores/unifiedTimelineStore';
-import type { BaseEntity } from '../types/entityRegistry';
+  Zap,
+} from "lucide-react";
+import { useEntityRegistryStore } from "../stores/entityRegistryStore";
+import { useUnifiedTimelineStore } from "../stores/unifiedTimelineStore";
+import type { BaseEntity } from "../types/entityRegistry";
 
 interface ContinuityIssue {
   id: string;
-  type: 'error' | 'warning' | 'suggestion';
-  category: 'character' | 'location' | 'timeline' | 'consistency';
+  type: "error" | "warning" | "suggestion";
+  category: "character" | "location" | "timeline" | "consistency";
   title: string;
   description: string;
   entities: string[];
@@ -44,22 +44,27 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
   isEnabled = true,
   embedded = false,
   onIssueClick,
-  className = ''
+  className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
-    new Set(['error', 'warning', 'suggestion'])
+    new Set(["error", "warning", "suggestion"]),
   );
   const [showSettings, setShowSettings] = useState(false);
 
-  const { searchEntities, getEntity, getRelationshipsForEntity } = useEntityRegistryStore();
+  const { searchEntities, getEntity, getRelationshipsForEntity } =
+    useEntityRegistryStore();
   const { searchEvents } = useUnifiedTimelineStore();
 
   // Extract entity references from text
   const extractedEntities = useMemo(() => {
     if (!content) return [];
 
-    const entityRefs: { name: string; position: number; entity?: BaseEntity }[] = [];
+    const entityRefs: {
+      name: string;
+      position: number;
+      entity?: BaseEntity;
+    }[] = [];
 
     // Look for entity references in format [EntityName] or [[EntityName]]
     const entityRegex = /\[{1,2}([^\]]+)\]{1,2}/g;
@@ -72,15 +77,16 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
       // Try to find the entity in the registry
       const searchResults = searchEntities({
         query: entityName,
-        limit: 1
+        limit: 1,
       });
 
-      const entity = searchResults.length > 0 ? searchResults[0].entity : undefined;
+      const entity =
+        searchResults.length > 0 ? searchResults[0].entity : undefined;
 
       entityRefs.push({
         name: entityName,
         position,
-        entity
+        entity,
       });
     }
 
@@ -96,14 +102,16 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
     // Check for character location consistency
     const characterLocations = new Map<string, string[]>();
 
-    extractedEntities.forEach(ref => {
-      if (ref.entity?.type === 'character') {
+    extractedEntities.forEach((ref) => {
+      if (ref.entity?.type === "character") {
         const relationships = getRelationshipsForEntity(ref.entity.id);
-        const locationRels = relationships.filter(r => r.relationshipType === 'located_in');
+        const locationRels = relationships.filter(
+          (r) => r.relationshipType === "located_in",
+        );
 
         if (locationRels.length > 0) {
           const currentLocations = characterLocations.get(ref.entity.id) || [];
-          locationRels.forEach(rel => {
+          locationRels.forEach((rel) => {
             const location = getEntity(rel.toEntity.id);
             if (location && !currentLocations.includes(location.name)) {
               currentLocations.push(location.name);
@@ -121,16 +129,16 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
         if (character) {
           issues.push({
             id: `location-conflict-${characterId}`,
-            type: 'warning',
-            category: 'consistency',
-            title: 'Character Location Conflict',
-            description: `${character.name} appears to be in multiple locations: ${locations.join(', ')}`,
+            type: "warning",
+            category: "consistency",
+            title: "Character Location Conflict",
+            description: `${character.name} appears to be in multiple locations: ${locations.join(", ")}`,
             entities: [characterId],
             suggestions: [
-              'Update character relationships to reflect current location',
-              'Add timeline event for character movement',
-              'Clarify character\'s actual location in this scene'
-            ]
+              "Update character relationships to reflect current location",
+              "Add timeline event for character movement",
+              "Clarify character's actual location in this scene",
+            ],
           });
         }
       }
@@ -138,62 +146,66 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
 
     // Check for timeline consistency
     if (storyId && chapterId) {
-      const chapterEvents = searchEvents('', {
+      const chapterEvents = searchEvents("", {
         entities: [storyId],
-        scopes: ['story']
-      }).filter(event => event.storyContext?.chapterId === chapterId);
+        scopes: ["story"],
+      }).filter((event) => event.storyContext?.chapterId === chapterId);
 
       // Look for timeline contradictions
-      const mentionedEvents = extractedEntities.filter(ref =>
-        ref.name.toLowerCase().includes('event') ||
-        ref.name.toLowerCase().includes('battle') ||
-        ref.name.toLowerCase().includes('meeting')
+      const mentionedEvents = extractedEntities.filter(
+        (ref) =>
+          ref.name.toLowerCase().includes("event") ||
+          ref.name.toLowerCase().includes("battle") ||
+          ref.name.toLowerCase().includes("meeting"),
       );
 
       if (mentionedEvents.length > 0 && chapterEvents.length > 0) {
         issues.push({
-          id: 'timeline-check',
-          type: 'suggestion',
-          category: 'timeline',
-          title: 'Timeline Cross-Reference',
-          description: 'Consider linking mentioned events to your timeline for consistency tracking',
+          id: "timeline-check",
+          type: "suggestion",
+          category: "timeline",
+          title: "Timeline Cross-Reference",
+          description:
+            "Consider linking mentioned events to your timeline for consistency tracking",
           entities: [],
           suggestions: [
-            'Create timeline events for mentioned occurrences',
-            'Link character actions to existing timeline events',
-            'Verify event chronology matches story progression'
-          ]
+            "Create timeline events for mentioned occurrences",
+            "Link character actions to existing timeline events",
+            "Verify event chronology matches story progression",
+          ],
         });
       }
     }
 
     // Check for unknown entity references
-    const unknownEntities = extractedEntities.filter(ref => !ref.entity);
+    const unknownEntities = extractedEntities.filter((ref) => !ref.entity);
     if (unknownEntities.length > 0) {
       issues.push({
-        id: 'unknown-entities',
-        type: 'suggestion',
-        category: 'character',
-        title: 'Unlinked References',
+        id: "unknown-entities",
+        type: "suggestion",
+        category: "character",
+        title: "Unlinked References",
         description: `Found ${unknownEntities.length} references that aren't in your entity registry`,
         entities: [],
         suggestions: [
-          'Create entities for these references',
-          'Link to existing entities with different names',
-          'Remove brackets if these aren\'t entity references'
-        ]
+          "Create entities for these references",
+          "Link to existing entities with different names",
+          "Remove brackets if these aren't entity references",
+        ],
       });
     }
 
     // Check for repetitive phrasing
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const sentences = content
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
     const phraseCounts = new Map<string, number>();
 
-    sentences.forEach(sentence => {
+    sentences.forEach((sentence) => {
       const words = sentence.trim().toLowerCase().split(/\s+/);
       if (words.length >= 3) {
         for (let i = 0; i <= words.length - 3; i++) {
-          const phrase = words.slice(i, i + 3).join(' ');
+          const phrase = words.slice(i, i + 3).join(" ");
           phraseCounts.set(phrase, (phraseCounts.get(phrase) || 0) + 1);
         }
       }
@@ -205,21 +217,21 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
 
     if (repeatedPhrases.length > 0) {
       issues.push({
-        id: 'repetitive-phrasing',
-        type: 'suggestion',
-        category: 'consistency',
-        title: 'Repetitive Phrasing Detected',
-        description: `Found repeated phrases: ${repeatedPhrases.map(([phrase]) => `"${phrase}"`).join(', ')}`,
+        id: "repetitive-phrasing",
+        type: "suggestion",
+        category: "consistency",
+        title: "Repetitive Phrasing Detected",
+        description: `Found repeated phrases: ${repeatedPhrases.map(([phrase]) => `"${phrase}"`).join(", ")}`,
         entities: [],
         suggestions: [
-          'Vary sentence structure and word choice',
-          'Use synonyms to avoid repetition',
-          'Consider restructuring repeated concepts'
-        ]
+          "Vary sentence structure and word choice",
+          "Use synonyms to avoid repetition",
+          "Consider restructuring repeated concepts",
+        ],
       });
     }
 
-    return issues.filter(issue => selectedCategories.has(issue.type));
+    return issues.filter((issue) => selectedCategories.has(issue.type));
   }, [
     isEnabled,
     content,
@@ -229,11 +241,11 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
     getRelationshipsForEntity,
     getEntity,
     searchEvents,
-    selectedCategories
+    selectedCategories,
   ]);
 
   const toggleCategory = useCallback((category: string) => {
-    setSelectedCategories(prev => {
+    setSelectedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(category)) {
         newSet.delete(category);
@@ -244,21 +256,29 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
     });
   }, []);
 
-  const getIssueIcon = (type: ContinuityIssue['type']) => {
+  const getIssueIcon = (type: ContinuityIssue["type"]) => {
     switch (type) {
-      case 'error': return AlertTriangle;
-      case 'warning': return Info;
-      case 'suggestion': return CheckCircle;
-      default: return Info;
+      case "error":
+        return AlertTriangle;
+      case "warning":
+        return Info;
+      case "suggestion":
+        return CheckCircle;
+      default:
+        return Info;
     }
   };
 
-  const getIssueColor = (type: ContinuityIssue['type']) => {
+  const getIssueColor = (type: ContinuityIssue["type"]) => {
     switch (type) {
-      case 'error': return 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
-      case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
-      case 'suggestion': return 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
+      case "error":
+        return "text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
+      case "warning":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800";
+      case "suggestion":
+        return "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
     }
   };
 
@@ -282,9 +302,10 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
       initial={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 300 }}
       animate={embedded ? { opacity: 1, y: 0 } : { opacity: 1, x: 0 }}
       exit={embedded ? { opacity: 0, y: 10 } : { opacity: 0, x: 300 }}
-      className={embedded
-        ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
-        : `fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 ${className}`
+      className={
+        embedded
+          ? `h-full w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl flex flex-col ${className}`
+          : `fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-40 ${className}`
       }
     >
       {/* Header */}
@@ -322,7 +343,7 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
         {showSettings && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="border-b border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/50"
           >
@@ -331,11 +352,18 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
             </div>
             <div className="space-y-2">
               {[
-                { key: 'error', label: 'Errors', color: 'text-red-600' },
-                { key: 'warning', label: 'Warnings', color: 'text-yellow-600' },
-                { key: 'suggestion', label: 'Suggestions', color: 'text-blue-600' }
-              ].map(category => (
-                <label key={category.key} className="flex items-center space-x-2 cursor-pointer">
+                { key: "error", label: "Errors", color: "text-red-600" },
+                { key: "warning", label: "Warnings", color: "text-yellow-600" },
+                {
+                  key: "suggestion",
+                  label: "Suggestions",
+                  color: "text-blue-600",
+                },
+              ].map((category) => (
+                <label
+                  key={category.key}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     checked={selectedCategories.has(category.key)}
@@ -353,7 +381,13 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
       </AnimatePresence>
 
       {/* Issues List */}
-      <div className={embedded ? 'flex-1 overflow-y-auto p-2' : 'max-h-64 overflow-y-auto p-2'}>
+      <div
+        className={
+          embedded
+            ? "flex-1 overflow-y-auto p-2"
+            : "max-h-64 overflow-y-auto p-2"
+        }
+      >
         {continuityIssues.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <CheckCircle size={32} className="mx-auto mb-2 opacity-50" />
@@ -385,9 +419,11 @@ export const ContinuityChecker: React.FC<ContinuityCheckerProps> = ({
                         <div className="text-xs space-y-1">
                           <div className="font-medium">Suggestions:</div>
                           <ul className="list-disc list-inside space-y-0.5 opacity-75">
-                            {issue.suggestions.slice(0, 2).map((suggestion, index) => (
-                              <li key={index}>{suggestion}</li>
-                            ))}
+                            {issue.suggestions
+                              .slice(0, 2)
+                              .map((suggestion, index) => (
+                                <li key={index}>{suggestion}</li>
+                              ))}
                           </ul>
                         </div>
                       )}

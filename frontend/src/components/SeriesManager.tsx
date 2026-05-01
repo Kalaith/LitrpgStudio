@@ -1,31 +1,38 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useSeriesStore } from '../stores/seriesStore';
-import type { Series, Book, SeriesStatus, BookStatus } from '../types/series';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSeriesStore } from "../stores/seriesStore";
+import type { Series, Book, SeriesStatus, BookStatus } from "../types/series";
 import {
   OverviewTab,
   BooksTab,
   CharactersTab,
   WorldBuildingTab,
-  ConsistencyTab
-} from './series';
+  ConsistencyTab,
+} from "./series";
 
 interface SeriesManagerProps {
   onSeriesSelect?: (series: Series) => void;
 }
 
-type SeriesTab = 'overview' | 'books' | 'characters' | 'worldbuilding' | 'consistency';
+type SeriesTab =
+  | "overview"
+  | "books"
+  | "characters"
+  | "worldbuilding"
+  | "consistency";
 
 const seriesTabs: Array<{ id: SeriesTab; label: string; icon: string }> = [
-  { id: 'overview', label: 'Overview', icon: '📊' },
-  { id: 'books', label: 'Books', icon: '📚' },
-  { id: 'characters', label: 'Characters', icon: '👥' },
-  { id: 'worldbuilding', label: 'World Building', icon: '🌍' },
-  { id: 'consistency', label: 'Consistency', icon: '✓' }
+  { id: "overview", label: "Overview", icon: "📊" },
+  { id: "books", label: "Books", icon: "📚" },
+  { id: "characters", label: "Characters", icon: "👥" },
+  { id: "worldbuilding", label: "World Building", icon: "🌍" },
+  { id: "consistency", label: "Consistency", icon: "✓" },
 ];
 
-export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) => {
-  const [activeTab, setActiveTab] = useState<SeriesTab>('overview');
+export const SeriesManager: React.FC<SeriesManagerProps> = ({
+  onSeriesSelect,
+}) => {
+  const [activeTab, setActiveTab] = useState<SeriesTab>("overview");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBookModal, setShowBookModal] = useState(false);
 
@@ -36,7 +43,7 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
     createSeries,
     addBookToSeries,
     checkConsistency,
-    generateSeriesAnalytics
+    generateSeriesAnalytics,
   } = useSeriesStore();
 
   const handleSeriesSelect = (selectedSeries: Series) => {
@@ -44,8 +51,24 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
     onSeriesSelect?.(selectedSeries);
   };
 
-  const consistencyIssues = currentSeries ? (() => { try { return checkConsistency(currentSeries.id); } catch { return []; } })() : [];
-  const analytics = currentSeries ? (() => { try { return generateSeriesAnalytics(currentSeries.id); } catch { return null; } })() : null;
+  const consistencyIssues = currentSeries
+    ? (() => {
+        try {
+          return checkConsistency(currentSeries.id);
+        } catch {
+          return [];
+        }
+      })()
+    : [];
+  const analytics = currentSeries
+    ? (() => {
+        try {
+          return generateSeriesAnalytics(currentSeries.id);
+        } catch {
+          return null;
+        }
+      })()
+    : null;
 
   const renderTabContent = () => {
     if (!currentSeries) {
@@ -68,21 +91,23 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
     }
 
     switch (activeTab) {
-      case 'overview':
+      case "overview":
         return <OverviewTab series={currentSeries} analytics={analytics} />;
-      case 'books':
+      case "books":
         return (
           <BooksTab
             series={currentSeries}
             onAddBook={() => setShowBookModal(true)}
-            onUpdateBook={(bookId, updates) => useSeriesStore.getState().updateBook(bookId, updates)}
+            onUpdateBook={(bookId, updates) =>
+              useSeriesStore.getState().updateBook(bookId, updates)
+            }
           />
         );
-      case 'characters':
+      case "characters":
         return <CharactersTab series={currentSeries} />;
-      case 'worldbuilding':
+      case "worldbuilding":
         return <WorldBuildingTab series={currentSeries} />;
-      case 'consistency':
+      case "consistency":
         return <ConsistencyTab issues={consistencyIssues} />;
       default:
         return null;
@@ -108,16 +133,20 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
           <div className="flex items-center gap-3">
             {/* Series Selector */}
             <select
-              value={currentSeries?.id || ''}
+              value={currentSeries?.id || ""}
               onChange={(e) => {
-                const selectedSeries = series.find(s => s.id === e.target.value);
+                const selectedSeries = series.find(
+                  (s) => s.id === e.target.value,
+                );
                 if (selectedSeries) handleSeriesSelect(selectedSeries);
               }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">Select Series</option>
-              {series.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+              {series.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
             </select>
 
@@ -133,19 +162,26 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
         {/* Status Indicators */}
         {currentSeries && (
           <div className="flex items-center gap-4 mb-4">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              currentSeries.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-              currentSeries.status === 'published' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-              currentSeries.status === 'writing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-              'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-            }`}>
+            <div
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                currentSeries.status === "completed"
+                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  : currentSeries.status === "published"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    : currentSeries.status === "writing"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+              }`}
+            >
               {currentSeries.status}
             </div>
 
             {consistencyIssues.length > 0 && (
               <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full">
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span className="text-sm font-medium">{consistencyIssues.length} issues</span>
+                <span className="text-sm font-medium">
+                  {consistencyIssues.length} issues
+                </span>
               </div>
             )}
 
@@ -165,8 +201,8 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
               <span>{tab.icon}</span>
@@ -221,22 +257,24 @@ export const SeriesManager: React.FC<SeriesManagerProps> = ({ onSeriesSelect }) 
 // Create Series Modal Component
 const CreateSeriesModal: React.FC<{
   onClose: () => void;
-  onCreate: (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  onCreate: (
+    seriesData: Omit<Series, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<void>;
 }> = ({ onClose, onCreate }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    genre: 'fantasy',
-    status: 'planning' as SeriesStatus,
+    name: "",
+    description: "",
+    genre: "fantasy",
+    status: "planning" as SeriesStatus,
     metadata: {
-      author: '',
-      genres: ['fantasy'],
+      author: "",
+      genres: ["fantasy"],
       themes: [],
-      targetAudience: 'adult',
-      marketCategory: 'general-fiction',
+      targetAudience: "adult",
+      marketCategory: "general-fiction",
       seriesLength: 5,
-      marketingTags: []
-    }
+      marketingTags: [],
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -252,20 +290,22 @@ const CreateSeriesModal: React.FC<{
           cultures: [],
           languages: [],
           religions: [],
-          economics: []
+          economics: [],
         },
         magicSystems: [],
         locations: [],
         factions: [],
-        terminology: []
-      }
+        terminology: [],
+      },
     });
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Create New Series</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          Create New Series
+        </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -275,7 +315,9 @@ const CreateSeriesModal: React.FC<{
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               required
             />
@@ -287,7 +329,9 @@ const CreateSeriesModal: React.FC<{
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               rows={3}
             />
@@ -299,7 +343,9 @@ const CreateSeriesModal: React.FC<{
             </label>
             <select
               value={formData.genre}
-              onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, genre: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="fantasy">Fantasy</option>
@@ -316,10 +362,15 @@ const CreateSeriesModal: React.FC<{
             <input
               type="number"
               value={formData.metadata.seriesLength}
-              onChange={(e) => setFormData({
-                ...formData,
-                metadata: { ...formData.metadata, seriesLength: parseInt(e.target.value) || 1 }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  metadata: {
+                    ...formData.metadata,
+                    seriesLength: parseInt(e.target.value) || 1,
+                  },
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               min="1"
             />
@@ -351,19 +402,21 @@ const CreateBookModal: React.FC<{
   seriesId: string;
   bookNumber: number;
   onClose: () => void;
-  onCreate: (bookData: Omit<Book, 'id' | 'seriesId' | 'createdAt' | 'updatedAt'>) => void;
+  onCreate: (
+    bookData: Omit<Book, "id" | "seriesId" | "createdAt" | "updatedAt">,
+  ) => void;
 }> = ({ bookNumber, onClose, onCreate }) => {
   const [formData, setFormData] = useState({
     bookNumber,
-    title: '',
-    subtitle: '',
-    status: 'planning' as BookStatus,
+    title: "",
+    subtitle: "",
+    status: "planning" as BookStatus,
     targetWordCount: 80000,
     currentWordCount: 0,
     stories: [],
     characterArcs: [],
     plotThreads: [],
-    timelineEvents: []
+    timelineEvents: [],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -374,7 +427,9 @@ const CreateBookModal: React.FC<{
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add New Book</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          Add New Book
+        </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -384,7 +439,12 @@ const CreateBookModal: React.FC<{
             <input
               type="number"
               value={formData.bookNumber}
-              onChange={(e) => setFormData({ ...formData, bookNumber: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  bookNumber: parseInt(e.target.value) || 1,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               min="1"
               required
@@ -398,7 +458,9 @@ const CreateBookModal: React.FC<{
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               required
             />
@@ -411,7 +473,9 @@ const CreateBookModal: React.FC<{
             <input
               type="text"
               value={formData.subtitle}
-              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, subtitle: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -423,7 +487,12 @@ const CreateBookModal: React.FC<{
             <input
               type="number"
               value={formData.targetWordCount}
-              onChange={(e) => setFormData({ ...formData, targetWordCount: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  targetWordCount: parseInt(e.target.value) || 0,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               min="0"
             />

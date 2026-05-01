@@ -26,7 +26,7 @@ export interface GameSystemDefinition {
 export interface CoreSystem {
   name: string;
   genre: string;
-  complexity: 'simple' | 'moderate' | 'complex';
+  complexity: "simple" | "moderate" | "complex";
   baseRules: GameRule[];
   dice: DiceSystem;
   attributes: AttributeDefinition[];
@@ -45,7 +45,7 @@ export interface GameRule {
 }
 
 export interface DiceSystem {
-  type: 'd20' | '3d6' | '2d10' | 'percentile' | 'custom';
+  type: "d20" | "3d6" | "2d10" | "percentile" | "custom";
   description: string;
   modifiers: DiceModifier[];
   criticals: CriticalRule[];
@@ -59,7 +59,7 @@ export interface DiceModifier {
 }
 
 export interface CriticalRule {
-  type: 'success' | 'failure';
+  type: "success" | "failure";
   threshold: number;
   effect: string;
   description: string;
@@ -85,7 +85,7 @@ export interface CombatSystem {
 }
 
 export interface InitiativeSystem {
-  type: 'dexterity' | 'roll' | 'speed' | 'custom';
+  type: "dexterity" | "roll" | "speed" | "custom";
   formula: string;
   modifiers: string[];
   description: string;
@@ -146,7 +146,7 @@ export interface ResistanceRule {
 }
 
 export interface ArmorSystem {
-  type: 'AC' | 'damage_reduction' | 'ablative' | 'custom';
+  type: "AC" | "damage_reduction" | "ablative" | "custom";
   calculation: string;
   interactions: string[];
   description: string;
@@ -203,7 +203,7 @@ export interface EnvironmentRule {
 }
 
 export interface MagicSystem {
-  type: 'vancian' | 'mana' | 'spell_points' | 'cooldown' | 'ritual' | 'custom';
+  type: "vancian" | "mana" | "spell_points" | "cooldown" | "ritual" | "custom";
   description: string;
   schools: MagicSchool[];
   casting: CastingSystem;
@@ -241,7 +241,7 @@ export interface RangeDefinition {
 }
 
 export interface MagicComponent {
-  type: 'verbal' | 'somatic' | 'material' | 'focus' | 'divine';
+  type: "verbal" | "somatic" | "material" | "focus" | "divine";
   description: string;
   requirements: string[];
   alternatives: string[];
@@ -255,7 +255,7 @@ export interface MagicLimitation {
 }
 
 export interface SkillSystem {
-  structure: 'list' | 'tree' | 'point_buy' | 'class_based';
+  structure: "list" | "tree" | "point_buy" | "class_based";
   skills: SkillDefinition[];
   advancement: SkillAdvancement;
   synergies: SkillSynergy[];
@@ -329,7 +329,7 @@ export interface ItemExample {
 
 export interface ItemProperty {
   name: string;
-  type: 'numeric' | 'boolean' | 'string' | 'list';
+  type: "numeric" | "boolean" | "string" | "list";
   description: string;
   affects: string[];
   examples: string[];
@@ -521,7 +521,7 @@ export interface ClassAbility {
   name: string;
   level: number;
   description: string;
-  type: 'active' | 'passive' | 'reaction';
+  type: "active" | "passive" | "reaction";
   uses: string;
 }
 
@@ -545,7 +545,7 @@ export interface CharacterRace {
 export interface RacialTrait {
   name: string;
   description: string;
-  type: 'innate' | 'learned' | 'cultural';
+  type: "innate" | "learned" | "cultural";
   mechanics: string;
 }
 
@@ -849,7 +849,7 @@ export interface Appendix {
 export interface DocumentationTemplate {
   id: string;
   name: string;
-  type: 'section' | 'table' | 'example' | 'formula';
+  type: "section" | "table" | "example" | "formula";
   category: string;
   template: string;
   variables: TemplateVariable[];
@@ -858,7 +858,7 @@ export interface DocumentationTemplate {
 
 export interface TemplateVariable {
   name: string;
-  type: 'text' | 'number' | 'list' | 'object';
+  type: "text" | "number" | "list" | "object";
   description: string;
   defaultValue?: unknown;
   required: boolean;
@@ -875,7 +875,7 @@ export interface ExportFormat {
 
 export interface ExportOption {
   name: string;
-  type: 'boolean' | 'string' | 'number' | 'select';
+  type: "boolean" | "string" | "number" | "select";
   description: string;
   defaultValue: unknown;
   options?: string[];

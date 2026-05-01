@@ -1,11 +1,10 @@
-import { useSeriesStore } from '../stores/seriesStore';
-import { useCharacterStore } from '../stores/characterStore';
-import { useStoryStore } from '../stores/storyStore';
-import { seriesApi } from '../api/series';
-import { charactersApi } from '../api/characters';
-import { apiClient } from '../api/client';
-import type { Series } from '../types/series';
-import type { Character } from '../types/character';
+import { useSeriesStore } from "../stores/seriesStore";
+import { useCharacterStore } from "../stores/characterStore";
+import { useStoryStore } from "../stores/storyStore";
+import { seriesApi } from "../api/series";
+import { charactersApi } from "../api/characters";
+import type { Series } from "../types/series";
+import type { Character } from "../types/character";
 
 let initialDataSyncInFlight: Promise<void> | null = null;
 let hasSyncedInitialData = false;
@@ -17,8 +16,6 @@ export function resetInitialDataSync(): void {
 
 // Hook to manage API integration and sync with stores
 export function useApiIntegration() {
-
-
   // Load initial data
   const loadInitialData = async () => {
     if (hasSyncedInitialData) {
@@ -34,22 +31,12 @@ export function useApiIntegration() {
         // Load series data — use the store's own action so set() fires reactively
         await useSeriesStore.getState().fetchSeries();
 
-        // If series is still empty, there may be orphaned rows with no owner_user_id
-        // (data imported before tenant isolation was added). Claim them for the current user
-        // then retry the fetch.
-        if (useSeriesStore.getState().series.length === 0) {
-          try {
-            await apiClient.post('/data/claim-unowned', {});
-            await useSeriesStore.getState().fetchSeries();
-          } catch {
-            // Not authenticated yet or nothing to claim — silently ignore.
-          }
-        }
-
         // Load characters data
         const charactersResponse = await charactersApi.getAll();
         if (charactersResponse.success && charactersResponse.data) {
-          useCharacterStore.setState({ characters: charactersResponse.data as unknown as Character[] });
+          useCharacterStore.setState({
+            characters: charactersResponse.data as unknown as Character[],
+          });
         }
 
         // Load stories data — use the store's own action so set() fires reactively
@@ -57,7 +44,10 @@ export function useApiIntegration() {
 
         hasSyncedInitialData = true;
       } catch (error) {
-        console.warn('Failed to sync with backend, using local storage:', error);
+        console.warn(
+          "Failed to sync with backend, using local storage:",
+          error,
+        );
       } finally {
         initialDataSyncInFlight = null;
       }
@@ -67,39 +57,47 @@ export function useApiIntegration() {
   };
 
   // Sync series to backend
-  const syncSeriesToBackend = async (series: Partial<Series> & { id?: string }) => {
+  const syncSeriesToBackend = async (
+    series: Partial<Series> & { id?: string },
+  ) => {
     try {
-      if (series.id && !series.id.includes('local-')) {
+      if (series.id && !series.id.includes("local-")) {
         // Update existing
         await seriesApi.update(series.id, series);
       } else {
         // Create new
-        const response = await seriesApi.create(series as Omit<Series, 'id' | 'createdAt' | 'updatedAt'>);
+        const response = await seriesApi.create(
+          series as Omit<Series, "id" | "createdAt" | "updatedAt">,
+        );
         if (response.success && response.data) {
           return response.data;
         }
       }
     } catch (error) {
-      console.warn('Failed to sync series to backend:', error);
+      console.warn("Failed to sync series to backend:", error);
     }
     return null;
   };
 
   // Sync character to backend
-  const syncCharacterToBackend = async (character: Partial<Character> & { id?: string }) => {
+  const syncCharacterToBackend = async (
+    character: Partial<Character> & { id?: string },
+  ) => {
     try {
-      if (character.id && !character.id.includes('local-')) {
+      if (character.id && !character.id.includes("local-")) {
         // Update existing
         await charactersApi.update(character.id, character);
       } else {
         // Create new
-        const response = await charactersApi.create(character as Omit<Character, 'id' | 'createdAt' | 'updatedAt'>);
+        const response = await charactersApi.create(
+          character as Omit<Character, "id" | "createdAt" | "updatedAt">,
+        );
         if (response.success && response.data) {
           return response.data;
         }
       }
     } catch (error) {
-      console.warn('Failed to sync character to backend:', error);
+      console.warn("Failed to sync character to backend:", error);
     }
     return null;
   };
@@ -108,7 +106,7 @@ export function useApiIntegration() {
     loadInitialData,
     syncSeriesToBackend,
     syncCharacterToBackend,
-    isOnline: true // Could be enhanced with actual network detection
+    isOnline: true, // Could be enhanced with actual network detection
   };
 }
 
@@ -116,7 +114,9 @@ export function useApiIntegration() {
 export function useSeriesWithApi() {
   const store = useSeriesStore();
 
-  const createSeries = async (seriesData: Omit<Series, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createSeries = async (
+    seriesData: Omit<Series, "id" | "createdAt" | "updatedAt">,
+  ) => {
     try {
       // Try to create on backend first
       const response = await seriesApi.create(seriesData);
@@ -126,7 +126,7 @@ export function useSeriesWithApi() {
         return response.data;
       }
     } catch (error) {
-      console.warn('Backend create failed, falling back to local:', error);
+      console.warn("Backend create failed, falling back to local:", error);
     }
 
     // Fallback to local creation
@@ -141,7 +141,7 @@ export function useSeriesWithApi() {
         return;
       }
     } catch (error) {
-      console.warn('Backend update failed, falling back to local:', error);
+      console.warn("Backend update failed, falling back to local:", error);
     }
 
     // Fallback to local update
@@ -152,7 +152,10 @@ export function useSeriesWithApi() {
     try {
       await seriesApi.delete(seriesId);
     } catch (error) {
-      console.warn('Backend delete failed, proceeding with local delete:', error);
+      console.warn(
+        "Backend delete failed, proceeding with local delete:",
+        error,
+      );
     }
 
     // Always delete locally
@@ -171,7 +174,9 @@ export function useSeriesWithApi() {
 export function useCharactersWithApi() {
   const store = useCharacterStore();
 
-  const createCharacter = async (characterData: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createCharacter = async (
+    characterData: Omit<Character, "id" | "createdAt" | "updatedAt">,
+  ) => {
     try {
       const response = await charactersApi.create(characterData);
       if (response.success && response.data) {
@@ -179,14 +184,17 @@ export function useCharactersWithApi() {
         return response.data;
       }
     } catch (error) {
-      console.warn('Backend create failed, falling back to local:', error);
+      console.warn("Backend create failed, falling back to local:", error);
     }
 
     // Fallback to local creation
     store.createCharacter(characterData);
   };
 
-  const updateCharacter = async (characterId: string, updates: Partial<Character>) => {
+  const updateCharacter = async (
+    characterId: string,
+    updates: Partial<Character>,
+  ) => {
     try {
       const response = await charactersApi.update(characterId, updates);
       if (response.success && response.data) {
@@ -194,7 +202,7 @@ export function useCharactersWithApi() {
         return;
       }
     } catch (error) {
-      console.warn('Backend update failed, falling back to local:', error);
+      console.warn("Backend update failed, falling back to local:", error);
     }
 
     // Fallback to local update
@@ -209,7 +217,7 @@ export function useCharactersWithApi() {
         return;
       }
     } catch (error) {
-      console.warn('Backend level up failed, falling back to local:', error);
+      console.warn("Backend level up failed, falling back to local:", error);
     }
 
     // Fallback to local level up

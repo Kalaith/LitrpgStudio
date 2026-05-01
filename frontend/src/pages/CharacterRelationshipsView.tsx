@@ -1,18 +1,28 @@
-import { useState, useEffect } from 'react';
-import { useStoryStore } from '../stores/storyStore';
-import { useCharacterStore } from '../stores/characterStore';
-import CharacterRelationshipMap from '../components/CharacterRelationshipMap';
-import type { Character, CharacterRelationship } from '../types/character';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from "react";
+import { useStoryStore } from "../stores/storyStore";
+import { useCharacterStore } from "../stores/characterStore";
+import CharacterRelationshipMap from "../components/CharacterRelationshipMap";
+import type { Character, CharacterRelationship } from "../types/character";
+import { motion } from "framer-motion";
 
 export default function CharacterRelationshipsView() {
-  const { stories, currentStory, setCurrentStory, fetchStories, fetchStoryById } = useStoryStore();
+  const {
+    stories,
+    currentStory,
+    setCurrentStory,
+    fetchStories,
+    fetchStoryById,
+  } = useStoryStore();
   const { characters } = useCharacterStore();
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null,
+  );
   const [showAddRelationship, setShowAddRelationship] = useState(false);
 
   // Ensure stories are loaded
-  useEffect(() => { fetchStories(); }, []);
+  useEffect(() => {
+    fetchStories();
+  }, []);
 
   // Auto-select first story if nothing is current
   useEffect(() => {
@@ -23,7 +33,7 @@ export default function CharacterRelationshipsView() {
 
   const handleStoryChange = (storyId: string) => {
     if (!storyId) return;
-    const story = stories.find(s => s.id === storyId);
+    const story = stories.find((s) => s.id === storyId);
     if (story) {
       setCurrentStory(story);
       fetchStoryById(storyId);
@@ -34,10 +44,13 @@ export default function CharacterRelationshipsView() {
     if (!currentStory) return characters;
 
     // Combine story characters with global characters
-    const storyCharacters = [currentStory.mainCharacter, ...(currentStory.supportingCharacters || [])];
+    const storyCharacters = [
+      currentStory.mainCharacter,
+      ...(currentStory.supportingCharacters || []),
+    ];
     const uniqueCharacters = new Map<string, Character>();
 
-    [...storyCharacters, ...characters].forEach(char => {
+    [...storyCharacters, ...characters].forEach((char) => {
       if (char && !uniqueCharacters.has(char.id)) {
         uniqueCharacters.set(char.id, char);
       }
@@ -52,18 +65,18 @@ export default function CharacterRelationshipsView() {
     const relationships: Array<{
       sourceId: string;
       targetId: string;
-      type: 'ally' | 'enemy' | 'neutral' | 'romantic' | 'family';
+      type: "ally" | "enemy" | "neutral" | "romantic" | "family";
       strength: number;
     }> = [];
 
-    allCharacters.forEach(character => {
+    allCharacters.forEach((character) => {
       if (character.relationships) {
-        character.relationships.forEach(rel => {
+        character.relationships.forEach((rel) => {
           relationships.push({
             sourceId: character.id,
             targetId: rel.characterId,
             type: rel.type,
-            strength: rel.strength
+            strength: rel.strength,
           });
         });
       }
@@ -79,10 +92,17 @@ export default function CharacterRelationshipsView() {
   const getRelatedCharacters = (character: Character) => {
     if (!character.relationships) return [];
 
-    return character.relationships.map(rel => {
-      const relatedChar = allCharacters.find(c => c.id === rel.characterId);
-      return relatedChar ? { character: relatedChar, relationship: rel } : null;
-    }).filter(Boolean) as Array<{ character: Character; relationship: CharacterRelationship }>;
+    return character.relationships
+      .map((rel) => {
+        const relatedChar = allCharacters.find((c) => c.id === rel.characterId);
+        return relatedChar
+          ? { character: relatedChar, relationship: rel }
+          : null;
+      })
+      .filter(Boolean) as Array<{
+      character: Character;
+      relationship: CharacterRelationship;
+    }>;
   };
 
   return (
@@ -96,13 +116,15 @@ export default function CharacterRelationshipsView() {
             </p>
           </div>
           <select
-            value={currentStory?.id ?? ''}
-            onChange={e => handleStoryChange(e.target.value)}
+            value={currentStory?.id ?? ""}
+            onChange={(e) => handleStoryChange(e.target.value)}
             className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
           >
             <option value="">All characters</option>
-            {stories.map(s => (
-              <option key={s.id} value={s.id}>{s.title}</option>
+            {stories.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
             ))}
           </select>
         </div>
@@ -117,9 +139,7 @@ export default function CharacterRelationshipsView() {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Create some characters first to see their relationships
             </p>
-            <button className="btn-primary">
-              Create Character
-            </button>
+            <button className="btn-primary">Create Character</button>
           </div>
         ) : (
           <div className="flex gap-6">
@@ -142,7 +162,9 @@ export default function CharacterRelationshipsView() {
         >
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-xl font-semibold">{selectedCharacter.name}</h3>
+              <h3 className="text-xl font-semibold">
+                {selectedCharacter.name}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Level {selectedCharacter.level} {selectedCharacter.class}
               </p>
@@ -159,10 +181,20 @@ export default function CharacterRelationshipsView() {
             <div>
               <h4 className="font-semibold mb-3">Character Details</h4>
               <div className="space-y-2 text-sm">
-                <p><strong>Race:</strong> {selectedCharacter.race}</p>
-                <p><strong>Experience:</strong> {selectedCharacter.experience}</p>
-                <p><strong>Skills:</strong> {selectedCharacter.skills.length} total</p>
-                <p><strong>Equipment:</strong> {selectedCharacter.equipment.length} items</p>
+                <p>
+                  <strong>Race:</strong> {selectedCharacter.race}
+                </p>
+                <p>
+                  <strong>Experience:</strong> {selectedCharacter.experience}
+                </p>
+                <p>
+                  <strong>Skills:</strong> {selectedCharacter.skills.length}{" "}
+                  total
+                </p>
+                <p>
+                  <strong>Equipment:</strong>{" "}
+                  {selectedCharacter.equipment.length} items
+                </p>
               </div>
 
               {selectedCharacter.backstory && (
@@ -176,39 +208,54 @@ export default function CharacterRelationshipsView() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-3">Relationships ({getRelatedCharacters(selectedCharacter).length})</h4>
+              <h4 className="font-semibold mb-3">
+                Relationships ({getRelatedCharacters(selectedCharacter).length})
+              </h4>
               <div className="space-y-3">
                 {getRelatedCharacters(selectedCharacter).length === 0 ? (
-                  <p className="text-gray-500 text-sm">No relationships defined</p>
+                  <p className="text-gray-500 text-sm">
+                    No relationships defined
+                  </p>
                 ) : (
-                  getRelatedCharacters(selectedCharacter).map(({ character, relationship }) => (
-                    <div
-                      key={character.id}
-                      className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className={`
+                  getRelatedCharacters(selectedCharacter).map(
+                    ({ character, relationship }) => (
+                      <div
+                        key={character.id}
+                        className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0">
+                            <div
+                              className={`
                             w-3 h-3 rounded-full
-                            ${relationship.type === 'ally' ? 'bg-green-500' :
-                              relationship.type === 'enemy' ? 'bg-red-500' :
-                              relationship.type === 'romantic' ? 'bg-pink-500' :
-                              relationship.type === 'family' ? 'bg-purple-500' :
-                              'bg-gray-500'}
-                          `} />
+                            ${
+                              relationship.type === "ally"
+                                ? "bg-green-500"
+                                : relationship.type === "enemy"
+                                  ? "bg-red-500"
+                                  : relationship.type === "romantic"
+                                    ? "bg-pink-500"
+                                    : relationship.type === "family"
+                                      ? "bg-purple-500"
+                                      : "bg-gray-500"
+                            }
+                          `}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium">{character.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {relationship.type} • Strength:{" "}
+                              {relationship.strength}/10
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{character.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {relationship.type} • Strength: {relationship.strength}/10
-                          </p>
-                        </div>
+                        <button className="text-xs text-blue-600 hover:text-blue-800">
+                          Edit
+                        </button>
                       </div>
-                      <button className="text-xs text-blue-600 hover:text-blue-800">
-                        Edit
-                      </button>
-                    </div>
-                  ))
+                    ),
+                  )
                 )}
               </div>
             </div>
@@ -229,22 +276,25 @@ export default function CharacterRelationshipsView() {
 
             <form className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Character</label>
+                <label className="block text-sm font-medium mb-2">
+                  Character
+                </label>
                 <select className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded">
                   <option value="">Select a character...</option>
                   {allCharacters
-                    .filter(c => c.id !== selectedCharacter.id)
-                    .map(character => (
+                    .filter((c) => c.id !== selectedCharacter.id)
+                    .map((character) => (
                       <option key={character.id} value={character.id}>
                         {character.name}
                       </option>
-                    ))
-                  }
+                    ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Relationship Type</label>
+                <label className="block text-sm font-medium mb-2">
+                  Relationship Type
+                </label>
                 <select className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded">
                   <option value="ally">Ally</option>
                   <option value="enemy">Enemy</option>
@@ -255,7 +305,9 @@ export default function CharacterRelationshipsView() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Strength (1-10)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Strength (1-10)
+                </label>
                 <input
                   type="range"
                   min="1"
@@ -266,7 +318,9 @@ export default function CharacterRelationshipsView() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Description (optional)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Description (optional)
+                </label>
                 <textarea
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
                   rows={3}

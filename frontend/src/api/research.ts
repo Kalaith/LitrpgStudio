@@ -1,5 +1,5 @@
-import { apiClient, ApiResponse } from './client';
-import type { ResearchCollection, ResearchSource } from '../types/research';
+import { apiClient, ApiResponse } from "./client";
+import type { ResearchCollection, ResearchSource } from "../types/research";
 
 type ResearchSourceApi = Partial<ResearchSource> & {
   created_at?: string;
@@ -17,7 +17,7 @@ function toDate(value: unknown, fallback: Date): Date {
     return value;
   }
 
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === "string" || typeof value === "number") {
     const parsed = new Date(value);
     if (!Number.isNaN(parsed.getTime())) {
       return parsed;
@@ -29,14 +29,20 @@ function toDate(value: unknown, fallback: Date): Date {
 
 function normalizeSource(raw: ResearchSourceApi): ResearchSource {
   const content = raw.content ?? {
-    summary: '',
+    summary: "",
     keyPoints: [],
     excerpts: [],
     media: [],
-    structure: { headings: [], sections: [], references: [], figures: [], tables: [] },
+    structure: {
+      headings: [],
+      sections: [],
+      references: [],
+      figures: [],
+      tables: [],
+    },
     readingTime: 0,
     wordCount: 0,
-    language: 'en',
+    language: "en",
     quality: {
       credibility: 0,
       accuracy: 0,
@@ -44,26 +50,32 @@ function normalizeSource(raw: ResearchSourceApi): ResearchSource {
       completeness: 0,
       freshness: 0,
       overallScore: 0,
-      issues: []
-    }
+      issues: [],
+    },
   };
   const metadata = raw.metadata ?? {
     author: [],
     accessDate: new Date(),
-    format: 'unknown'
+    format: "unknown",
   };
   const now = new Date();
 
   return {
-    id: String(raw.id ?? ''),
-    title: String(raw.title ?? ''),
-    type: (raw.type ?? 'article') as ResearchSource['type'],
+    id: String(raw.id ?? ""),
+    title: String(raw.title ?? ""),
+    type: (raw.type ?? "article") as ResearchSource["type"],
     content: {
       ...content,
       keyPoints: content.keyPoints ?? [],
       excerpts: content.excerpts ?? [],
       media: content.media ?? [],
-      structure: content.structure ?? { headings: [], sections: [], references: [], figures: [], tables: [] },
+      structure: content.structure ?? {
+        headings: [],
+        sections: [],
+        references: [],
+        figures: [],
+        tables: [],
+      },
       quality: content.quality ?? {
         credibility: 0,
         accuracy: 0,
@@ -71,15 +83,17 @@ function normalizeSource(raw: ResearchSourceApi): ResearchSource {
         completeness: 0,
         freshness: 0,
         overallScore: 0,
-        issues: []
-      }
+        issues: [],
+      },
     },
     metadata: {
       ...metadata,
       author: metadata.author ?? [],
       accessDate: toDate(metadata.accessDate, now),
-      publishDate: metadata.publishDate ? toDate(metadata.publishDate, now) : undefined,
-      format: metadata.format ?? 'unknown'
+      publishDate: metadata.publishDate
+        ? toDate(metadata.publishDate, now)
+        : undefined,
+      format: metadata.format ?? "unknown",
     },
     annotations: raw.annotations ?? [],
     links: raw.links ?? [],
@@ -98,15 +112,15 @@ function normalizeSource(raw: ResearchSourceApi): ResearchSource {
 function normalizeCollection(raw: ResearchCollectionApi): ResearchCollection {
   const now = new Date();
   return {
-    id: String(raw.id ?? ''),
-    name: String(raw.name ?? ''),
-    description: raw.description ?? '',
-    category: (raw.category ?? 'general') as ResearchCollection['category'],
+    id: String(raw.id ?? ""),
+    name: String(raw.name ?? ""),
+    description: raw.description ?? "",
+    category: (raw.category ?? "general") as ResearchCollection["category"],
     sources: raw.sources ?? [],
     tags: raw.tags ?? [],
-    color: raw.color ?? '#3B82F6',
-    icon: raw.icon ?? '📚',
-    visibility: raw.visibility ?? 'private',
+    color: raw.color ?? "#3B82F6",
+    icon: raw.icon ?? "📚",
+    visibility: raw.visibility ?? "private",
     collaborators: raw.collaborators ?? [],
     createdAt: toDate(raw.createdAt ?? raw.created_at, now),
     updatedAt: toDate(raw.updatedAt ?? raw.updated_at, now),
@@ -115,7 +129,7 @@ function normalizeCollection(raw: ResearchCollectionApi): ResearchCollection {
 
 const mapResponse = <TInput, TOutput>(
   response: ApiResponse<TInput>,
-  transform: (data: TInput) => TOutput
+  transform: (data: TInput) => TOutput,
 ): ApiResponse<TOutput> => ({
   success: response.success,
   data: response.data ? transform(response.data) : undefined,
@@ -126,12 +140,17 @@ const mapResponse = <TInput, TOutput>(
 
 export const researchApi = {
   getSources: async (): Promise<ApiResponse<ResearchSource[]>> => {
-    const response = await apiClient.get<ResearchSourceApi[]>('/research/sources');
+    const response =
+      await apiClient.get<ResearchSourceApi[]>("/research/sources");
     return mapResponse(response, (sources) => sources.map(normalizeSource));
   },
 
   getCollections: async (): Promise<ApiResponse<ResearchCollection[]>> => {
-    const response = await apiClient.get<ResearchCollectionApi[]>('/research/collections');
-    return mapResponse(response, (collections) => collections.map(normalizeCollection));
+    const response = await apiClient.get<ResearchCollectionApi[]>(
+      "/research/collections",
+    );
+    return mapResponse(response, (collections) =>
+      collections.map(normalizeCollection),
+    );
   },
 };

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { apiClient } from '../api/client';
+import { useState, useEffect } from "react";
+import { apiClient } from "../api/client";
 
 export function useApiStatus() {
   const [isOnline, setIsOnline] = useState(false);
@@ -35,6 +35,6 @@ export function useApiStatus() {
     isChecking,
     lastCheck,
     checkApiStatus,
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
   };
 }

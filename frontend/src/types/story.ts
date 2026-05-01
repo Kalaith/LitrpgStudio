@@ -1,4 +1,4 @@
-import type { Character } from './character';
+import type { Character } from "./character";
 
 export interface Story {
   id: string;
@@ -25,8 +25,19 @@ export interface Story {
   updatedAt: Date;
 }
 
-export type StoryGenre = 'fantasy' | 'sci-fi' | 'modern' | 'historical' | 'cyberpunk' | 'steampunk';
-export type StoryStatus = 'draft' | 'in_progress' | 'completed' | 'published' | 'archived';
+export type StoryGenre =
+  | "fantasy"
+  | "sci-fi"
+  | "modern"
+  | "historical"
+  | "cyberpunk"
+  | "steampunk";
+export type StoryStatus =
+  | "draft"
+  | "in_progress"
+  | "completed"
+  | "published"
+  | "archived";
 
 export interface Chapter {
   id: string;
@@ -39,7 +50,7 @@ export interface Chapter {
   characterProgression: CharacterProgressionEvent[];
   // Legacy compatibility fields for older chapter tooling.
   summary?: string;
-  status?: 'draft' | 'in_progress' | 'completed' | 'published' | 'archived';
+  status?: "draft" | "in_progress" | "completed" | "published" | "archived";
   scenes?: string[];
   characters?: string[];
   locations?: string[];
@@ -85,12 +96,26 @@ export interface Location {
   updatedAt: Date;
 }
 
-export type LocationType = 'continent' | 'kingdom' | 'city' | 'town' | 'village' | 'dungeon' | 'landmark' | 'wilderness';
-export type LocationSize = 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gigantic';
+export type LocationType =
+  | "continent"
+  | "kingdom"
+  | "city"
+  | "town"
+  | "village"
+  | "dungeon"
+  | "landmark"
+  | "wilderness";
+export type LocationSize =
+  | "tiny"
+  | "small"
+  | "medium"
+  | "large"
+  | "huge"
+  | "gigantic";
 
 export interface LocationConnection {
   locationId: string;
-  type: 'road' | 'river' | 'sea_route' | 'teleport' | 'portal' | 'passage';
+  type: "road" | "river" | "sea_route" | "teleport" | "portal" | "passage";
   distance?: number;
   travelTime?: string;
   description?: string;
@@ -98,15 +123,15 @@ export interface LocationConnection {
 
 export interface Resource {
   name: string;
-  type: 'mineral' | 'agricultural' | 'magical' | 'trade_good';
-  abundance: 'scarce' | 'limited' | 'common' | 'abundant';
+  type: "mineral" | "agricultural" | "magical" | "trade_good";
+  abundance: "scarce" | "limited" | "common" | "abundant";
   description?: string;
 }
 
 export interface WorldMap {
   id: string;
   name: string;
-  type: 'world' | 'region' | 'city' | 'building' | 'dungeon';
+  type: "world" | "region" | "city" | "building" | "dungeon";
   imageUrl?: string;
   scale: string;
   locations: MapLocation[];
@@ -120,7 +145,7 @@ export interface MapLocation {
   x: number;
   y: number;
   label: string;
-  markerType: 'city' | 'town' | 'dungeon' | 'landmark' | 'poi';
+  markerType: "city" | "town" | "dungeon" | "landmark" | "poi";
 }
 
 export interface WorldTimelineEvent {
@@ -128,7 +153,13 @@ export interface WorldTimelineEvent {
   title: string;
   date: string; // In-world date system
   era?: string;
-  type: 'historical' | 'political' | 'natural' | 'magical' | 'war' | 'discovery';
+  type:
+    | "historical"
+    | "political"
+    | "natural"
+    | "magical"
+    | "war"
+    | "discovery";
   description: string;
   consequences?: string[];
   locationsAffected: string[];
@@ -138,7 +169,14 @@ export interface WorldTimelineEvent {
 export interface Faction {
   id: string;
   name: string;
-  type: 'government' | 'guild' | 'religion' | 'military' | 'criminal' | 'merchant' | 'academic';
+  type:
+    | "government"
+    | "guild"
+    | "religion"
+    | "military"
+    | "criminal"
+    | "merchant"
+    | "academic";
   description: string;
   goals: string[];
   methods: string[];
@@ -148,7 +186,7 @@ export interface Faction {
   enemies: string[];
   leaders: FactionLeader[];
   influence: number; // 1-100 scale
-  status: 'growing' | 'stable' | 'declining' | 'disbanded';
+  status: "growing" | "stable" | "declining" | "disbanded";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -170,11 +208,11 @@ export interface StoryEvent {
   importance: EventImportance;
 }
 
-export type EventImportance = 'minor' | 'moderate' | 'major' | 'critical';
+export type EventImportance = "minor" | "moderate" | "major" | "critical";
 
 export interface CharacterProgressionEvent {
   characterId: string;
-  type: 'level_up' | 'skill_gain' | 'item_acquired' | 'stat_change';
+  type: "level_up" | "skill_gain" | "item_acquired" | "stat_change";
   details: string;
   before?: Record<string, unknown>;
   after?: Record<string, unknown>;

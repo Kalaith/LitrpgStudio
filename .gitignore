@@ -17,13 +17,13 @@ frontend/dist/
 
 # Build outputs
 frontend/dist/
+frontend/eslint-report.json
+frontend/*.tsbuildinfo
 backend/storage/logs/
 backend/storage/cache/
 
 # Development files
 backend/.phpunit.cache/
-backend/phpunit.xml
-backend/tests/
 backend/docs/
 backend/server.log
 *.log
@@ -42,4 +42,7 @@ Thumbs.db
 backend/DEPLOYMENT_SUMMARY.md
 frontend/.env.preview
 
-**/.env*
+# Keep documented env examples in source control.
+!.env.example
+!backend/.env.example
+!frontend/.env.example

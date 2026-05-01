@@ -5,13 +5,13 @@ import type {
   EntityType,
   EntityValidationResult,
   EntityValidationError,
-  EntityValidationWarning
-} from '../types/entityRegistry';
-import type { Character } from '../types/character';
-import type { Story, Chapter } from '../types/story';
-import type { Series } from '../types/series';
-import type { ResearchSource, SourceType } from '../types/research';
-import type { LootTable } from '../types/lootTable';
+  EntityValidationWarning,
+} from "../types/entityRegistry";
+import type { Character } from "../types/character";
+import type { Story, Chapter } from "../types/story";
+import type { Series } from "../types/series";
+import type { ResearchSource, SourceType } from "../types/research";
+import type { LootTable } from "../types/lootTable";
 
 type MetadataRecord = Record<string, unknown>;
 
@@ -22,10 +22,10 @@ export class CharacterAdapter implements EntityAdapter<Character> {
     return {
       id: entity.id,
       name: entity.name,
-      description: entity.description || '',
+      description: entity.description || "",
       level: metadata.level || 1,
-      class: metadata.class || 'Adventurer',
-      race: metadata.race || 'Human',
+      class: metadata.class || "Adventurer",
+      race: metadata.race || "Human",
       stats: metadata.stats || {
         strength: 10,
         dexterity: 10,
@@ -35,26 +35,28 @@ export class CharacterAdapter implements EntityAdapter<Character> {
         charisma: 10,
         hitPoints: 100,
         manaPoints: 50,
-        armorClass: 10
+        armorClass: 10,
       },
       skills: metadata.skills || [],
       equipment: metadata.inventory || metadata.equipment || [],
       inventory: metadata.inventory || metadata.equipment || [],
-      location: metadata.location || '',
+      location: metadata.location || "",
       experience: metadata.experience || 0,
-      backstory: metadata.backstory || '',
+      backstory: metadata.backstory || "",
       personality: Array.isArray(metadata.personality)
         ? metadata.personality
-        : (metadata.personality ? [String(metadata.personality)] : []),
+        : metadata.personality
+          ? [String(metadata.personality)]
+          : [],
       goals: metadata.goals || [],
       relationships: metadata.relationships || [],
-      appearance: metadata.appearance || '',
-      notes: metadata.notes || '',
+      appearance: metadata.appearance || "",
+      notes: metadata.notes || "",
       tags: entity.tags,
       progression: metadata.progression || [],
       storyReferences: metadata.storyReferences || [],
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -62,8 +64,8 @@ export class CharacterAdapter implements EntityAdapter<Character> {
     return {
       id: character.id,
       name: character.name,
-      type: 'character' as EntityType,
-      description: character.description || '',
+      type: "character" as EntityType,
+      description: character.description || "",
       tags: character.tags || [],
       createdAt: character.createdAt,
       updatedAt: character.updatedAt,
@@ -82,8 +84,8 @@ export class CharacterAdapter implements EntityAdapter<Character> {
         relationships: character.relationships,
         appearance: character.appearance,
         notes: character.notes,
-        storyReferences: character.storyReferences
-      }
+        storyReferences: character.storyReferences,
+      },
     };
   }
 
@@ -94,25 +96,28 @@ export class CharacterAdapter implements EntityAdapter<Character> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Character name is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Character name is required",
+        severity: "error" as const,
       });
     }
 
     const metadata = entity.metadata as Partial<Character> & MetadataRecord;
-    if (typeof metadata.level === 'number' && (metadata.level < 1 || metadata.level > 100)) {
+    if (
+      typeof metadata.level === "number" &&
+      (metadata.level < 1 || metadata.level > 100)
+    ) {
       warnings.push({
         entityId: entity.id,
-        message: 'Character level should be between 1 and 100',
-        suggestion: 'Adjust character level to a reasonable range'
+        message: "Character level should be between 1 and 100",
+        suggestion: "Adjust character level to a reasonable range",
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -123,9 +128,9 @@ export class StoryAdapter implements EntityAdapter<Story> {
     const metadata = entity.metadata as Partial<Story> & MetadataRecord;
     const placeholderCharacter: Character = {
       id: `${entity.id}-character`,
-      name: 'Unknown',
-      class: 'Adventurer',
-      race: 'Human',
+      name: "Unknown",
+      class: "Adventurer",
+      race: "Human",
       level: 1,
       experience: 0,
       stats: {
@@ -137,49 +142,49 @@ export class StoryAdapter implements EntityAdapter<Story> {
         charisma: 10,
         hitPoints: 100,
         manaPoints: 50,
-        armorClass: 10
+        armorClass: 10,
       },
       skills: [],
       equipment: [],
-      backstory: '',
-      appearance: '',
+      backstory: "",
+      appearance: "",
       personality: [],
       progression: [],
       relationships: [],
       storyReferences: [],
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
 
     return {
       id: entity.id,
       title: entity.name,
-      description: entity.description || '',
-      genre: metadata.genre || 'fantasy',
-      status: metadata.status || 'draft',
+      description: entity.description || "",
+      genre: metadata.genre || "fantasy",
+      status: metadata.status || "draft",
       wordCount: metadata.wordCount || 0,
       targetWordCount: metadata.targetWordCount || 50000,
       mainCharacter: metadata.mainCharacter || placeholderCharacter,
       supportingCharacters: metadata.supportingCharacters || [],
       worldBuilding: metadata.worldBuilding || {
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         locations: [],
         maps: [],
         timeline: [],
-        factions: []
+        factions: [],
       },
       timeline: metadata.timeline || [],
       chapters: metadata.chapters || [],
       characters: metadata.characters || [],
-      worldBuildingNotes: metadata.worldBuildingNotes || '',
-      plotOutline: metadata.plotOutline || '',
+      worldBuildingNotes: metadata.worldBuildingNotes || "",
+      plotOutline: metadata.plotOutline || "",
       themes: metadata.themes || [],
       tags: entity.tags,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       lastModified: metadata.lastModified || entity.updatedAt,
-      author: metadata.author || 'Unknown'
+      author: metadata.author || "Unknown",
     };
   }
 
@@ -187,7 +192,7 @@ export class StoryAdapter implements EntityAdapter<Story> {
     return {
       id: story.id,
       name: story.title,
-      type: 'story' as EntityType,
+      type: "story" as EntityType,
       description: story.description,
       tags: story.tags || [],
       createdAt: story.createdAt,
@@ -207,8 +212,8 @@ export class StoryAdapter implements EntityAdapter<Story> {
         plotOutline: story.plotOutline,
         themes: story.themes,
         lastModified: story.lastModified,
-        author: story.author
-      }
+        author: story.author,
+      },
     };
   }
 
@@ -219,34 +224,34 @@ export class StoryAdapter implements EntityAdapter<Story> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Story title is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Story title is required",
+        severity: "error" as const,
       });
     }
 
     const metadata = entity.metadata as Partial<Story> & MetadataRecord;
-    if (typeof metadata.wordCount === 'number' && metadata.wordCount < 0) {
+    if (typeof metadata.wordCount === "number" && metadata.wordCount < 0) {
       errors.push({
         entityId: entity.id,
-        field: 'wordCount',
-        message: 'Word count cannot be negative',
-        severity: 'error' as const
+        field: "wordCount",
+        message: "Word count cannot be negative",
+        severity: "error" as const,
       });
     }
 
     if (metadata.targetWordCount && metadata.targetWordCount < 1000) {
       warnings.push({
         entityId: entity.id,
-        message: 'Target word count seems very low',
-        suggestion: 'Consider setting a higher target word count'
+        message: "Target word count seems very low",
+        suggestion: "Consider setting a higher target word count",
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -257,22 +262,22 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
     const metadata = entity.metadata as Partial<Chapter> & MetadataRecord;
     return {
       id: entity.id,
-      storyId: metadata.storyId || '',
+      storyId: metadata.storyId || "",
       title: entity.name,
-      content: metadata.content || '',
-      summary: entity.description || '',
+      content: metadata.content || "",
+      summary: entity.description || "",
       wordCount: metadata.wordCount || 0,
-      status: metadata.status || 'draft',
+      status: metadata.status || "draft",
       order: metadata.order || 0,
       characterProgression: metadata.characterProgression || [],
       scenes: metadata.scenes || [],
       characters: metadata.characters || [],
       locations: metadata.locations || [],
       plotPoints: metadata.plotPoints || [],
-      notes: metadata.notes || '',
+      notes: metadata.notes || "",
       tags: entity.tags,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -280,8 +285,8 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
     return {
       id: chapter.id,
       name: chapter.title,
-      type: 'chapter' as EntityType,
-      description: chapter.summary || '',
+      type: "chapter" as EntityType,
+      description: chapter.summary || "",
       tags: chapter.tags || [],
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
@@ -296,8 +301,8 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
         characters: chapter.characters,
         locations: chapter.locations,
         plotPoints: chapter.plotPoints,
-        notes: chapter.notes
-      }
+        notes: chapter.notes,
+      },
     };
   }
 
@@ -308,26 +313,26 @@ export class ChapterAdapter implements EntityAdapter<Chapter> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Chapter title is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Chapter title is required",
+        severity: "error" as const,
       });
     }
 
     const metadata = entity.metadata as Partial<Chapter> & MetadataRecord;
-    if (typeof metadata.order === 'number' && metadata.order < 0) {
+    if (typeof metadata.order === "number" && metadata.order < 0) {
       errors.push({
         entityId: entity.id,
-        field: 'order',
-        message: 'Chapter order cannot be negative',
-        severity: 'error' as const
+        field: "order",
+        message: "Chapter order cannot be negative",
+        severity: "error" as const,
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -339,9 +344,9 @@ export class SeriesAdapter implements EntityAdapter<Series> {
     return {
       id: entity.id,
       name: entity.name,
-      description: entity.description || '',
-      genre: metadata.genre || 'Fantasy',
-      status: metadata.status || 'planning',
+      description: entity.description || "",
+      genre: metadata.genre || "Fantasy",
+      status: metadata.status || "planning",
       books: metadata.books || [],
       sharedElements: metadata.sharedElements || {
         characters: [],
@@ -351,53 +356,54 @@ export class SeriesAdapter implements EntityAdapter<Series> {
           cultures: [],
           languages: [],
           religions: [],
-          economics: []
+          economics: [],
         },
         magicSystems: [],
         locations: [],
         factions: [],
-        terminology: []
+        terminology: [],
       },
       worldBible: metadata.worldBible || {
         locations: [],
         cultures: [],
         magicSystems: [],
         timeline: [],
-        rules: []
+        rules: [],
       },
       characterArcs: metadata.characterArcs || [],
-      overarchingPlot: metadata.overarchingPlot || '',
+      overarchingPlot: metadata.overarchingPlot || "",
       themes: metadata.themes || [],
       consistency: metadata.consistency || {
         characterContinuity: [],
         worldStateContinuity: [],
         plotContinuity: [],
-        lastCheck: new Date()
+        lastCheck: new Date(),
       },
-      metadata: (metadata.seriesMetadata as Series['metadata']) || {
-        author: '',
+      metadata: (metadata.seriesMetadata as Series["metadata"]) || {
+        author: "",
         genres: [],
         themes: [],
-        targetAudience: '',
-        marketCategory: '',
+        targetAudience: "",
+        marketCategory: "",
         seriesLength: 0,
         marketingTags: [],
         totalWordCount: 0,
         estimatedBooks: 0,
-        publishingPlan: '',
-        marketingNotes: ''
+        publishingPlan: "",
+        marketingNotes: "",
       },
       tags: entity.tags,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
   toEntity(series: Series): BaseEntity {
     return {
       id: series.id,
-      name: series.name ?? (series as unknown as { title?: string }).title ?? '',
-      type: 'series' as EntityType,
+      name:
+        series.name ?? (series as unknown as { title?: string }).title ?? "",
+      type: "series" as EntityType,
       description: series.description,
       tags: series.tags || [],
       createdAt: series.createdAt,
@@ -411,8 +417,8 @@ export class SeriesAdapter implements EntityAdapter<Series> {
         overarchingPlot: series.overarchingPlot,
         themes: series.themes,
         consistency: series.consistency,
-        seriesMetadata: series.metadata
-      }
+        seriesMetadata: series.metadata,
+      },
     };
   }
 
@@ -423,16 +429,16 @@ export class SeriesAdapter implements EntityAdapter<Series> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Series name is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Series name is required",
+        severity: "error" as const,
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -440,20 +446,27 @@ export class SeriesAdapter implements EntityAdapter<Series> {
 // Research Source Adapter
 export class ResearchAdapter implements EntityAdapter<ResearchSource> {
   fromEntity(entity: BaseEntity): ResearchSource {
-    const metadata = entity.metadata as Partial<ResearchSource> & MetadataRecord;
+    const metadata = entity.metadata as Partial<ResearchSource> &
+      MetadataRecord;
     return {
       id: entity.id,
       title: entity.name,
-      type: (metadata.sourceType as SourceType) || 'article',
+      type: (metadata.sourceType as SourceType) || "article",
       content: metadata.content || {
-        summary: entity.description || '',
+        summary: entity.description || "",
         keyPoints: [],
         excerpts: [],
         media: [],
-        structure: { headings: [], sections: [], references: [], figures: [], tables: [] },
+        structure: {
+          headings: [],
+          sections: [],
+          references: [],
+          figures: [],
+          tables: [],
+        },
         readingTime: 0,
         wordCount: 0,
-        language: 'en',
+        language: "en",
         quality: {
           credibility: 5,
           accuracy: 5,
@@ -461,13 +474,13 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
           completeness: 5,
           freshness: 5,
           overallScore: 5,
-          issues: []
-        }
+          issues: [],
+        },
       },
-      metadata: (metadata.sourceMetadata as ResearchSource['metadata']) || {
+      metadata: (metadata.sourceMetadata as ResearchSource["metadata"]) || {
         author: [],
         accessDate: new Date(),
-        format: 'unknown'
+        format: "unknown",
       },
       annotations: metadata.annotations || [],
       links: metadata.links || [],
@@ -479,7 +492,7 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
       archived: metadata.archived || false,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      lastAccessed: metadata.lastAccessed || entity.updatedAt
+      lastAccessed: metadata.lastAccessed || entity.updatedAt,
     };
   }
 
@@ -487,7 +500,7 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
     return {
       id: source.id,
       name: source.title,
-      type: 'research' as EntityType,
+      type: "research" as EntityType,
       description: source.content.summary,
       tags: source.tags,
       createdAt: source.createdAt,
@@ -503,8 +516,8 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
         collections: source.collections,
         favorited: source.favorited,
         archived: source.archived,
-        lastAccessed: source.lastAccessed
-      }
+        lastAccessed: source.lastAccessed,
+      },
     };
   }
 
@@ -515,16 +528,16 @@ export class ResearchAdapter implements EntityAdapter<ResearchSource> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Research source title is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Research source title is required",
+        severity: "error" as const,
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -536,17 +549,18 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
     return {
       id: entity.id,
       name: entity.name,
-      description: entity.description || '',
-      category: metadata.category || 'monster',
-      type: (metadata.tableType as LootTable['type']) || metadata.type || 'simple',
+      description: entity.description || "",
+      category: metadata.category || "monster",
+      type:
+        (metadata.tableType as LootTable["type"]) || metadata.type || "simple",
       entries: metadata.entries || [],
       conditions: metadata.conditions || [],
       modifiers: metadata.modifiers || [],
-      metadata: (metadata.lootMetadata as LootTable['metadata']) || {
-        version: '1.0',
-        author: '',
+      metadata: (metadata.lootMetadata as LootTable["metadata"]) || {
+        version: "1.0",
+        author: "",
         tags: entity.tags,
-        difficulty: 'normal',
+        difficulty: "normal",
         recommendedLevel: { min: 1, max: 10, optimal: 5 },
         balanceScore: 5,
         totalWeight: 0,
@@ -560,14 +574,14 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
             epic: 0,
             legendary: 0,
             artifact: 0,
-            unique: 0
+            unique: 0,
           },
-          typeDistribution: {}
+          typeDistribution: {},
         },
-        testResults: []
+        testResults: [],
       },
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -575,7 +589,7 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
     return {
       id: lootTable.id,
       name: lootTable.name,
-      type: 'lootTable' as EntityType,
+      type: "lootTable" as EntityType,
       description: lootTable.description,
       tags: lootTable.metadata.tags,
       createdAt: lootTable.createdAt,
@@ -586,8 +600,8 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
         entries: lootTable.entries,
         conditions: lootTable.conditions,
         modifiers: lootTable.modifiers,
-        lootMetadata: lootTable.metadata
-      }
+        lootMetadata: lootTable.metadata,
+      },
     };
   }
 
@@ -598,9 +612,9 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
     if (!entity.name?.trim()) {
       errors.push({
         entityId: entity.id,
-        field: 'name',
-        message: 'Loot table name is required',
-        severity: 'error' as const
+        field: "name",
+        message: "Loot table name is required",
+        severity: "error" as const,
       });
     }
 
@@ -608,15 +622,15 @@ export class LootTableAdapter implements EntityAdapter<LootTable> {
     if (!metadata.entries || metadata.entries.length === 0) {
       warnings.push({
         entityId: entity.id,
-        message: 'Loot table has no entries',
-        suggestion: 'Add loot entries to make this table functional'
+        message: "Loot table has no entries",
+        suggestion: "Add loot entries to make this table functional",
       });
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -626,12 +640,12 @@ export class AdapterRegistry {
   private adapters = new Map<EntityType, EntityAdapter<unknown>>();
 
   constructor() {
-    this.adapters.set('character', new CharacterAdapter());
-    this.adapters.set('story', new StoryAdapter());
-    this.adapters.set('chapter', new ChapterAdapter());
-    this.adapters.set('series', new SeriesAdapter());
-    this.adapters.set('research', new ResearchAdapter());
-    this.adapters.set('lootTable', new LootTableAdapter());
+    this.adapters.set("character", new CharacterAdapter());
+    this.adapters.set("story", new StoryAdapter());
+    this.adapters.set("chapter", new ChapterAdapter());
+    this.adapters.set("series", new SeriesAdapter());
+    this.adapters.set("research", new ResearchAdapter());
+    this.adapters.set("lootTable", new LootTableAdapter());
   }
 
   getAdapter<T>(type: EntityType): EntityAdapter<T> | undefined {
@@ -657,13 +671,15 @@ export class AdapterRegistry {
     if (!adapter) {
       return {
         isValid: false,
-        errors: [{
-          entityId: entity.id,
-          field: 'type',
-          message: `No adapter found for entity type: ${entity.type}`,
-          severity: 'error'
-        }],
-        warnings: []
+        errors: [
+          {
+            entityId: entity.id,
+            field: "type",
+            message: `No adapter found for entity type: ${entity.type}`,
+            severity: "error",
+          },
+        ],
+        warnings: [],
       };
     }
     return adapter.validateEntity(entity);

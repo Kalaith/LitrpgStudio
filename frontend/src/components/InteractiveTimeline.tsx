@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import * as d3 from 'd3';
-import type { StoryEvent } from '../types/story';
-import type { Character } from '../types/character';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import * as d3 from "d3";
+import type { StoryEvent } from "../types/story";
+import type { Character } from "../types/character";
 
-interface TimelineEvent extends Omit<StoryEvent, 'date'> {
+interface TimelineEvent extends Omit<StoryEvent, "date"> {
   date: Date;
   position: number;
 }
@@ -14,7 +14,7 @@ interface InteractiveTimelineProps {
   characters: Character[];
   onEventClick?: (event: StoryEvent) => void;
   onEventUpdate?: (eventId: string, updates: Partial<StoryEvent>) => void;
-  onAddEvent?: (event: Omit<StoryEvent, 'id'>) => void;
+  onAddEvent?: (event: Omit<StoryEvent, "id">) => void;
 }
 
 export default function InteractiveTimeline({
@@ -22,27 +22,27 @@ export default function InteractiveTimeline({
   characters,
   onEventClick,
   onEventUpdate,
-  onAddEvent
+  onAddEvent,
 }: InteractiveTimelineProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedEvent, setSelectedEvent] = useState<StoryEvent | null>(null);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [filterCharacter, setFilterCharacter] = useState<string>('');
-  const [filterImportance, setFilterImportance] = useState<string>('');
+  const [filterCharacter, setFilterCharacter] = useState<string>("");
+  const [filterImportance, setFilterImportance] = useState<string>("");
   const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     // Convert and sort events
     const processedEvents: TimelineEvent[] = events
-      .map(event => ({
+      .map((event) => ({
         ...event,
         date: new Date(event.date),
-        position: 0
+        position: 0,
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .map((event, index) => ({
         ...event,
-        position: index
+        position: index,
       }));
 
     setTimelineEvents(processedEvents);
@@ -61,36 +61,45 @@ export default function InteractiveTimeline({
     // Filter events
     let filteredEvents = timelineEvents;
     if (filterCharacter) {
-      filteredEvents = filteredEvents.filter(event =>
-        event.charactersInvolved.includes(filterCharacter)
+      filteredEvents = filteredEvents.filter((event) =>
+        event.charactersInvolved.includes(filterCharacter),
       );
     }
     if (filterImportance) {
-      filteredEvents = filteredEvents.filter(event =>
-        event.importance === filterImportance
+      filteredEvents = filteredEvents.filter(
+        (event) => event.importance === filterImportance,
       );
     }
 
     if (filteredEvents.length === 0) return;
 
     // Set up scales
-    const xScale = d3.scaleTime()
-      .domain(d3.extent(filteredEvents, d => d.date) as [Date, Date])
+    const xScale = d3
+      .scaleTime()
+      .domain(d3.extent(filteredEvents, (d) => d.date) as [Date, Date])
       .range([margin.left, width - margin.right]);
 
-    const yScale = d3.scaleOrdinal()
-      .domain(['critical', 'major', 'moderate', 'minor'])
-      .range([margin.top + 20, margin.top + 80, margin.top + 140, margin.top + 200]);
+    const yScale = d3
+      .scaleOrdinal()
+      .domain(["critical", "major", "moderate", "minor"])
+      .range([
+        margin.top + 20,
+        margin.top + 80,
+        margin.top + 140,
+        margin.top + 200,
+      ]);
 
-    const colorScale = d3.scaleOrdinal<string>()
-      .domain(['critical', 'major', 'moderate', 'minor'])
-      .range(['#DC2626', '#F59E0B', '#3B82F6', '#6B7280']);
+    const colorScale = d3
+      .scaleOrdinal<string>()
+      .domain(["critical", "major", "moderate", "minor"])
+      .range(["#DC2626", "#F59E0B", "#3B82F6", "#6B7280"]);
 
     // Create container
     const container = svg.append("g");
 
     // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 3])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
@@ -99,7 +108,8 @@ export default function InteractiveTimeline({
     svg.call(zoom);
 
     // Create timeline line
-    container.append("line")
+    container
+      .append("line")
       .attr("x1", margin.left)
       .attr("x2", width - margin.right)
       .attr("y1", height / 2)
@@ -108,30 +118,52 @@ export default function InteractiveTimeline({
       .attr("stroke-width", 2);
 
     // Create events
-    const eventGroups = container.selectAll(".timeline-event")
+    const eventGroups = container
+      .selectAll(".timeline-event")
       .data(filteredEvents)
-      .enter().append("g")
+      .enter()
+      .append("g")
       .attr("class", "timeline-event")
-      .attr("transform", d => `translate(${xScale(d.date)}, ${yScale(d.importance)})`)
+      .attr(
+        "transform",
+        (d) => `translate(${xScale(d.date)}, ${yScale(d.importance)})`,
+      )
       .style("cursor", "pointer");
 
     // Event circles
-    eventGroups.append("circle")
-      .attr("r", d => d.importance === 'critical' ? 12 :
-                    d.importance === 'major' ? 10 :
-                    d.importance === 'moderate' ? 8 : 6)
-      .attr("fill", d => colorScale(d.importance))
+    eventGroups
+      .append("circle")
+      .attr("r", (d) =>
+        d.importance === "critical"
+          ? 12
+          : d.importance === "major"
+            ? 10
+            : d.importance === "moderate"
+              ? 8
+              : 6,
+      )
+      .attr("fill", (d) => colorScale(d.importance))
       .attr("stroke", "#fff")
       .attr("stroke-width", 2)
-      .on("mouseover", function(event, d) {
-        d3.select(this).transition().duration(150).attr("r",
-          d.importance === 'critical' ? 15 :
-          d.importance === 'major' ? 13 :
-          d.importance === 'moderate' ? 11 : 9
-        );
+      .on("mouseover", function (event, d) {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .attr(
+            "r",
+            d.importance === "critical"
+              ? 15
+              : d.importance === "major"
+                ? 13
+                : d.importance === "moderate"
+                  ? 11
+                  : 9,
+          );
 
         // Show tooltip
-        const tooltip = d3.select("body").append("div")
+        const tooltip = d3
+          .select("body")
+          .append("div")
           .attr("class", "timeline-tooltip")
           .style("position", "absolute")
           .style("background", "rgba(0, 0, 0, 0.9)")
@@ -141,23 +173,33 @@ export default function InteractiveTimeline({
           .style("font-size", "12px")
           .style("pointer-events", "none")
           .style("z-index", "1000")
-          .html(`
+          .html(
+            `
             <strong>${d.title}</strong><br/>
             ${d.date.toLocaleDateString()}<br/>
             Importance: ${d.importance}<br/>
-            Characters: ${d.charactersInvolved.slice(0, 3).join(', ')}${d.charactersInvolved.length > 3 ? '...' : ''}
-          `)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 10) + "px");
+            Characters: ${d.charactersInvolved.slice(0, 3).join(", ")}${d.charactersInvolved.length > 3 ? "..." : ""}
+          `,
+          )
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 10 + "px");
 
         setTimeout(() => tooltip.remove(), 3000);
       })
-      .on("mouseout", function(_event, d) {
-        d3.select(this).transition().duration(150).attr("r",
-          d.importance === 'critical' ? 12 :
-          d.importance === 'major' ? 10 :
-          d.importance === 'moderate' ? 8 : 6
-        );
+      .on("mouseout", function (_event, d) {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .attr(
+            "r",
+            d.importance === "critical"
+              ? 12
+              : d.importance === "major"
+                ? 10
+                : d.importance === "moderate"
+                  ? 8
+                  : 6,
+          );
       })
       .on("click", (_event, d) => {
         setSelectedEvent(d as unknown as StoryEvent);
@@ -165,8 +207,11 @@ export default function InteractiveTimeline({
       });
 
     // Event labels
-    eventGroups.append("text")
-      .text(d => d.title.length > 15 ? d.title.substring(0, 15) + '...' : d.title)
+    eventGroups
+      .append("text")
+      .text((d) =>
+        d.title.length > 15 ? d.title.substring(0, 15) + "..." : d.title,
+      )
       .attr("x", 0)
       .attr("y", -20)
       .attr("text-anchor", "middle")
@@ -175,8 +220,9 @@ export default function InteractiveTimeline({
       .attr("fill", "#374151");
 
     // Date labels
-    eventGroups.append("text")
-      .text(d => d.date.toLocaleDateString())
+    eventGroups
+      .append("text")
+      .text((d) => d.date.toLocaleDateString())
       .attr("x", 0)
       .attr("y", 25)
       .attr("text-anchor", "middle")
@@ -186,17 +232,19 @@ export default function InteractiveTimeline({
     // Character connections
     filteredEvents.forEach((event, eventIndex) => {
       event.charactersInvolved.forEach((characterId) => {
-        const character = characters.find(c => c.id === characterId);
+        const character = characters.find((c) => c.id === characterId);
         if (!character) return;
 
         // Find other events with this character
-        const relatedEvents = filteredEvents.filter((e, i) =>
-          i !== eventIndex && e.charactersInvolved.includes(characterId)
+        const relatedEvents = filteredEvents.filter(
+          (e, i) =>
+            i !== eventIndex && e.charactersInvolved.includes(characterId),
         );
 
-        relatedEvents.forEach(relatedEvent => {
+        relatedEvents.forEach((relatedEvent) => {
           if (relatedEvent.date > event.date) {
-            container.append("line")
+            container
+              .append("line")
               .attr("x1", xScale(event.date) as number)
               .attr("y1", yScale(event.importance) as number)
               .attr("x2", xScale(relatedEvent.date) as number)
@@ -211,23 +259,31 @@ export default function InteractiveTimeline({
     });
 
     // Add axis
-    const xAxis = d3.axisBottom(xScale)
+    const xAxis = d3
+      .axisBottom(xScale)
       .tickFormat((d) => d3.timeFormat("%b %Y")(d as Date));
 
-    container.append("g")
+    container
+      .append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
       .call(xAxis);
-
-  }, [timelineEvents, filterCharacter, filterImportance, zoomLevel, characters, onEventClick]);
+  }, [
+    timelineEvents,
+    filterCharacter,
+    filterImportance,
+    zoomLevel,
+    characters,
+    onEventClick,
+  ]);
 
   const handleAddEvent = () => {
     if (onAddEvent) {
       onAddEvent({
-        title: 'New Event',
-        description: 'Event description',
+        title: "New Event",
+        description: "Event description",
         date: new Date().toISOString(),
         charactersInvolved: [],
-        importance: 'moderate'
+        importance: "moderate",
       });
     }
   };
@@ -238,21 +294,27 @@ export default function InteractiveTimeline({
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Filter by Character</label>
+            <label className="block text-sm font-medium mb-1">
+              Filter by Character
+            </label>
             <select
               value={filterCharacter}
               onChange={(e) => setFilterCharacter(e.target.value)}
               className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded"
             >
               <option value="">All Characters</option>
-              {characters.map(char => (
-                <option key={char.id} value={char.id}>{char.name}</option>
+              {characters.map((char) => (
+                <option key={char.id} value={char.id}>
+                  {char.name}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Filter by Importance</label>
+            <label className="block text-sm font-medium mb-1">
+              Filter by Importance
+            </label>
             <select
               value={filterImportance}
               onChange={(e) => setFilterImportance(e.target.value)}
@@ -280,10 +342,7 @@ export default function InteractiveTimeline({
           </div>
         </div>
 
-        <button
-          onClick={handleAddEvent}
-          className="btn-primary text-sm"
-        >
+        <button onClick={handleAddEvent} className="btn-primary text-sm">
           Add Event
         </button>
       </div>
@@ -292,10 +351,10 @@ export default function InteractiveTimeline({
       <div className="flex items-center space-x-4 mb-4 text-sm">
         <span className="font-medium">Importance:</span>
         {[
-          { level: 'critical', color: '#DC2626', label: 'Critical' },
-          { level: 'major', color: '#F59E0B', label: 'Major' },
-          { level: 'moderate', color: '#3B82F6', label: 'Moderate' },
-          { level: 'minor', color: '#6B7280', label: 'Minor' }
+          { level: "critical", color: "#DC2626", label: "Critical" },
+          { level: "major", color: "#F59E0B", label: "Major" },
+          { level: "moderate", color: "#3B82F6", label: "Moderate" },
+          { level: "minor", color: "#6B7280", label: "Minor" },
         ].map(({ level, color, label }) => (
           <div key={level} className="flex items-center space-x-1">
             <div
@@ -339,13 +398,17 @@ export default function InteractiveTimeline({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Title</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Title
+                  </label>
                   <input
                     type="text"
                     value={selectedEvent.title}
                     onChange={(e) => {
                       if (onEventUpdate) {
-                        onEventUpdate(selectedEvent.id, { title: e.target.value });
+                        onEventUpdate(selectedEvent.id, {
+                          title: e.target.value,
+                        });
                       }
                     }}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
@@ -359,7 +422,9 @@ export default function InteractiveTimeline({
                     value={selectedEvent.date}
                     onChange={(e) => {
                       if (onEventUpdate) {
-                        onEventUpdate(selectedEvent.id, { date: e.target.value });
+                        onEventUpdate(selectedEvent.id, {
+                          date: e.target.value,
+                        });
                       }
                     }}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
@@ -367,12 +432,17 @@ export default function InteractiveTimeline({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Importance</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Importance
+                  </label>
                   <select
                     value={selectedEvent.importance}
                     onChange={(e) => {
                       if (onEventUpdate) {
-                        onEventUpdate(selectedEvent.id, { importance: e.target.value as StoryEvent['importance'] });
+                        onEventUpdate(selectedEvent.id, {
+                          importance: e.target
+                            .value as StoryEvent["importance"],
+                        });
                       }
                     }}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
@@ -387,12 +457,16 @@ export default function InteractiveTimeline({
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Description
+                  </label>
                   <textarea
                     value={selectedEvent.description}
                     onChange={(e) => {
                       if (onEventUpdate) {
-                        onEventUpdate(selectedEvent.id, { description: e.target.value });
+                        onEventUpdate(selectedEvent.id, {
+                          description: e.target.value,
+                        });
                       }
                     }}
                     rows={4}
@@ -401,19 +475,30 @@ export default function InteractiveTimeline({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Characters Involved</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Characters Involved
+                  </label>
                   <div className="space-y-2">
-                    {characters.map(character => (
+                    {characters.map((character) => (
                       <label key={character.id} className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={selectedEvent.charactersInvolved.includes(character.id)}
+                          checked={selectedEvent.charactersInvolved.includes(
+                            character.id,
+                          )}
                           onChange={(e) => {
                             if (onEventUpdate) {
                               const updatedCharacters = e.target.checked
-                                ? [...selectedEvent.charactersInvolved, character.id]
-                                : selectedEvent.charactersInvolved.filter(id => id !== character.id);
-                              onEventUpdate(selectedEvent.id, { charactersInvolved: updatedCharacters });
+                                ? [
+                                    ...selectedEvent.charactersInvolved,
+                                    character.id,
+                                  ]
+                                : selectedEvent.charactersInvolved.filter(
+                                    (id) => id !== character.id,
+                                  );
+                              onEventUpdate(selectedEvent.id, {
+                                charactersInvolved: updatedCharacters,
+                              });
                             }
                           }}
                           className="mr-2"
@@ -433,9 +518,7 @@ export default function InteractiveTimeline({
               >
                 Close
               </button>
-              <button className="btn-primary">
-                Save Changes
-              </button>
+              <button className="btn-primary">Save Changes</button>
             </div>
           </motion.div>
         )}
@@ -452,20 +535,34 @@ export default function InteractiveTimeline({
             </div>
             <div className="text-center">
               <div className="text-xl font-bold">
-                {timelineEvents.filter(e => e.importance === 'critical' || e.importance === 'major').length}
+                {
+                  timelineEvents.filter(
+                    (e) =>
+                      e.importance === "critical" || e.importance === "major",
+                  ).length
+                }
               </div>
               <div className="text-gray-600">Major Events</div>
             </div>
             <div className="text-center">
               <div className="text-xl font-bold">
-                {new Set(timelineEvents.flatMap(e => e.charactersInvolved)).size}
+                {
+                  new Set(timelineEvents.flatMap((e) => e.charactersInvolved))
+                    .size
+                }
               </div>
               <div className="text-gray-600">Active Characters</div>
             </div>
             <div className="text-center">
               <div className="text-xl font-bold">
                 {timelineEvents.length > 0
-                  ? Math.round((timelineEvents[timelineEvents.length - 1].date.getTime() - timelineEvents[0].date.getTime()) / (1000 * 60 * 60 * 24))
+                  ? Math.round(
+                      (timelineEvents[
+                        timelineEvents.length - 1
+                      ].date.getTime() -
+                        timelineEvents[0].date.getTime()) /
+                        (1000 * 60 * 60 * 24),
+                    )
                   : 0}
               </div>
               <div className="text-gray-600">Days Span</div>

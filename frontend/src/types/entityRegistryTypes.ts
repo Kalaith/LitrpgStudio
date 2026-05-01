@@ -2,18 +2,18 @@
 // Separated from entityRegistry.ts to avoid verbatimModuleSyntax issues
 
 export type EntityType =
-  | 'character'
-  | 'location'
-  | 'item'
-  | 'skill'
-  | 'event'
-  | 'quest'
-  | 'faction'
-  | 'story'
-  | 'chapter'
-  | 'series'
-  | 'lootTable'
-  | 'research';
+  | "character"
+  | "location"
+  | "item"
+  | "skill"
+  | "event"
+  | "quest"
+  | "faction"
+  | "story"
+  | "chapter"
+  | "series"
+  | "lootTable"
+  | "research";
 
 export interface BaseEntity {
   id: string;
@@ -47,23 +47,23 @@ export interface EntityRelationship {
 }
 
 export type RelationshipType =
-  | 'contains' // location contains character
-  | 'owns' // character owns item
-  | 'knows' // character knows skill
-  | 'participates' // character participates in event
-  | 'located_in' // item located in location
-  | 'prerequisite' // skill prerequisite for another skill
-  | 'enemy_of' // character enemy of character
-  | 'ally_of' // character ally of character
-  | 'member_of' // character member of faction
-  | 'leads' // character leads faction
-  | 'part_of' // chapter part of story
-  | 'references' // research references entity
-  | 'inspired_by' // entity inspired by research
-  | 'parent_of' // series parent of story
-  | 'child_of' // story child of series
-  | 'produces' // loot table produces item
-  | 'custom'; // user-defined relationship
+  | "contains" // location contains character
+  | "owns" // character owns item
+  | "knows" // character knows skill
+  | "participates" // character participates in event
+  | "located_in" // item located in location
+  | "prerequisite" // skill prerequisite for another skill
+  | "enemy_of" // character enemy of character
+  | "ally_of" // character ally of character
+  | "member_of" // character member of faction
+  | "leads" // character leads faction
+  | "part_of" // chapter part of story
+  | "references" // research references entity
+  | "inspired_by" // entity inspired by research
+  | "parent_of" // series parent of story
+  | "child_of" // story child of series
+  | "produces" // loot table produces item
+  | "custom"; // user-defined relationship
 
 export interface EntityRegistry {
   entities: Map<string, BaseEntity>;
@@ -90,7 +90,7 @@ export interface EntityValidationError {
   entityId: string;
   field: string;
   message: string;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
 }
 
 export interface EntityValidationWarning {
@@ -109,7 +109,7 @@ export interface CrossReference {
 }
 
 export interface EntityChangeEvent {
-  type: 'created' | 'updated' | 'deleted';
+  type: "created" | "updated" | "deleted";
   entity: BaseEntity;
   previousVersion?: BaseEntity;
   timestamp: Date;
@@ -137,8 +137,8 @@ export interface EntityFilter {
 export interface EntitySearchOptions {
   query?: string;
   filter?: EntityFilter;
-  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'relevance';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "createdAt" | "updatedAt" | "relevance";
+  sortOrder?: "asc" | "desc";
   limit?: number;
   includeRelationships?: boolean;
 }

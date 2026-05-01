@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type {
   BaseEntity,
   EntityType,
@@ -9,8 +9,8 @@ import type {
   EntitySearchOptions,
   EntityFilter,
   EntityChangeEvent,
-  CrossReference
-} from '../types/entityRegistry';
+  CrossReference,
+} from "../types/entityRegistry";
 
 interface EntityRegistryState {
   registry: EntityRegistry;
@@ -27,11 +27,19 @@ interface EntityRegistryState {
   getEntitiesByTag: (tag: string) => BaseEntity[];
 
   // Relationship Management
-  addRelationship: (relationship: Omit<EntityRelationship, 'id' | 'createdAt'>) => void;
-  updateRelationship: (id: string, updates: Partial<EntityRelationship>) => void;
+  addRelationship: (
+    relationship: Omit<EntityRelationship, "id" | "createdAt">,
+  ) => void;
+  updateRelationship: (
+    id: string,
+    updates: Partial<EntityRelationship>,
+  ) => void;
   removeRelationship: (id: string) => void;
   getRelationshipsForEntity: (entityId: string) => EntityRelationship[];
-  getRelationshipsBetween: (entityId1: string, entityId2: string) => EntityRelationship[];
+  getRelationshipsBetween: (
+    entityId1: string,
+    entityId2: string,
+  ) => EntityRelationship[];
 
   // Search and Discovery
   searchEntities: (options: EntitySearchOptions) => EntitySearchResult[];
@@ -46,7 +54,10 @@ interface EntityRegistryState {
 
   // Bulk Operations
   importEntities: (entities: BaseEntity[]) => void;
-  bulkImport: (entities: BaseEntity[], relationships: Omit<EntityRelationship, 'id' | 'createdAt'>[]) => void;
+  bulkImport: (
+    entities: BaseEntity[],
+    relationships: Omit<EntityRelationship, "id" | "createdAt">[],
+  ) => void;
   exportEntities: (filter?: EntityFilter) => BaseEntity[];
   mergeEntities: (sourceId: string, targetId: string) => void;
 
@@ -66,7 +77,7 @@ const createEmptyRegistry = (): EntityRegistry => ({
   relationships: new Map(),
   typeIndex: new Map(),
   tagIndex: new Map(),
-  nameIndex: new Map()
+  nameIndex: new Map(),
 });
 
 export const useEntityRegistryStore = create<EntityRegistryState>()(
@@ -92,7 +103,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           newRegistry.typeIndex.get(entity.type)!.add(entity.id);
 
           // Update tag index
-          entity.tags.forEach(tag => {
+          entity.tags.forEach((tag) => {
             if (!newRegistry.tagIndex.has(tag)) {
               newRegistry.tagIndex.set(tag, new Set());
             }
@@ -108,16 +119,16 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
           // Add change event
           const changeEvent: EntityChangeEvent = {
-            type: 'created',
+            type: "created",
             entity,
             timestamp: new Date(),
-            affectedRelationships: []
+            affectedRelationships: [],
           };
 
           return {
             registry: newRegistry,
             changeLog: [...state.changeLog.slice(-99), changeEvent], // Keep last 100 changes
-            recentEntities: [entity.id, ...state.recentEntities.slice(0, 19)] // Keep last 20
+            recentEntities: [entity.id, ...state.recentEntities.slice(0, 19)], // Keep last 20
           };
         });
       },
@@ -127,7 +138,11 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           const existingEntity = state.registry.entities.get(id);
           if (!existingEntity) return state;
 
-          const updatedEntity = { ...existingEntity, ...updates, updatedAt: new Date() };
+          const updatedEntity = {
+            ...existingEntity,
+            ...updates,
+            updatedAt: new Date(),
+          };
           const newRegistry = { ...state.registry };
 
           // Update entities map
@@ -153,9 +168,12 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             newRegistry.nameIndex.get(newNameLower)!.add(id);
           }
 
-          if (updates.tags && JSON.stringify(updates.tags) !== JSON.stringify(existingEntity.tags)) {
+          if (
+            updates.tags &&
+            JSON.stringify(updates.tags) !== JSON.stringify(existingEntity.tags)
+          ) {
             // Remove old tag indices
-            existingEntity.tags.forEach(tag => {
+            existingEntity.tags.forEach((tag) => {
               const tagSet = newRegistry.tagIndex.get(tag);
               if (tagSet) {
                 tagSet.delete(id);
@@ -166,7 +184,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             });
 
             // Add new tag indices
-            updates.tags.forEach(tag => {
+            updates.tags.forEach((tag) => {
               if (!newRegistry.tagIndex.has(tag)) {
                 newRegistry.tagIndex.set(tag, new Set());
               }
@@ -176,16 +194,16 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
           // Add change event
           const changeEvent: EntityChangeEvent = {
-            type: 'updated',
+            type: "updated",
             entity: updatedEntity,
             previousVersion: existingEntity,
             timestamp: new Date(),
-            affectedRelationships: []
+            affectedRelationships: [],
           };
 
           return {
             registry: newRegistry,
-            changeLog: [...state.changeLog.slice(-99), changeEvent]
+            changeLog: [...state.changeLog.slice(-99), changeEvent],
           };
         });
       },
@@ -210,7 +228,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           }
 
           // Remove from tag index
-          entity.tags.forEach(tag => {
+          entity.tags.forEach((tag) => {
             const tagSet = newRegistry.tagIndex.get(tag);
             if (tagSet) {
               tagSet.delete(id);
@@ -233,7 +251,10 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           // Remove all relationships involving this entity
           const affectedRelationships: string[] = [];
           for (const [relId, relationship] of newRegistry.relationships) {
-            if (relationship.fromEntity.id === id || relationship.toEntity.id === id) {
+            if (
+              relationship.fromEntity.id === id ||
+              relationship.toEntity.id === id
+            ) {
               newRegistry.relationships.delete(relId);
               affectedRelationships.push(relId);
             }
@@ -241,16 +262,18 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
           // Add change event
           const changeEvent: EntityChangeEvent = {
-            type: 'deleted',
+            type: "deleted",
             entity,
             timestamp: new Date(),
-            affectedRelationships
+            affectedRelationships,
           };
 
           return {
             registry: newRegistry,
             changeLog: [...state.changeLog.slice(-99), changeEvent],
-            recentEntities: state.recentEntities.filter(entityId => entityId !== id)
+            recentEntities: state.recentEntities.filter(
+              (entityId) => entityId !== id,
+            ),
           };
         });
       },
@@ -265,8 +288,8 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         if (!entityIds) return [];
 
         return Array.from(entityIds)
-          .map(id => state.registry.entities.get(id))
-          .filter(entity => entity !== undefined) as BaseEntity[];
+          .map((id) => state.registry.entities.get(id))
+          .filter((entity) => entity !== undefined) as BaseEntity[];
       },
 
       getEntitiesByTag: (tag: string) => {
@@ -275,8 +298,8 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         if (!entityIds) return [];
 
         return Array.from(entityIds)
-          .map(id => state.registry.entities.get(id))
-          .filter(entity => entity !== undefined) as BaseEntity[];
+          .map((id) => state.registry.entities.get(id))
+          .filter((entity) => entity !== undefined) as BaseEntity[];
       },
 
       // Relationship Management
@@ -285,7 +308,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           const relationship: EntityRelationship = {
             ...relationshipData,
             id: `rel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            createdAt: new Date()
+            createdAt: new Date(),
           };
 
           const newRegistry = { ...state.registry };
@@ -321,7 +344,10 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const relationships: EntityRelationship[] = [];
 
         for (const relationship of state.registry.relationships.values()) {
-          if (relationship.fromEntity.id === entityId || relationship.toEntity.id === entityId) {
+          if (
+            relationship.fromEntity.id === entityId ||
+            relationship.toEntity.id === entityId
+          ) {
             relationships.push(relationship);
           }
         }
@@ -334,8 +360,11 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const relationships: EntityRelationship[] = [];
 
         for (const relationship of state.registry.relationships.values()) {
-          const isMatch = (relationship.fromEntity.id === entityId1 && relationship.toEntity.id === entityId2) ||
-                         (relationship.fromEntity.id === entityId2 && relationship.toEntity.id === entityId1);
+          const isMatch =
+            (relationship.fromEntity.id === entityId1 &&
+              relationship.toEntity.id === entityId2) ||
+            (relationship.fromEntity.id === entityId2 &&
+              relationship.toEntity.id === entityId1);
 
           if (isMatch) {
             relationships.push(relationship);
@@ -352,14 +381,22 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
         // Apply filters
         if (options.filter) {
-          entities = entities.filter(entity => {
+          entities = entities.filter((entity) => {
             const filter = options.filter!;
 
-            if (filter.types && !filter.types.includes(entity.type)) return false;
-            if (filter.tags && !filter.tags.some(tag => entity.tags.includes(tag))) return false;
-            if (filter.createdAfter && entity.createdAt < filter.createdAfter) return false;
-            if (filter.createdBefore && entity.createdAt > filter.createdBefore) return false;
-            if (filter.customFilter && !filter.customFilter(entity)) return false;
+            if (filter.types && !filter.types.includes(entity.type))
+              return false;
+            if (
+              filter.tags &&
+              !filter.tags.some((tag) => entity.tags.includes(tag))
+            )
+              return false;
+            if (filter.createdAfter && entity.createdAt < filter.createdAfter)
+              return false;
+            if (filter.createdBefore && entity.createdAt > filter.createdBefore)
+              return false;
+            if (filter.customFilter && !filter.customFilter(entity))
+              return false;
 
             return true;
           });
@@ -368,15 +405,16 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         // Apply text search
         if (options.query) {
           const query = options.query.toLowerCase();
-          entities = entities.filter(entity =>
-            entity.name.toLowerCase().includes(query) ||
-            entity.description?.toLowerCase().includes(query) ||
-            entity.tags.some(tag => tag.toLowerCase().includes(query))
+          entities = entities.filter(
+            (entity) =>
+              entity.name.toLowerCase().includes(query) ||
+              entity.description?.toLowerCase().includes(query) ||
+              entity.tags.some((tag) => tag.toLowerCase().includes(query)),
           );
         }
 
         // Calculate relevance scores and create results
-        const results: EntitySearchResult[] = entities.map(entity => {
+        const results: EntitySearchResult[] = entities.map((entity) => {
           let relevanceScore = 1;
           const matchedFields: string[] = [];
 
@@ -384,15 +422,15 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             const query = options.query.toLowerCase();
             if (entity.name.toLowerCase().includes(query)) {
               relevanceScore += 10;
-              matchedFields.push('name');
+              matchedFields.push("name");
             }
             if (entity.description?.toLowerCase().includes(query)) {
               relevanceScore += 5;
-              matchedFields.push('description');
+              matchedFields.push("description");
             }
-            if (entity.tags.some(tag => tag.toLowerCase().includes(query))) {
+            if (entity.tags.some((tag) => tag.toLowerCase().includes(query))) {
               relevanceScore += 3;
-              matchedFields.push('tags');
+              matchedFields.push("tags");
             }
           }
 
@@ -404,24 +442,24 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             entity,
             relevanceScore,
             matchedFields,
-            relationships
+            relationships,
           };
         });
 
         // Sort results
         results.sort((a, b) => {
-          if (options.sortBy === 'relevance') {
+          if (options.sortBy === "relevance") {
             return b.relevanceScore - a.relevanceScore;
-          } else if (options.sortBy === 'name') {
-            return options.sortOrder === 'desc'
+          } else if (options.sortBy === "name") {
+            return options.sortOrder === "desc"
               ? b.entity.name.localeCompare(a.entity.name)
               : a.entity.name.localeCompare(b.entity.name);
-          } else if (options.sortBy === 'createdAt') {
-            return options.sortOrder === 'desc'
+          } else if (options.sortBy === "createdAt") {
+            return options.sortOrder === "desc"
               ? b.entity.createdAt.getTime() - a.entity.createdAt.getTime()
               : a.entity.createdAt.getTime() - b.entity.createdAt.getTime();
-          } else if (options.sortBy === 'updatedAt') {
-            return options.sortOrder === 'desc'
+          } else if (options.sortBy === "updatedAt") {
+            return options.sortOrder === "desc"
               ? b.entity.updatedAt.getTime() - a.entity.updatedAt.getTime()
               : a.entity.updatedAt.getTime() - b.entity.updatedAt.getTime();
           }
@@ -435,11 +473,13 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
         // Update search history
         if (options.query && options.query.trim()) {
-          set(state => ({
+          set((state) => ({
             searchHistory: [
               options.query!,
-              ...state.searchHistory.filter(q => q !== options.query).slice(0, 19)
-            ]
+              ...state.searchHistory
+                .filter((q) => q !== options.query)
+                .slice(0, 19),
+            ],
           }));
         }
 
@@ -451,23 +491,28 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const entity = state.registry.entities.get(entityId);
         if (!entity) return [];
 
-        const allEntities = Array.from(state.registry.entities.values())
-          .filter(e => e.id !== entityId);
+        const allEntities = Array.from(state.registry.entities.values()).filter(
+          (e) => e.id !== entityId,
+        );
 
         // Simple similarity based on shared tags and type
-        const similarities = allEntities.map(other => {
+        const similarities = allEntities.map((other) => {
           let score = 0;
 
           // Same type gets bonus
           if (other.type === entity.type) score += 5;
 
           // Shared tags
-          const sharedTags = entity.tags.filter(tag => other.tags.includes(tag));
+          const sharedTags = entity.tags.filter((tag) =>
+            other.tags.includes(tag),
+          );
           score += sharedTags.length * 2;
 
           // Name similarity (simple)
-          if (other.name.toLowerCase().includes(entity.name.toLowerCase()) ||
-              entity.name.toLowerCase().includes(other.name.toLowerCase())) {
+          if (
+            other.name.toLowerCase().includes(entity.name.toLowerCase()) ||
+            entity.name.toLowerCase().includes(other.name.toLowerCase())
+          ) {
             score += 3;
           }
 
@@ -475,15 +520,15 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         });
 
         return similarities
-          .filter(s => s.score > 0)
+          .filter((s) => s.score > 0)
           .sort((a, b) => b.score - a.score)
           .slice(0, limit)
-          .map(s => s.entity);
+          .map((s) => s.entity);
       },
 
       getCrossReferences: (entityId: string) => {
         const state = get();
-        const referencedIn: CrossReference['referencedIn'] = [];
+        const referencedIn: CrossReference["referencedIn"] = [];
 
         // Check relationships
         for (const relationship of state.registry.relationships.values()) {
@@ -491,7 +536,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
             referencedIn.push({
               entityId: relationship.fromEntity.id,
               context: `${relationship.relationshipType} relationship`,
-              fieldName: 'relationship'
+              fieldName: "relationship",
             });
           }
         }
@@ -504,7 +549,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
       // Validation
       validateEntity: (entityId: string) => {
         const entity = get().registry.entities.get(entityId);
-        return entity ? entity.name.trim() !== '' : false;
+        return entity ? entity.name.trim() !== "" : false;
       },
 
       validateAllEntities: () => {
@@ -512,7 +557,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const valid: BaseEntity[] = [];
         const invalid: BaseEntity[] = [];
 
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           if (get().validateEntity(entity.id)) {
             valid.push(entity);
           } else {
@@ -528,10 +573,13 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const entities = Array.from(state.registry.entities.values());
         const orphaned: BaseEntity[] = [];
 
-        entities.forEach(entity => {
-          const hasRelationships = state.registry.relationships.size > 0 &&
-            Array.from(state.registry.relationships.values()).some(rel =>
-              rel.fromEntity.id === entity.id || rel.toEntity.id === entity.id
+        entities.forEach((entity) => {
+          const hasRelationships =
+            state.registry.relationships.size > 0 &&
+            Array.from(state.registry.relationships.values()).some(
+              (rel) =>
+                rel.fromEntity.id === entity.id ||
+                rel.toEntity.id === entity.id,
             );
 
           if (!hasRelationships && state.registry.relationships.size > 0) {
@@ -546,7 +594,7 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         const entities = Array.from(get().registry.entities.values());
         const nameGroups = new Map<string, BaseEntity[]>();
 
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           const key = `${entity.type}:${entity.name.toLowerCase()}`;
           if (!nameGroups.has(key)) {
             nameGroups.set(key, []);
@@ -554,32 +602,40 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
           nameGroups.get(key)!.push(entity);
         });
 
-        return Array.from(nameGroups.values()).filter(group => group.length > 1);
+        return Array.from(nameGroups.values()).filter(
+          (group) => group.length > 1,
+        );
       },
 
       // Bulk Operations
       importEntities: (entities: BaseEntity[]) => {
-        entities.forEach(entity => get().addEntity(entity));
+        entities.forEach((entity) => get().addEntity(entity));
       },
 
       /**
        * Bulk-import entities and relationships in a single state update.
        * Much faster than calling addEntity/addRelationship individually.
        */
-      bulkImport: (entities: BaseEntity[], relationships: Omit<EntityRelationship, 'id' | 'createdAt'>[]) => {
+      bulkImport: (
+        entities: BaseEntity[],
+        relationships: Omit<EntityRelationship, "id" | "createdAt">[],
+      ) => {
         set((state) => {
           const newRegistry = { ...state.registry };
 
           for (const entity of entities) {
             newRegistry.entities.set(entity.id, entity);
-            if (!newRegistry.typeIndex.has(entity.type)) newRegistry.typeIndex.set(entity.type, new Set());
+            if (!newRegistry.typeIndex.has(entity.type))
+              newRegistry.typeIndex.set(entity.type, new Set());
             newRegistry.typeIndex.get(entity.type)!.add(entity.id);
             for (const tag of entity.tags) {
-              if (!newRegistry.tagIndex.has(tag)) newRegistry.tagIndex.set(tag, new Set());
+              if (!newRegistry.tagIndex.has(tag))
+                newRegistry.tagIndex.set(tag, new Set());
               newRegistry.tagIndex.get(tag)!.add(entity.id);
             }
             const nameLower = entity.name.toLowerCase();
-            if (!newRegistry.nameIndex.has(nameLower)) newRegistry.nameIndex.set(nameLower, new Set());
+            if (!newRegistry.nameIndex.has(nameLower))
+              newRegistry.nameIndex.set(nameLower, new Set());
             newRegistry.nameIndex.get(nameLower)!.add(entity.id);
           }
 
@@ -600,12 +656,20 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         let entities = Array.from(get().registry.entities.values());
 
         if (filter) {
-          entities = entities.filter(entity => {
-            if (filter.types && !filter.types.includes(entity.type)) return false;
-            if (filter.tags && !filter.tags.some(tag => entity.tags.includes(tag))) return false;
-            if (filter.createdAfter && entity.createdAt < filter.createdAfter) return false;
-            if (filter.createdBefore && entity.createdAt > filter.createdBefore) return false;
-            if (filter.customFilter && !filter.customFilter(entity)) return false;
+          entities = entities.filter((entity) => {
+            if (filter.types && !filter.types.includes(entity.type))
+              return false;
+            if (
+              filter.tags &&
+              !filter.tags.some((tag) => entity.tags.includes(tag))
+            )
+              return false;
+            if (filter.createdAfter && entity.createdAt < filter.createdAfter)
+              return false;
+            if (filter.createdBefore && entity.createdAt > filter.createdBefore)
+              return false;
+            if (filter.customFilter && !filter.customFilter(entity))
+              return false;
             return true;
           });
         }
@@ -621,23 +685,33 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
         if (!sourceEntity || !targetEntity) return;
 
         // Merge tags
-        const mergedTags = Array.from(new Set([...sourceEntity.tags, ...targetEntity.tags]));
+        const mergedTags = Array.from(
+          new Set([...sourceEntity.tags, ...targetEntity.tags]),
+        );
 
         // Update target entity
         get().updateEntity(targetId, {
           tags: mergedTags,
-          metadata: { ...sourceEntity.metadata, ...targetEntity.metadata }
+          metadata: { ...sourceEntity.metadata, ...targetEntity.metadata },
         });
 
         // Transfer relationships
         const relationships = get().getRelationshipsForEntity(sourceId);
-        relationships.forEach(rel => {
+        relationships.forEach((rel) => {
           const newRel = { ...rel };
           if (rel.fromEntity.id === sourceId) {
-            newRel.fromEntity = { ...rel.fromEntity, id: targetId, name: targetEntity.name };
+            newRel.fromEntity = {
+              ...rel.fromEntity,
+              id: targetId,
+              name: targetEntity.name,
+            };
           }
           if (rel.toEntity.id === sourceId) {
-            newRel.toEntity = { ...rel.toEntity, id: targetId, name: targetEntity.name };
+            newRel.toEntity = {
+              ...rel.toEntity,
+              id: targetId,
+              name: targetEntity.name,
+            };
           }
           get().removeRelationship(rel.id);
           get().addRelationship(newRel);
@@ -653,11 +727,13 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
       },
 
       addToRecentEntities: (entityId: string) => {
-        set(state => ({
+        set((state) => ({
           recentEntities: [
             entityId,
-            ...state.recentEntities.filter(id => id !== entityId).slice(0, 19)
-          ]
+            ...state.recentEntities
+              .filter((id) => id !== entityId)
+              .slice(0, 19),
+          ],
         }));
       },
 
@@ -667,9 +743,12 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
       getEntityStats: () => {
         const entities = Array.from(get().registry.entities.values());
-        const stats: Record<EntityType, number> = {} as Record<EntityType, number>;
+        const stats: Record<EntityType, number> = {} as Record<
+          EntityType,
+          number
+        >;
 
-        entities.forEach(entity => {
+        entities.forEach((entity) => {
           stats[entity.type] = (stats[entity.type] || 0) + 1;
         });
 
@@ -683,10 +762,10 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
 
       getAllRelationships: () => {
         return Array.from(get().registry.relationships.values());
-      }
+      },
     }),
     {
-      name: 'entity-registry-store',
+      name: "entity-registry-store",
       storage: {
         getItem: (name) => {
           const str = localStorage.getItem(name);
@@ -713,13 +792,21 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
                 ...(parsed.state || {}),
                 registry: {
                   entities: new Map(parsed.state?.registry?.entities || []),
-                  relationships: new Map(parsed.state?.registry?.relationships || []),
-                  typeIndex: new Map(typeIndexEntries.map(([k, v]) => [k, new Set(v)])),
-                  tagIndex: new Map(tagIndexEntries.map(([k, v]) => [k, new Set(v)])),
-                  nameIndex: new Map(nameIndexEntries.map(([k, v]) => [k, new Set(v)]))
-                }
+                  relationships: new Map(
+                    parsed.state?.registry?.relationships || [],
+                  ),
+                  typeIndex: new Map(
+                    typeIndexEntries.map(([k, v]) => [k, new Set(v)]),
+                  ),
+                  tagIndex: new Map(
+                    tagIndexEntries.map(([k, v]) => [k, new Set(v)]),
+                  ),
+                  nameIndex: new Map(
+                    nameIndexEntries.map(([k, v]) => [k, new Set(v)]),
+                  ),
+                },
               },
-              version: parsed.version
+              version: parsed.version,
             };
           } catch {
             return null;
@@ -731,18 +818,26 @@ export const useEntityRegistryStore = create<EntityRegistryState>()(
               ...value.state,
               registry: {
                 entities: Array.from(value.state.registry.entities.entries()),
-                relationships: Array.from(value.state.registry.relationships.entries()),
-                typeIndex: Array.from(value.state.registry.typeIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
-                tagIndex: Array.from(value.state.registry.tagIndex.entries()).map(([k, v]) => [k, Array.from(v)]),
-                nameIndex: Array.from(value.state.registry.nameIndex.entries()).map(([k, v]) => [k, Array.from(v)])
-              }
+                relationships: Array.from(
+                  value.state.registry.relationships.entries(),
+                ),
+                typeIndex: Array.from(
+                  value.state.registry.typeIndex.entries(),
+                ).map(([k, v]) => [k, Array.from(v)]),
+                tagIndex: Array.from(
+                  value.state.registry.tagIndex.entries(),
+                ).map(([k, v]) => [k, Array.from(v)]),
+                nameIndex: Array.from(
+                  value.state.registry.nameIndex.entries(),
+                ).map(([k, v]) => [k, Array.from(v)]),
+              },
             },
-            version: value.version
+            version: value.version,
           };
           localStorage.setItem(name, JSON.stringify(serializedState));
         },
-        removeItem: (name) => localStorage.removeItem(name)
-      }
-    }
-  )
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+    },
+  ),
 );

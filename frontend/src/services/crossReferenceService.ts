@@ -1,6 +1,10 @@
-import type { Character, StoryReference, CharacterCrossReference } from '../types/character';
-import type { Story, Chapter, CharacterProgressionEvent } from '../types/story';
-import { useCharacterStore } from '../stores/characterStore';
+import type {
+  Character,
+  StoryReference,
+  CharacterCrossReference,
+} from "../types/character";
+import type { Story, Chapter, CharacterProgressionEvent } from "../types/story";
+import { useCharacterStore } from "../stores/characterStore";
 
 export interface CharacterMention {
   characterId: string;
@@ -8,13 +12,17 @@ export interface CharacterMention {
   context: string;
   position: number;
   confidence: number;
-  mentionType: 'direct' | 'indirect' | 'reference';
+  mentionType: "direct" | "indirect" | "reference";
 }
 
 export interface ConsistencyIssue {
   id: string;
-  type: 'character_inconsistency' | 'timeline_error' | 'stat_mismatch' | 'relationship_conflict';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "character_inconsistency"
+    | "timeline_error"
+    | "stat_mismatch"
+    | "relationship_conflict";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   sourceId: string;
   targetId?: string;
@@ -33,19 +41,26 @@ export class CrossReferenceService {
   }
 
   // Detect character mentions in text
-  public detectCharacterMentions(text: string, characters: Character[]): CharacterMention[] {
+  public detectCharacterMentions(
+    text: string,
+    characters: Character[],
+  ): CharacterMention[] {
     const mentions: CharacterMention[] = [];
 
-    characters.forEach(character => {
+    characters.forEach((character) => {
       const variations = this.generateNameVariations(character.name);
 
-      variations.forEach(variation => {
-        const regex = new RegExp(`\\b${this.escapeRegex(variation)}\\b`, 'gi');
+      variations.forEach((variation) => {
+        const regex = new RegExp(`\\b${this.escapeRegex(variation)}\\b`, "gi");
         let match;
 
         while ((match = regex.exec(text)) !== null) {
           const context = this.extractContext(text, match.index, 100);
-          const confidence = this.calculateMentionConfidence(variation, character.name, context);
+          const confidence = this.calculateMentionConfidence(
+            variation,
+            character.name,
+            context,
+          );
 
           mentions.push({
             characterId: character.id,
@@ -53,7 +68,7 @@ export class CrossReferenceService {
             context,
             position: match.index,
             confidence,
-            mentionType: this.determineMentionType(context, variation)
+            mentionType: this.determineMentionType(context, variation),
           });
         }
       });
@@ -67,17 +82,20 @@ export class CrossReferenceService {
     mentions: CharacterMention[],
     storyId: string,
     chapterId?: string,
-    chapterNumber?: number
+    chapterNumber?: number,
   ): StoryReference[] {
     return mentions
-      .filter(mention => mention.confidence > 0.7)
-      .map(mention => ({
+      .filter((mention) => mention.confidence > 0.7)
+      .map((mention) => ({
         storyId,
         chapterId,
         mentionType: this.mapMentionToReferenceType(mention.mentionType),
         context: mention.context,
         chapterNumber,
-        importanceLevel: this.determineImportanceLevel(mention.confidence, mention.context)
+        importanceLevel: this.determineImportanceLevel(
+          mention.confidence,
+          mention.context,
+        ),
       }));
   }
 
@@ -85,7 +103,7 @@ export class CrossReferenceService {
   public analyzeConsistency(
     characters: Character[],
     _stories: Story[],
-    _chapters: Chapter[]
+    _chapters: Chapter[],
   ): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
 
@@ -101,19 +119,22 @@ export class CrossReferenceService {
     // Check character appearance consistency
     issues.push(...this.checkAppearanceConsistency());
 
-    return issues.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity));
+    return issues.sort(
+      (a, b) =>
+        this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity),
+    );
   }
 
   // Create cross-references between story elements
   public createCrossReference(
-    sourceType: CharacterCrossReference['sourceType'],
+    sourceType: CharacterCrossReference["sourceType"],
     sourceId: string,
-    targetType: CharacterCrossReference['targetType'],
+    targetType: CharacterCrossReference["targetType"],
     targetId: string,
     relationshipType: string,
     strength: number = 5,
-    description?: string
-  ): Omit<CharacterCrossReference, 'id'> {
+    description?: string,
+  ): Omit<CharacterCrossReference, "id"> {
     return {
       sourceType,
       sourceId,
@@ -121,7 +142,7 @@ export class CrossReferenceService {
       targetId,
       relationshipType,
       strength,
-      description
+      description,
     };
   }
 
@@ -130,7 +151,7 @@ export class CrossReferenceService {
     characterId: string,
     newMentions: CharacterMention[],
     storyId: string,
-    chapterId?: string
+    chapterId?: string,
   ): void {
     const characterStore = useCharacterStore.getState();
 
@@ -138,8 +159,12 @@ export class CrossReferenceService {
     characterStore.removeStoryReference(characterId, storyId, chapterId);
 
     // Add new references
-    const newReferences = this.generateStoryReferences(newMentions, storyId, chapterId);
-    newReferences.forEach(ref => {
+    const newReferences = this.generateStoryReferences(
+      newMentions,
+      storyId,
+      chapterId,
+    );
+    newReferences.forEach((ref) => {
       characterStore.addStoryReference(characterId, ref);
     });
   }
@@ -147,17 +172,19 @@ export class CrossReferenceService {
   // Track character progression through story
   public trackCharacterProgression(
     characterId: string,
-    chapters: Chapter[]
+    chapters: Chapter[],
   ): { chapter: Chapter; progressionEvents: CharacterProgressionEvent[] }[] {
     return chapters
-      .filter(chapter =>
-        chapter.characterProgression.some(event => event.characterId === characterId)
+      .filter((chapter) =>
+        chapter.characterProgression.some(
+          (event) => event.characterId === characterId,
+        ),
       )
-      .map(chapter => ({
+      .map((chapter) => ({
         chapter,
         progressionEvents: chapter.characterProgression.filter(
-          event => event.characterId === characterId
-        )
+          (event) => event.characterId === characterId,
+        ),
       }))
       .sort((a, b) => a.chapter.order - b.chapter.order);
   }
@@ -167,7 +194,7 @@ export class CrossReferenceService {
     const variations = [name];
 
     // Add common nickname patterns
-    const parts = name.split(' ');
+    const parts = name.split(" ");
     if (parts.length > 1) {
       variations.push(parts[0]); // First name
       variations.push(parts[parts.length - 1]); // Last name
@@ -182,10 +209,14 @@ export class CrossReferenceService {
   }
 
   private escapeRegex(text: string): string {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
-  private extractContext(text: string, position: number, contextLength: number): string {
+  private extractContext(
+    text: string,
+    position: number,
+    contextLength: number,
+  ): string {
     const start = Math.max(0, position - contextLength / 2);
     const end = Math.min(text.length, position + contextLength / 2);
     return text.substring(start, end).trim();
@@ -194,7 +225,7 @@ export class CrossReferenceService {
   private calculateMentionConfidence(
     variation: string,
     originalName: string,
-    context: string
+    context: string,
   ): number {
     let confidence = 0.5;
 
@@ -203,43 +234,63 @@ export class CrossReferenceService {
 
     // Context clues increase confidence
     const contextWords = context.toLowerCase();
-    if (contextWords.includes('said') || contextWords.includes('replied')) confidence += 0.2;
-    if (contextWords.includes('he') || contextWords.includes('she')) confidence += 0.1;
+    if (contextWords.includes("said") || contextWords.includes("replied"))
+      confidence += 0.2;
+    if (contextWords.includes("he") || contextWords.includes("she"))
+      confidence += 0.1;
 
     return Math.min(1, confidence);
   }
 
-  private determineMentionType(context: string, variation: string): CharacterMention['mentionType'] {
+  private determineMentionType(
+    context: string,
+    variation: string,
+  ): CharacterMention["mentionType"] {
     const lowerContext = context.toLowerCase();
 
-    if (lowerContext.includes(variation.toLowerCase() + ' said') ||
-        lowerContext.includes(variation.toLowerCase() + ' replied')) {
-      return 'direct';
+    if (
+      lowerContext.includes(variation.toLowerCase() + " said") ||
+      lowerContext.includes(variation.toLowerCase() + " replied")
+    ) {
+      return "direct";
     }
 
-    if (lowerContext.includes('he') || lowerContext.includes('she') ||
-        lowerContext.includes('his') || lowerContext.includes('her')) {
-      return 'indirect';
+    if (
+      lowerContext.includes("he") ||
+      lowerContext.includes("she") ||
+      lowerContext.includes("his") ||
+      lowerContext.includes("her")
+    ) {
+      return "indirect";
     }
 
-    return 'reference';
+    return "reference";
   }
 
-  private mapMentionToReferenceType(mentionType: CharacterMention['mentionType']): StoryReference['mentionType'] {
+  private mapMentionToReferenceType(
+    mentionType: CharacterMention["mentionType"],
+  ): StoryReference["mentionType"] {
     switch (mentionType) {
-      case 'direct': return 'appears';
-      case 'indirect': return 'mentioned';
-      case 'reference': return 'mentioned';
-      default: return 'mentioned';
+      case "direct":
+        return "appears";
+      case "indirect":
+        return "mentioned";
+      case "reference":
+        return "mentioned";
+      default:
+        return "mentioned";
     }
   }
 
-  private determineImportanceLevel(confidence: number, _context: string): StoryReference['importanceLevel'] {
-    if (confidence > 0.9) return 'critical';
-    if (confidence > 0.8) return 'major';
-    if (confidence > 0.7) return 'moderate';
-    if (confidence > 0.6) return 'minor';
-    return 'background';
+  private determineImportanceLevel(
+    confidence: number,
+    _context: string,
+  ): StoryReference["importanceLevel"] {
+    if (confidence > 0.9) return "critical";
+    if (confidence > 0.8) return "major";
+    if (confidence > 0.7) return "moderate";
+    if (confidence > 0.6) return "minor";
+    return "background";
   }
 
   private checkStatConsistency(): ConsistencyIssue[] {
@@ -251,28 +302,32 @@ export class CrossReferenceService {
     return issues;
   }
 
-  private checkRelationshipConsistency(characters: Character[]): ConsistencyIssue[] {
+  private checkRelationshipConsistency(
+    characters: Character[],
+  ): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
 
-    characters.forEach(character => {
-      character.relationships.forEach(relationship => {
-        const targetCharacter = characters.find(c => c.id === relationship.characterId);
+    characters.forEach((character) => {
+      character.relationships.forEach((relationship) => {
+        const targetCharacter = characters.find(
+          (c) => c.id === relationship.characterId,
+        );
 
         if (targetCharacter) {
           const reciprocalRelationship = targetCharacter.relationships.find(
-            r => r.characterId === character.id
+            (r) => r.characterId === character.id,
           );
 
           if (!reciprocalRelationship) {
             issues.push({
               id: `missing_reciprocal_${character.id}_${relationship.characterId}`,
-              type: 'relationship_conflict',
-              severity: 'medium',
+              type: "relationship_conflict",
+              severity: "medium",
               description: `${character.name} has a relationship with ${targetCharacter.name}, but not vice versa`,
               sourceId: character.id,
               targetId: targetCharacter.id,
               suggestion: `Add reciprocal relationship to ${targetCharacter.name}`,
-              autoFixAvailable: true
+              autoFixAvailable: true,
             });
           }
         }
@@ -300,13 +355,18 @@ export class CrossReferenceService {
     return issues;
   }
 
-  private getSeverityWeight(severity: ConsistencyIssue['severity']): number {
+  private getSeverityWeight(severity: ConsistencyIssue["severity"]): number {
     switch (severity) {
-      case 'critical': return 4;
-      case 'high': return 3;
-      case 'medium': return 2;
-      case 'low': return 1;
-      default: return 0;
+      case "critical":
+        return 4;
+      case "high":
+        return 3;
+      case "medium":
+        return 2;
+      case "low":
+        return 1;
+      default:
+        return 0;
     }
   }
 }

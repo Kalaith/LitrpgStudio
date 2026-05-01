@@ -2,6 +2,7 @@
     "name": "writers-studio/backend",
     "description": "Backend API for Writers Studio",
     "type": "project",
+    "license": "proprietary",
     "require": {
         "php": "^8.1",
         "slim/slim": "^4.11",
@@ -31,10 +32,10 @@
     },
     "scripts": {
         "start": "php -S localhost:8000 -t public/",
-        "test": "../../../vendor/bin/phpunit -c phpunit.xml",
-        "cs-check": "../../../vendor/bin/phpcs --standard=PSR12 src/ tests/",
-        "cs-fix": "../../../vendor/bin/phpcbf --standard=PSR12 src/ tests/",
-        "production-install": "composer install --working-dir=../../.. --no-dev --optimize-autoloader --classmap-authoritative",
+        "test": "@php vendor/bin/phpunit -c phpunit.xml",
+        "cs-check": "@php vendor/bin/phpcs --standard=PSR12 src/ tests/",
+        "cs-fix": "@php vendor/bin/phpcbf --standard=PSR12 src/ tests/",
+        "production-install": "composer install --no-dev --optimize-autoloader --classmap-authoritative",
         "vendor-cleanup": [
             "@php scripts/vendor-cleanup.php"
         ]

@@ -1,6 +1,13 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Character, CharacterTemplate, Skill, Item, StoryReference, CharacterCrossReference } from '../types/character';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type {
+  Character,
+  CharacterTemplate,
+  Skill,
+  Item,
+  StoryReference,
+  CharacterCrossReference,
+} from "../types/character";
 
 interface CharacterState {
   characters: Character[];
@@ -21,31 +28,56 @@ interface CharacterActions {
   fetchCharacterById: (id: string) => Promise<void>;
 
   // Character management (async)
-  createCharacter: (character: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Character>;
-  updateCharacter: (characterId: string, updates: Partial<Character>) => Promise<void>;
+  createCharacter: (
+    character: Omit<Character, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<Character>;
+  updateCharacter: (
+    characterId: string,
+    updates: Partial<Character>,
+  ) => Promise<void>;
   deleteCharacter: (characterId: string) => Promise<void>;
   setCurrentCharacter: (character: Character | null) => void;
-  
+
   // Character progression
   levelUpCharacter: (characterId: string) => void;
   addSkillToCharacter: (characterId: string, skill: Skill) => void;
-  updateCharacterSkill: (characterId: string, skillId: string, updates: Partial<Skill>) => void;
+  updateCharacterSkill: (
+    characterId: string,
+    skillId: string,
+    updates: Partial<Skill>,
+  ) => void;
   addItemToCharacter: (characterId: string, item: Item) => void;
   removeItemFromCharacter: (characterId: string, itemId: string) => void;
   equipItem: (characterId: string, itemId: string) => void;
   unequipItem: (characterId: string, itemId: string) => void;
-  
+
   // Templates
   saveAsTemplate: (character: Character, templateName: string) => void;
   createFromTemplate: (templateId: string, characterName: string) => void;
 
   // Story References & Cross-References
-  addStoryReference: (characterId: string, storyReference: StoryReference) => void;
-  removeStoryReference: (characterId: string, storyId: string, chapterId?: string) => void;
-  updateStoryReference: (characterId: string, storyId: string, updates: Partial<StoryReference>) => void;
-  addCrossReference: (crossReference: Omit<CharacterCrossReference, 'id'>) => void;
+  addStoryReference: (
+    characterId: string,
+    storyReference: StoryReference,
+  ) => void;
+  removeStoryReference: (
+    characterId: string,
+    storyId: string,
+    chapterId?: string,
+  ) => void;
+  updateStoryReference: (
+    characterId: string,
+    storyId: string,
+    updates: Partial<StoryReference>,
+  ) => void;
+  addCrossReference: (
+    crossReference: Omit<CharacterCrossReference, "id">,
+  ) => void;
   removeCrossReference: (crossReferenceId: string) => void;
-  getCrossReferences: (sourceId: string, sourceType?: string) => CharacterCrossReference[];
+  getCrossReferences: (
+    sourceId: string,
+    sourceType?: string,
+  ) => CharacterCrossReference[];
 
   // Utility
   clearAll: () => void;
@@ -55,7 +87,10 @@ type CharacterStore = CharacterState & CharacterActions;
 
 const generateId = () => crypto.randomUUID();
 
-const calculateDerivedStats = (stats: Character['stats'], characterLevel: number): Character['stats'] => {
+const calculateDerivedStats = (
+  stats: Character["stats"],
+  characterLevel: number,
+): Character["stats"] => {
   return {
     ...stats,
     hitPoints: Math.max(1, stats.constitution * 10 + characterLevel * 5),
@@ -81,21 +116,28 @@ export const useCharacterStore = create<CharacterStore>()(
       fetchCharacters: async () => {
         set({ loading: true, error: null });
         try {
-          const { charactersApi } = await import('../api/characters');
+          const { charactersApi } = await import("../api/characters");
           const response = await charactersApi.getAll();
           if (response.success && Array.isArray(response.data)) {
-            set({ characters: response.data as unknown as Character[], loading: false });
+            set({
+              characters: response.data as unknown as Character[],
+              loading: false,
+            });
           } else {
             set({ loading: false });
           }
         } catch (err) {
-          set({ loading: false, error: err instanceof Error ? err.message : 'Failed to load characters' });
+          set({
+            loading: false,
+            error:
+              err instanceof Error ? err.message : "Failed to load characters",
+          });
         }
       },
 
       fetchCharacterById: async (id) => {
         set({ loading: true, error: null });
-        const character = get().characters.find(c => c.id === id) || null;
+        const character = get().characters.find((c) => c.id === id) || null;
         set({ currentCharacter: character, loading: false });
       },
 
@@ -106,7 +148,10 @@ export const useCharacterStore = create<CharacterStore>()(
           const newCharacter: Character = {
             ...characterData,
             id: generateId(),
-            stats: calculateDerivedStats(characterData.stats, characterData.level),
+            stats: calculateDerivedStats(
+              characterData.stats,
+              characterData.level,
+            ),
             storyReferences: characterData.storyReferences || [],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -118,30 +163,33 @@ export const useCharacterStore = create<CharacterStore>()(
           };
         });
         if (!createdCharacter) {
-          throw new Error('Failed to create character');
+          throw new Error("Failed to create character");
         }
         return createdCharacter;
       },
 
       updateCharacter: async (characterId, updates) => {
         set((state) => {
-          const updatedCharacters = state.characters.map(c =>
+          const updatedCharacters = state.characters.map((c) =>
             c.id === characterId
               ? {
                   ...c,
                   ...updates,
                   stats: updates.stats
-                    ? calculateDerivedStats({ ...c.stats, ...updates.stats }, updates.level ?? c.level)
+                    ? calculateDerivedStats(
+                        { ...c.stats, ...updates.stats },
+                        updates.level ?? c.level,
+                      )
                     : c.stats,
                   updatedAt: new Date(),
                 }
-              : c
+              : c,
           );
           return {
             characters: updatedCharacters,
             currentCharacter:
               state.currentCharacter?.id === characterId
-                ? updatedCharacters.find(c => c.id === characterId) || null
+                ? updatedCharacters.find((c) => c.id === characterId) || null
                 : state.currentCharacter,
           };
         });
@@ -149,8 +197,11 @@ export const useCharacterStore = create<CharacterStore>()(
 
       deleteCharacter: async (characterId) => {
         set((state) => ({
-          characters: state.characters.filter(c => c.id !== characterId),
-          currentCharacter: state.currentCharacter?.id === characterId ? null : state.currentCharacter,
+          characters: state.characters.filter((c) => c.id !== characterId),
+          currentCharacter:
+            state.currentCharacter?.id === characterId
+              ? null
+              : state.currentCharacter,
         }));
       },
 
@@ -158,7 +209,7 @@ export const useCharacterStore = create<CharacterStore>()(
 
       levelUpCharacter: (characterId) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const newLevel = character.level + 1;
@@ -167,27 +218,37 @@ export const useCharacterStore = create<CharacterStore>()(
             ...character,
             level: newLevel,
             experience: character.experience + 1000, // Could be configurable
-            stats: calculateDerivedStats({
-              ...character.stats,
-              strength: character.stats.strength + (newLevel % 4 === 0 ? 1 : 0),
-              constitution: character.stats.constitution + (newLevel % 4 === 1 ? 1 : 0),
-              intelligence: character.stats.intelligence + (newLevel % 4 === 2 ? 1 : 0),
-              dexterity: character.stats.dexterity + (newLevel % 4 === 3 ? 1 : 0),
-            }, newLevel),
+            stats: calculateDerivedStats(
+              {
+                ...character.stats,
+                strength:
+                  character.stats.strength + (newLevel % 4 === 0 ? 1 : 0),
+                constitution:
+                  character.stats.constitution + (newLevel % 4 === 1 ? 1 : 0),
+                intelligence:
+                  character.stats.intelligence + (newLevel % 4 === 2 ? 1 : 0),
+                dexterity:
+                  character.stats.dexterity + (newLevel % 4 === 3 ? 1 : 0),
+              },
+              newLevel,
+            ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       addSkillToCharacter: (characterId, skill) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
@@ -197,111 +258,132 @@ export const useCharacterStore = create<CharacterStore>()(
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       updateCharacterSkill: (characterId, skillId, updates) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            skills: character.skills.map(s =>
-              s.id === skillId ? { ...s, ...updates } : s
+            skills: character.skills.map((s) =>
+              s.id === skillId ? { ...s, ...updates } : s,
             ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       addItemToCharacter: (characterId, item) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            equipment: [...character.equipment, { ...item, id: generateId(), equipped: false }],
+            equipment: [
+              ...character.equipment,
+              { ...item, id: generateId(), equipped: false },
+            ],
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       removeItemFromCharacter: (characterId, itemId) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            equipment: character.equipment.filter(i => i.id !== itemId),
+            equipment: character.equipment.filter((i) => i.id !== itemId),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       equipItem: (characterId, itemId) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            equipment: character.equipment.map(i =>
-              i.id === itemId ? { ...i, equipped: true } : i
+            equipment: character.equipment.map((i) =>
+              i.id === itemId ? { ...i, equipped: true } : i,
             ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       unequipItem: (characterId, itemId) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            equipment: character.equipment.map(i =>
-              i.id === itemId ? { ...i, equipped: false } : i
+            equipment: character.equipment.map((i) =>
+              i.id === itemId ? { ...i, equipped: false } : i,
             ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
@@ -313,7 +395,7 @@ export const useCharacterStore = create<CharacterStore>()(
             description: `Template based on ${character.name}`,
             baseStats: character.stats,
             startingSkills: character.skills,
-            startingEquipment: character.equipment.filter(i => !i.equipped),
+            startingEquipment: character.equipment.filter((i) => !i.equipped),
             backgroundStory: character.backstory,
           };
           return {
@@ -323,21 +405,28 @@ export const useCharacterStore = create<CharacterStore>()(
 
       createFromTemplate: (templateId, characterName) =>
         set((state) => {
-          const template = state.templates.find(t => t.id === templateId);
+          const template = state.templates.find((t) => t.id === templateId);
           if (!template) return state;
 
           const newCharacter: Character = {
             id: generateId(),
             name: characterName,
-            class: 'Adventurer',
-            race: 'Human',
+            class: "Adventurer",
+            race: "Human",
             level: 1,
             experience: 0,
             stats: template.baseStats,
-            skills: template.startingSkills.map(s => ({ ...s, id: generateId() })),
-            equipment: template.startingEquipment.map(i => ({ ...i, id: generateId(), equipped: false })),
+            skills: template.startingSkills.map((s) => ({
+              ...s,
+              id: generateId(),
+            })),
+            equipment: template.startingEquipment.map((i) => ({
+              ...i,
+              id: generateId(),
+              equipped: false,
+            })),
             backstory: template.backgroundStory,
-            appearance: '',
+            appearance: "",
             personality: [],
             progression: [],
             relationships: [],
@@ -354,7 +443,7 @@ export const useCharacterStore = create<CharacterStore>()(
 
       addStoryReference: (characterId, storyReference) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
@@ -364,52 +453,63 @@ export const useCharacterStore = create<CharacterStore>()(
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       removeStoryReference: (characterId, storyId, chapterId) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            storyReferences: character.storyReferences.filter(ref =>
-              ref.storyId !== storyId || (chapterId && ref.chapterId !== chapterId)
+            storyReferences: character.storyReferences.filter(
+              (ref) =>
+                ref.storyId !== storyId ||
+                (chapterId && ref.chapterId !== chapterId),
             ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
       updateStoryReference: (characterId, storyId, updates) =>
         set((state) => {
-          const character = state.characters.find(c => c.id === characterId);
+          const character = state.characters.find((c) => c.id === characterId);
           if (!character) return state;
 
           const updatedCharacter: Character = {
             ...character,
-            storyReferences: character.storyReferences.map(ref =>
-              ref.storyId === storyId ? { ...ref, ...updates } : ref
+            storyReferences: character.storyReferences.map((ref) =>
+              ref.storyId === storyId ? { ...ref, ...updates } : ref,
             ),
             updatedAt: new Date(),
           };
 
           return {
-            characters: state.characters.map(c =>
-              c.id === characterId ? updatedCharacter : c
+            characters: state.characters.map((c) =>
+              c.id === characterId ? updatedCharacter : c,
             ),
-            currentCharacter: state.currentCharacter?.id === characterId ? updatedCharacter : state.currentCharacter,
+            currentCharacter:
+              state.currentCharacter?.id === characterId
+                ? updatedCharacter
+                : state.currentCharacter,
           };
         }),
 
@@ -426,13 +526,17 @@ export const useCharacterStore = create<CharacterStore>()(
 
       removeCrossReference: (crossReferenceId) =>
         set((state) => ({
-          crossReferences: state.crossReferences.filter(ref => ref.id !== crossReferenceId),
+          crossReferences: state.crossReferences.filter(
+            (ref) => ref.id !== crossReferenceId,
+          ),
         })),
 
       getCrossReferences: (sourceId, sourceType) => {
         const state = get();
-        return state.crossReferences.filter(ref =>
-          ref.sourceId === sourceId && (!sourceType || ref.sourceType === sourceType)
+        return state.crossReferences.filter(
+          (ref) =>
+            ref.sourceId === sourceId &&
+            (!sourceType || ref.sourceType === sourceType),
         );
       },
 
@@ -443,16 +547,16 @@ export const useCharacterStore = create<CharacterStore>()(
           templates: [],
           crossReferences: [],
           loading: false,
-          error: null
+          error: null,
         }),
     }),
     {
-      name: 'writers-character-storage',
+      name: "writers-character-storage",
       partialize: (state) => ({
         characters: state.characters,
         templates: state.templates,
         crossReferences: state.crossReferences,
       }),
-    }
-  )
+    },
+  ),
 );

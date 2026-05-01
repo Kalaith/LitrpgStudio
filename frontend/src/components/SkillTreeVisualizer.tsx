@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
-import * as d3 from 'd3';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState, useMemo } from "react";
+import * as d3 from "d3";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface SkillNode {
   id: string;
@@ -13,7 +13,7 @@ export interface SkillNode {
   prerequisites: string[];
   cost: number;
   unlocked: boolean;
-  skillType: 'active' | 'passive' | 'toggle';
+  skillType: "active" | "passive" | "toggle";
   category: string;
   effects: string[];
   children?: SkillNode[];
@@ -27,7 +27,7 @@ export interface SkillTree {
   connections: Array<{
     from: string;
     to: string;
-    type: 'prerequisite' | 'synergy';
+    type: "prerequisite" | "synergy";
   }>;
 }
 
@@ -46,27 +46,28 @@ export default function SkillTreeVisualizer({
   onSkillClick,
   onSkillUpgrade,
   onSkillReset,
-  readonly = false
+  readonly = false,
 }: SkillTreeVisualizerProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillNode | null>(null);
   const [hoveredSkill, setHoveredSkill] = useState<SkillNode | null>(null);
-  const [viewMode, setViewMode] = useState<'tree' | 'grid'>('tree');
-  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [viewMode, setViewMode] = useState<"tree" | "grid">("tree");
+  const [filterCategory, setFilterCategory] = useState<string>("");
   const [zoomLevel, setZoomLevel] = useState(1);
 
   // Get unique categories
-  const categories = useMemo(() =>
-    Array.from(new Set(skillTree.nodes.map(n => n.category))),
-    [skillTree.nodes]
+  const categories = useMemo(
+    () => Array.from(new Set(skillTree.nodes.map((n) => n.category))),
+    [skillTree.nodes],
   );
 
   // Filter nodes based on category
-  const filteredNodes = useMemo(() =>
-    filterCategory
-      ? skillTree.nodes.filter(n => n.category === filterCategory)
-      : skillTree.nodes,
-    [skillTree.nodes, filterCategory]
+  const filteredNodes = useMemo(
+    () =>
+      filterCategory
+        ? skillTree.nodes.filter((n) => n.category === filterCategory)
+        : skillTree.nodes,
+    [skillTree.nodes, filterCategory],
   );
 
   // Check if skill can be upgraded
@@ -75,8 +76,8 @@ export default function SkillTreeVisualizer({
     if (skill.currentLevel >= skill.maxLevel) return false;
 
     // Check prerequisites
-    const hasPrerequisites = skill.prerequisites.every(prereqId => {
-      const prereq = skillTree.nodes.find(n => n.id === prereqId);
+    const hasPrerequisites = skill.prerequisites.every((prereqId) => {
+      const prereq = skillTree.nodes.find((n) => n.id === prereqId);
       return (prereq?.currentLevel ?? 0) > 0;
     });
 
@@ -97,7 +98,8 @@ export default function SkillTreeVisualizer({
     const container = svg.append("g");
 
     // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 3])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
@@ -105,26 +107,36 @@ export default function SkillTreeVisualizer({
 
     svg.call(zoom);
 
-    if (viewMode === 'tree') {
+    if (viewMode === "tree") {
       // Tree layout
-      const treeLayout = d3.tree<SkillNode>()
-        .size([width - margin.left - margin.right, height - margin.top - margin.bottom]);
+      const treeLayout = d3
+        .tree<SkillNode>()
+        .size([
+          width - margin.left - margin.right,
+          height - margin.top - margin.bottom,
+        ]);
 
       // Create hierarchy based on prerequisites
       const root = d3.hierarchy<SkillNode>(
-        createHierarchy(filteredNodes, skillTree.connections)
+        createHierarchy(filteredNodes, skillTree.connections),
       );
 
       const treeData = treeLayout(root);
 
       // Create links (connections)
-      const linkGenerator = d3.linkVertical<d3.HierarchyPointLink<SkillNode>, d3.HierarchyPointNode<SkillNode>>()
+      const linkGenerator = d3
+        .linkVertical<
+          d3.HierarchyPointLink<SkillNode>,
+          d3.HierarchyPointNode<SkillNode>
+        >()
         .x((d) => d.x + margin.left)
         .y((d) => d.y + margin.top);
 
-      container.selectAll(".skill-link")
+      container
+        .selectAll(".skill-link")
         .data(treeData.links())
-        .enter().append("path")
+        .enter()
+        .append("path")
         .attr("class", "skill-link")
         .attr("d", linkGenerator)
         .attr("fill", "none")
@@ -132,23 +144,30 @@ export default function SkillTreeVisualizer({
         .attr("stroke-width", 2);
 
       // Create skill nodes
-      const nodes = container.selectAll(".skill-node")
+      const nodes = container
+        .selectAll(".skill-node")
         .data(treeData.descendants())
-        .enter().append("g")
+        .enter()
+        .append("g")
         .attr("class", "skill-node")
-        .attr("transform", d => `translate(${d.x + margin.left},${d.y + margin.top})`);
+        .attr(
+          "transform",
+          (d) => `translate(${d.x + margin.left},${d.y + margin.top})`,
+        );
 
       // Add circles for skills
-      nodes.append("circle")
+      nodes
+        .append("circle")
         .attr("r", 25)
-        .attr("fill", d => getSkillColor(d.data))
-        .attr("stroke", d => d.data.unlocked ? "#10B981" : "#9CA3AF")
+        .attr("fill", (d) => getSkillColor(d.data))
+        .attr("stroke", (d) => (d.data.unlocked ? "#10B981" : "#9CA3AF"))
         .attr("stroke-width", 3)
         .style("cursor", "pointer");
 
       // Add skill icons/text
-      nodes.append("text")
-        .text(d => d.data.icon || d.data.name.slice(0, 2))
+      nodes
+        .append("text")
+        .text((d) => d.data.icon || d.data.name.slice(0, 2))
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("font-size", "12px")
@@ -157,8 +176,9 @@ export default function SkillTreeVisualizer({
         .style("pointer-events", "none");
 
       // Add skill names below nodes
-      nodes.append("text")
-        .text(d => d.data.name)
+      nodes
+        .append("text")
+        .text((d) => d.data.name)
         .attr("text-anchor", "middle")
         .attr("dy", "3em")
         .attr("font-size", "10px")
@@ -166,14 +186,14 @@ export default function SkillTreeVisualizer({
         .style("pointer-events", "none");
 
       // Add level indicators
-      nodes.append("text")
-        .text(d => `${d.data.currentLevel}/${d.data.maxLevel}`)
+      nodes
+        .append("text")
+        .text((d) => `${d.data.currentLevel}/${d.data.maxLevel}`)
         .attr("text-anchor", "middle")
         .attr("dy", "4.5em")
         .attr("font-size", "9px")
         .attr("fill", "#6B7280")
         .style("pointer-events", "none");
-
     } else {
       // Grid layout
       const gridCols = Math.ceil(Math.sqrt(filteredNodes.length));
@@ -181,9 +201,11 @@ export default function SkillTreeVisualizer({
       const cellWidth = (width - margin.left - margin.right) / gridCols;
       const cellHeight = (height - margin.top - margin.bottom) / gridRows;
 
-      const nodes = container.selectAll(".skill-node")
+      const nodes = container
+        .selectAll(".skill-node")
         .data(filteredNodes)
-        .enter().append("g")
+        .enter()
+        .append("g")
         .attr("class", "skill-node")
         .attr("transform", (d, i) => {
           const row = Math.floor(i / gridCols);
@@ -192,20 +214,22 @@ export default function SkillTreeVisualizer({
         });
 
       // Add rectangles for grid view
-      nodes.append("rect")
+      nodes
+        .append("rect")
         .attr("x", -40)
         .attr("y", -25)
         .attr("width", 80)
         .attr("height", 50)
-        .attr("fill", d => getSkillColor(d))
-        .attr("stroke", d => d.unlocked ? "#10B981" : "#9CA3AF")
+        .attr("fill", (d) => getSkillColor(d))
+        .attr("stroke", (d) => (d.unlocked ? "#10B981" : "#9CA3AF"))
         .attr("stroke-width", 2)
         .attr("rx", 8)
         .style("cursor", "pointer");
 
       // Add skill names
-      nodes.append("text")
-        .text(d => d.name.length > 10 ? d.name.slice(0, 8) + '...' : d.name)
+      nodes
+        .append("text")
+        .text((d) => (d.name.length > 10 ? d.name.slice(0, 8) + "..." : d.name))
         .attr("text-anchor", "middle")
         .attr("dy", "-0.5em")
         .attr("font-size", "10px")
@@ -214,8 +238,9 @@ export default function SkillTreeVisualizer({
         .style("pointer-events", "none");
 
       // Add level indicators
-      nodes.append("text")
-        .text(d => `Lv.${d.currentLevel}/${d.maxLevel}`)
+      nodes
+        .append("text")
+        .text((d) => `Lv.${d.currentLevel}/${d.maxLevel}`)
         .attr("text-anchor", "middle")
         .attr("dy", "1em")
         .attr("font-size", "9px")
@@ -225,12 +250,13 @@ export default function SkillTreeVisualizer({
 
     // Add interactivity
     const getSkillData = (datum: unknown): SkillNode => {
-      return viewMode === 'tree'
+      return viewMode === "tree"
         ? (datum as d3.HierarchyPointNode<SkillNode>).data
         : (datum as SkillNode);
     };
 
-    container.selectAll(".skill-node")
+    container
+      .selectAll(".skill-node")
       .on("click", (_event, d) => {
         const skillData = getSkillData(d);
         setSelectedSkill(skillData);
@@ -246,7 +272,9 @@ export default function SkillTreeVisualizer({
 
     // Tooltip
     if (hoveredSkill) {
-      const tooltip = d3.select("body").append("div")
+      const tooltip = d3
+        .select("body")
+        .append("div")
         .attr("class", "skill-tooltip")
         .style("position", "absolute")
         .style("background", "rgba(0, 0, 0, 0.9)")
@@ -256,23 +284,29 @@ export default function SkillTreeVisualizer({
         .style("font-size", "12px")
         .style("pointer-events", "none")
         .style("z-index", "1000")
-        .style("max-width", "250px")
-        .html(`
+        .style("max-width", "250px").html(`
           <div class="font-bold text-yellow-400">${hoveredSkill.name}</div>
           <div class="text-gray-300 mb-2">${hoveredSkill.description}</div>
           <div class="text-sm">
             <div>Level: ${hoveredSkill.currentLevel}/${hoveredSkill.maxLevel}</div>
             <div>Type: <span class="capitalize">${hoveredSkill.skillType}</span></div>
             <div>Category: ${hoveredSkill.category}</div>
-            ${hoveredSkill.effects.length > 0 ? `<div class="mt-2"><strong>Effects:</strong><br/>${hoveredSkill.effects.slice(0, 3).join('<br/>')}</div>` : ''}
-            ${canUpgradeSkill(hoveredSkill) ? `<div class="text-green-400 mt-2">Click to upgrade (Cost: ${hoveredSkill.cost})</div>` : ''}
+            ${hoveredSkill.effects.length > 0 ? `<div class="mt-2"><strong>Effects:</strong><br/>${hoveredSkill.effects.slice(0, 3).join("<br/>")}</div>` : ""}
+            ${canUpgradeSkill(hoveredSkill) ? `<div class="text-green-400 mt-2">Click to upgrade (Cost: ${hoveredSkill.cost})</div>` : ""}
           </div>
         `);
 
       setTimeout(() => tooltip.remove(), 3000);
     }
-
-  }, [filteredNodes, skillTree, viewMode, zoomLevel, hoveredSkill, availablePoints, readonly]);
+  }, [
+    filteredNodes,
+    skillTree,
+    viewMode,
+    zoomLevel,
+    hoveredSkill,
+    availablePoints,
+    readonly,
+  ]);
 
   const getSkillColor = (skill: SkillNode): string => {
     if (!skill.unlocked) return "#6B7280"; // Gray for locked
@@ -281,42 +315,45 @@ export default function SkillTreeVisualizer({
     return "#10B981"; // Green for partially learned
   };
 
-  const createHierarchy = (nodes: SkillNode[], _connections: SkillTree['connections']): SkillNode => {
+  const createHierarchy = (
+    nodes: SkillNode[],
+    _connections: SkillTree["connections"],
+  ): SkillNode => {
     // Simple hierarchy creation - this could be enhanced
-    const rootNodes = nodes.filter(n => n.prerequisites.length === 0);
+    const rootNodes = nodes.filter((n) => n.prerequisites.length === 0);
 
     if (rootNodes.length === 0) {
       return {
-        id: 'skill-tree-root',
-        name: 'Root',
-        description: 'Skill tree root',
+        id: "skill-tree-root",
+        name: "Root",
+        description: "Skill tree root",
         tier: 0,
         maxLevel: 0,
         currentLevel: 0,
         prerequisites: [],
         cost: 0,
         unlocked: true,
-        skillType: 'passive',
-        category: 'system',
+        skillType: "passive",
+        category: "system",
         effects: [],
-        children: nodes
+        children: nodes,
       };
     }
 
     return {
-      id: 'skill-tree-root',
-      name: 'Skill Tree Root',
-      description: 'Skill tree root',
+      id: "skill-tree-root",
+      name: "Skill Tree Root",
+      description: "Skill tree root",
       tier: 0,
       maxLevel: 0,
       currentLevel: 0,
       prerequisites: [],
       cost: 0,
       unlocked: true,
-      skillType: 'passive',
-      category: 'system',
+      skillType: "passive",
+      category: "system",
       effects: [],
-      children: rootNodes
+      children: rootNodes,
     };
   };
 
@@ -327,7 +364,8 @@ export default function SkillTreeVisualizer({
         <div className="flex items-center space-x-4">
           <h3 className="text-lg font-semibold">{skillTree.name}</h3>
           <span className="text-sm text-gray-600">
-            Available Points: <span className="font-bold text-blue-600">{availablePoints}</span>
+            Available Points:{" "}
+            <span className="font-bold text-blue-600">{availablePoints}</span>
           </span>
         </div>
 
@@ -339,22 +377,25 @@ export default function SkillTreeVisualizer({
             className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded"
           >
             <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
 
           {/* View Mode Toggle */}
           <div className="flex rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
-            {(['tree', 'grid'] as const).map((mode) => (
+            {(["tree", "grid"] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`
                   px-3 py-1 text-sm capitalize
-                  ${viewMode === mode
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  ${
+                    viewMode === mode
+                      ? "bg-blue-500 text-white"
+                      : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                   }
                 `}
               >
@@ -402,7 +443,11 @@ export default function SkillTreeVisualizer({
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-semibold flex items-center">
-                    {selectedSkill.icon && <span className="mr-2 text-2xl">{selectedSkill.icon}</span>}
+                    {selectedSkill.icon && (
+                      <span className="mr-2 text-2xl">
+                        {selectedSkill.icon}
+                      </span>
+                    )}
                     {selectedSkill.name}
                   </h3>
                   <button
@@ -416,14 +461,20 @@ export default function SkillTreeVisualizer({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-gray-700 dark:text-gray-300">Description</h4>
-                      <p className="text-gray-600 dark:text-gray-400">{selectedSkill.description}</p>
+                      <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                        Description
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {selectedSkill.description}
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-medium">Type:</span>
-                        <span className="ml-2 capitalize">{selectedSkill.skillType}</span>
+                        <span className="ml-2 capitalize">
+                          {selectedSkill.skillType}
+                        </span>
                       </div>
                       <div>
                         <span className="font-medium">Category:</span>
@@ -431,7 +482,9 @@ export default function SkillTreeVisualizer({
                       </div>
                       <div>
                         <span className="font-medium">Level:</span>
-                        <span className="ml-2">{selectedSkill.currentLevel}/{selectedSkill.maxLevel}</span>
+                        <span className="ml-2">
+                          {selectedSkill.currentLevel}/{selectedSkill.maxLevel}
+                        </span>
                       </div>
                       <div>
                         <span className="font-medium">Tier:</span>
@@ -441,17 +494,21 @@ export default function SkillTreeVisualizer({
 
                     {selectedSkill.prerequisites.length > 0 && (
                       <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Prerequisites</h4>
+                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Prerequisites
+                        </h4>
                         <div className="flex flex-wrap gap-2">
-                          {selectedSkill.prerequisites.map(prereqId => {
-                            const prereq = skillTree.nodes.find(n => n.id === prereqId);
+                          {selectedSkill.prerequisites.map((prereqId) => {
+                            const prereq = skillTree.nodes.find(
+                              (n) => n.id === prereqId,
+                            );
                             return prereq ? (
                               <span
                                 key={prereqId}
                                 className={`px-2 py-1 text-xs rounded-full ${
                                   prereq.currentLevel > 0
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
                                 }`}
                               >
                                 {prereq.name}
@@ -466,7 +523,9 @@ export default function SkillTreeVisualizer({
                   <div className="space-y-4">
                     {selectedSkill.effects.length > 0 && (
                       <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Effects</h4>
+                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Effects
+                        </h4>
                         <ul className="list-disc list-inside text-sm space-y-1 text-gray-600 dark:text-gray-400">
                           {selectedSkill.effects.map((effect, index) => (
                             <li key={index}>{effect}</li>
@@ -482,8 +541,8 @@ export default function SkillTreeVisualizer({
                           disabled={!canUpgradeSkill(selectedSkill)}
                           className={`px-4 py-2 rounded-md font-medium ${
                             canUpgradeSkill(selectedSkill)
-                              ? 'bg-blue-600 text-white hover:bg-blue-700'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              ? "bg-blue-600 text-white hover:bg-blue-700"
+                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
                           }`}
                         >
                           Upgrade (Cost: {selectedSkill.cost})

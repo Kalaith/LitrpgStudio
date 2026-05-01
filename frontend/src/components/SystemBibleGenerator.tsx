@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type {
   SystemBible,
   GameSystemDefinition,
@@ -13,19 +13,21 @@ import type {
   CharacterSystem,
   ProgressionSystem,
   EconomySystem,
-  SocialSystem
-} from '../types/systemBible';
+  SocialSystem,
+} from "../types/systemBible";
 
 interface SystemBibleGeneratorProps {
   onGenerate?: (systemBible: SystemBible) => void;
 }
 
-export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGenerate }) => {
+export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({
+  onGenerate,
+}) => {
   const [activeStep, setActiveStep] = useState(0);
   const [systemBible, setSystemBible] = useState<Partial<SystemBible>>({
-    name: '',
-    version: '1.0',
-    description: '',
+    name: "",
+    version: "1.0",
+    description: "",
     gameSystem: {} as GameSystemDefinition,
   });
 
@@ -33,14 +35,14 @@ export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGe
   const [progress, setProgress] = useState(0);
 
   const steps = [
-    { id: 'basic', title: 'Basic Info', icon: '📋' },
-    { id: 'core', title: 'Core System', icon: '⚙️' },
-    { id: 'combat', title: 'Combat', icon: '⚔️' },
-    { id: 'magic', title: 'Magic', icon: '✨' },
-    { id: 'skills', title: 'Skills', icon: '📚' },
-    { id: 'items', title: 'Items', icon: '🎒' },
-    { id: 'characters', title: 'Characters', icon: '👤' },
-    { id: 'generate', title: 'Generate', icon: '🔄' }
+    { id: "basic", title: "Basic Info", icon: "📋" },
+    { id: "core", title: "Core System", icon: "⚙️" },
+    { id: "combat", title: "Combat", icon: "⚔️" },
+    { id: "magic", title: "Magic", icon: "✨" },
+    { id: "skills", title: "Skills", icon: "📚" },
+    { id: "items", title: "Items", icon: "🎒" },
+    { id: "characters", title: "Characters", icon: "👤" },
+    { id: "generate", title: "Generate", icon: "🔄" },
   ];
 
   const handleGenerate = async () => {
@@ -51,20 +53,20 @@ export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGe
     const totalSteps = 10;
     for (let i = 0; i <= totalSteps; i++) {
       setProgress((i / totalSteps) * 100);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     const completeBible: SystemBible = {
       id: crypto.randomUUID(),
-      name: systemBible.name || 'Untitled System',
-      version: systemBible.version || '1.0',
-      description: systemBible.description || '',
+      name: systemBible.name || "Untitled System",
+      version: systemBible.version || "1.0",
+      description: systemBible.description || "",
       gameSystem: generateCompleteGameSystem(systemBible.gameSystem!),
       documentation: generateDocumentation(),
       templates: generateTemplates(),
       exportFormats: generateExportFormats(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     setIsGenerating(false);
@@ -73,22 +75,54 @@ export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGe
 
   const renderStepContent = () => {
     switch (steps[activeStep].id) {
-      case 'basic':
-        return <BasicInfoStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'core':
-        return <CoreSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'combat':
-        return <CombatSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'magic':
-        return <MagicSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'skills':
-        return <SkillSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'items':
-        return <ItemSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'characters':
-        return <CharacterSystemStep systemBible={systemBible} onChange={setSystemBible} />;
-      case 'generate':
-        return <GenerateStep onGenerate={handleGenerate} isGenerating={isGenerating} progress={progress} />;
+      case "basic":
+        return (
+          <BasicInfoStep systemBible={systemBible} onChange={setSystemBible} />
+        );
+      case "core":
+        return (
+          <CoreSystemStep systemBible={systemBible} onChange={setSystemBible} />
+        );
+      case "combat":
+        return (
+          <CombatSystemStep
+            systemBible={systemBible}
+            onChange={setSystemBible}
+          />
+        );
+      case "magic":
+        return (
+          <MagicSystemStep
+            systemBible={systemBible}
+            onChange={setSystemBible}
+          />
+        );
+      case "skills":
+        return (
+          <SkillSystemStep
+            systemBible={systemBible}
+            onChange={setSystemBible}
+          />
+        );
+      case "items":
+        return (
+          <ItemSystemStep systemBible={systemBible} onChange={setSystemBible} />
+        );
+      case "characters":
+        return (
+          <CharacterSystemStep
+            systemBible={systemBible}
+            onChange={setSystemBible}
+          />
+        );
+      case "generate":
+        return (
+          <GenerateStep
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+            progress={progress}
+          />
+        );
       default:
         return null;
     }
@@ -111,32 +145,38 @@ export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGe
           <div
             key={step.id}
             className={`flex flex-col items-center min-w-0 flex-1 ${
-              index < steps.length - 1 ? 'relative' : ''
+              index < steps.length - 1 ? "relative" : ""
             }`}
           >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors cursor-pointer ${
                 index === activeStep
-                  ? 'bg-blue-500 text-white'
+                  ? "bg-blue-500 text-white"
                   : index < activeStep
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
               }`}
               onClick={() => setActiveStep(index)}
             >
               {step.icon}
             </div>
-            <span className={`mt-2 text-xs text-center font-medium ${
-              index === activeStep
-                ? 'text-blue-600 dark:text-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}>
+            <span
+              className={`mt-2 text-xs text-center font-medium ${
+                index === activeStep
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
+            >
               {step.title}
             </span>
             {index < steps.length - 1 && (
-              <div className={`absolute top-5 left-1/2 w-full h-0.5 -translate-y-1/2 ${
-                index < activeStep ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-              }`} />
+              <div
+                className={`absolute top-5 left-1/2 w-full h-0.5 -translate-y-1/2 ${
+                  index < activeStep
+                    ? "bg-green-500"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              />
             )}
           </div>
         ))}
@@ -167,11 +207,13 @@ export const SystemBibleGenerator: React.FC<SystemBibleGeneratorProps> = ({ onGe
             Previous
           </button>
           <button
-            onClick={() => setActiveStep(Math.min(steps.length - 1, activeStep + 1))}
+            onClick={() =>
+              setActiveStep(Math.min(steps.length - 1, activeStep + 1))
+            }
             disabled={activeStep === steps.length - 1}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
           >
-            {activeStep === steps.length - 2 ? 'Generate' : 'Next'}
+            {activeStep === steps.length - 2 ? "Generate" : "Next"}
           </button>
         </div>
       )}
@@ -185,7 +227,9 @@ const BasicInfoStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible, onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Basic System Information</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Basic System Information
+    </h3>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
@@ -194,7 +238,7 @@ const BasicInfoStep: React.FC<{
         </label>
         <input
           type="text"
-          value={systemBible.name || ''}
+          value={systemBible.name || ""}
           onChange={(e) => onChange({ ...systemBible, name: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="e.g., Arcane Ascension RPG"
@@ -207,8 +251,10 @@ const BasicInfoStep: React.FC<{
         </label>
         <input
           type="text"
-          value={systemBible.version || ''}
-          onChange={(e) => onChange({ ...systemBible, version: e.target.value })}
+          value={systemBible.version || ""}
+          onChange={(e) =>
+            onChange({ ...systemBible, version: e.target.value })
+          }
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="1.0"
         />
@@ -220,8 +266,10 @@ const BasicInfoStep: React.FC<{
         System Description
       </label>
       <textarea
-        value={systemBible.description || ''}
-        onChange={(e) => onChange({ ...systemBible, description: e.target.value })}
+        value={systemBible.description || ""}
+        onChange={(e) =>
+          onChange({ ...systemBible, description: e.target.value })
+        }
         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         rows={4}
         placeholder="Describe your game system, its themes, and core concepts..."
@@ -229,11 +277,14 @@ const BasicInfoStep: React.FC<{
     </div>
 
     <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-      <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">What is a System Bible?</h4>
+      <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+        What is a System Bible?
+      </h4>
       <p className="text-blue-700 dark:text-blue-200 text-sm">
-        A System Bible is comprehensive documentation that defines all rules, mechanics, and systems
-        in your game world. It ensures consistency across your story and helps readers understand
-        the underlying game mechanics that drive your narrative.
+        A System Bible is comprehensive documentation that defines all rules,
+        mechanics, and systems in your game world. It ensures consistency across
+        your story and helps readers understand the underlying game mechanics
+        that drive your narrative.
       </p>
     </div>
   </div>
@@ -244,11 +295,11 @@ const CoreSystemStep: React.FC<{
   systemBible: Partial<SystemBible>;
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible, onChange }) => {
-  const defaultDice: CoreSystem['dice'] = {
-    type: 'd20',
-    description: '',
+  const defaultDice: CoreSystem["dice"] = {
+    type: "d20",
+    description: "",
     modifiers: [],
-    criticals: []
+    criticals: [],
   };
 
   const updateCoreSystem = (updates: Partial<CoreSystem>) => {
@@ -256,14 +307,16 @@ const CoreSystemStep: React.FC<{
       ...systemBible,
       gameSystem: {
         ...systemBible.gameSystem!,
-        core: { ...systemBible.gameSystem?.core, ...updates } as CoreSystem
-      }
+        core: { ...systemBible.gameSystem?.core, ...updates } as CoreSystem,
+      },
     });
   };
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Core Game System</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+        Core Game System
+      </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -271,7 +324,7 @@ const CoreSystemStep: React.FC<{
             Genre
           </label>
           <select
-            value={systemBible.gameSystem?.core?.genre || ''}
+            value={systemBible.gameSystem?.core?.genre || ""}
             onChange={(e) => updateCoreSystem({ genre: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
@@ -290,8 +343,12 @@ const CoreSystemStep: React.FC<{
             Complexity Level
           </label>
           <select
-            value={systemBible.gameSystem?.core?.complexity || ''}
-            onChange={(e) => updateCoreSystem({ complexity: e.target.value as CoreSystem['complexity'] })}
+            value={systemBible.gameSystem?.core?.complexity || ""}
+            onChange={(e) =>
+              updateCoreSystem({
+                complexity: e.target.value as CoreSystem["complexity"],
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">Select Complexity</option>
@@ -307,7 +364,7 @@ const CoreSystemStep: React.FC<{
           Core Game Loop
         </label>
         <textarea
-          value={systemBible.gameSystem?.core?.coreLoop || ''}
+          value={systemBible.gameSystem?.core?.coreLoop || ""}
           onChange={(e) => updateCoreSystem({ coreLoop: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           rows={3}
@@ -316,20 +373,24 @@ const CoreSystemStep: React.FC<{
       </div>
 
       <div>
-        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Dice System</h4>
+        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+          Dice System
+        </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Dice Type
             </label>
             <select
-              value={systemBible.gameSystem?.core?.dice?.type || ''}
-              onChange={(e) => updateCoreSystem({
-                dice: {
-                  ...(systemBible.gameSystem?.core?.dice || defaultDice),
-                  type: e.target.value as CoreSystem['dice']['type']
-                }
-              })}
+              value={systemBible.gameSystem?.core?.dice?.type || ""}
+              onChange={(e) =>
+                updateCoreSystem({
+                  dice: {
+                    ...(systemBible.gameSystem?.core?.dice || defaultDice),
+                    type: e.target.value as CoreSystem["dice"]["type"],
+                  },
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">Select Dice System</option>
@@ -347,13 +408,15 @@ const CoreSystemStep: React.FC<{
             </label>
             <input
               type="text"
-              value={systemBible.gameSystem?.core?.dice?.description || ''}
-              onChange={(e) => updateCoreSystem({
-                dice: {
-                  ...(systemBible.gameSystem?.core?.dice || defaultDice),
-                  description: e.target.value
-                }
-              })}
+              value={systemBible.gameSystem?.core?.dice?.description || ""}
+              onChange={(e) =>
+                updateCoreSystem({
+                  dice: {
+                    ...(systemBible.gameSystem?.core?.dice || defaultDice),
+                    description: e.target.value,
+                  },
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="e.g., Roll 1d20 + modifier vs DC"
             />
@@ -375,16 +438,16 @@ const CombatSystemStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Combat System</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Combat System
+    </h3>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Initiative System
         </label>
-        <select
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
+        <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           <option value="">Select Initiative Type</option>
           <option value="dexterity">Dexterity-based</option>
           <option value="roll">Roll + Modifier</option>
@@ -397,9 +460,7 @@ const CombatSystemStep: React.FC<{
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Armor System
         </label>
-        <select
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
+        <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           <option value="">Select Armor Type</option>
           <option value="AC">Armor Class (harder to hit)</option>
           <option value="damage_reduction">Damage Reduction</option>
@@ -420,16 +481,16 @@ const MagicSystemStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Magic System</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Magic System
+    </h3>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Magic Type
         </label>
-        <select
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
+        <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           <option value="">Select Magic System</option>
           <option value="vancian">Vancian (Prepared Spells)</option>
           <option value="mana">Mana Points</option>
@@ -444,9 +505,7 @@ const MagicSystemStep: React.FC<{
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Magic Rarity
         </label>
-        <select
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
+        <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           <option value="common">Common (Everyone can use magic)</option>
           <option value="uncommon">Uncommon (Some people can use magic)</option>
           <option value="rare">Rare (Few people can use magic)</option>
@@ -466,15 +525,15 @@ const SkillSystemStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Skill System</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Skill System
+    </h3>
 
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Skill Structure
       </label>
-      <select
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-      >
+      <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
         <option value="">Select Skill System</option>
         <option value="list">Skill List (Fixed skills)</option>
         <option value="tree">Skill Tree (Prerequisites)</option>
@@ -494,7 +553,9 @@ const ItemSystemStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Item System</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Item System
+    </h3>
 
     <ItemCategoryBuilder />
     <CraftingSystemBuilder />
@@ -508,7 +569,9 @@ const CharacterSystemStep: React.FC<{
   onChange: (bible: Partial<SystemBible>) => void;
 }> = ({ systemBible: _systemBible, onChange: _onChange }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Character System</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Character System
+    </h3>
 
     <CharacterCreationBuilder />
     <CharacterClassBuilder />
@@ -523,12 +586,16 @@ const GenerateStep: React.FC<{
   progress: number;
 }> = ({ onGenerate, isGenerating, progress }) => (
   <div className="text-center space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Generate System Bible</h3>
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+      Generate System Bible
+    </h3>
 
     {!isGenerating ? (
       <>
         <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
-          <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">Ready to Generate</h4>
+          <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
+            Ready to Generate
+          </h4>
           <p className="text-green-700 dark:text-green-200 text-sm mb-4">
             Your system bible will include:
           </p>
@@ -552,14 +619,18 @@ const GenerateStep: React.FC<{
       <div className="space-y-4">
         <div className="w-32 h-32 mx-auto border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
         <div>
-          <h4 className="font-medium text-gray-900 dark:text-white mb-2">Generating Documentation...</h4>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+            Generating Documentation...
+          </h4>
           <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
             <div
               className="bg-blue-500 h-2 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{Math.round(progress)}% complete</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {Math.round(progress)}% complete
+          </p>
         </div>
       </div>
     )}
@@ -571,33 +642,48 @@ const AttributeBuilder: React.FC<{
   attributes: AttributeDefinition[];
   onChange: (attributes: AttributeDefinition[]) => void;
 }> = ({ attributes, onChange }) => {
-  const [newAttribute, setNewAttribute] = useState({ name: '', abbreviation: '', description: '' });
+  const [newAttribute, setNewAttribute] = useState({
+    name: "",
+    abbreviation: "",
+    description: "",
+  });
 
   const addAttribute = () => {
     if (newAttribute.name) {
       const attribute: AttributeDefinition = {
         id: crypto.randomUUID(),
         name: newAttribute.name,
-        abbreviation: newAttribute.abbreviation || newAttribute.name.slice(0, 3).toUpperCase(),
+        abbreviation:
+          newAttribute.abbreviation ||
+          newAttribute.name.slice(0, 3).toUpperCase(),
         description: newAttribute.description,
         range: { min: 1, max: 100 },
         derivedStats: [],
         useIn: [],
       };
       onChange([...attributes, attribute]);
-      setNewAttribute({ name: '', abbreviation: '', description: '' });
+      setNewAttribute({ name: "", abbreviation: "", description: "" });
     }
   };
 
   return (
     <div>
-      <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Attributes</h4>
+      <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+        Attributes
+      </h4>
       <div className="space-y-3">
         {attributes.map((attr, index) => (
-          <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div
+            key={index}
+            className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+          >
             <div className="flex-1">
-              <div className="font-medium text-gray-900 dark:text-white">{attr.name}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">{attr.description}</div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                {attr.name}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {attr.description}
+              </div>
             </div>
             <button
               onClick={() => onChange(attributes.filter((_, i) => i !== index))}
@@ -613,14 +699,18 @@ const AttributeBuilder: React.FC<{
         <input
           type="text"
           value={newAttribute.name}
-          onChange={(e) => setNewAttribute({ ...newAttribute, name: e.target.value })}
+          onChange={(e) =>
+            setNewAttribute({ ...newAttribute, name: e.target.value })
+          }
           className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="Attribute name (e.g., Strength)"
         />
         <input
           type="text"
           value={newAttribute.description}
-          onChange={(e) => setNewAttribute({ ...newAttribute, description: e.target.value })}
+          onChange={(e) =>
+            setNewAttribute({ ...newAttribute, description: e.target.value })
+          }
           className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="Description"
         />
@@ -636,21 +726,63 @@ const AttributeBuilder: React.FC<{
 };
 
 // Placeholder components for other builders
-const DamageTypeBuilder: React.FC = () => <div className="text-gray-500">Damage types will be configured here...</div>;
-const ActionSystemBuilder: React.FC = () => <div className="text-gray-500">Action system will be configured here...</div>;
-const MagicSchoolBuilder: React.FC = () => <div className="text-gray-500">Magic schools will be configured here...</div>;
-const SpellComponentBuilder: React.FC = () => <div className="text-gray-500">Spell components will be configured here...</div>;
-const SkillListBuilder: React.FC = () => <div className="text-gray-500">Skill list will be configured here...</div>;
-const SkillAdvancementBuilder: React.FC = () => <div className="text-gray-500">Skill advancement will be configured here...</div>;
-const ItemCategoryBuilder: React.FC = () => <div className="text-gray-500">Item categories will be configured here...</div>;
-const CraftingSystemBuilder: React.FC = () => <div className="text-gray-500">Crafting system will be configured here...</div>;
-const EnchantmentSystemBuilder: React.FC = () => <div className="text-gray-500">Enchantment system will be configured here...</div>;
-const CharacterCreationBuilder: React.FC = () => <div className="text-gray-500">Character creation will be configured here...</div>;
-const CharacterClassBuilder: React.FC = () => <div className="text-gray-500">Character classes will be configured here...</div>;
-const CharacterRaceBuilder: React.FC = () => <div className="text-gray-500">Character races will be configured here...</div>;
+const DamageTypeBuilder: React.FC = () => (
+  <div className="text-gray-500">Damage types will be configured here...</div>
+);
+const ActionSystemBuilder: React.FC = () => (
+  <div className="text-gray-500">Action system will be configured here...</div>
+);
+const MagicSchoolBuilder: React.FC = () => (
+  <div className="text-gray-500">Magic schools will be configured here...</div>
+);
+const SpellComponentBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Spell components will be configured here...
+  </div>
+);
+const SkillListBuilder: React.FC = () => (
+  <div className="text-gray-500">Skill list will be configured here...</div>
+);
+const SkillAdvancementBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Skill advancement will be configured here...
+  </div>
+);
+const ItemCategoryBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Item categories will be configured here...
+  </div>
+);
+const CraftingSystemBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Crafting system will be configured here...
+  </div>
+);
+const EnchantmentSystemBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Enchantment system will be configured here...
+  </div>
+);
+const CharacterCreationBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Character creation will be configured here...
+  </div>
+);
+const CharacterClassBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Character classes will be configured here...
+  </div>
+);
+const CharacterRaceBuilder: React.FC = () => (
+  <div className="text-gray-500">
+    Character races will be configured here...
+  </div>
+);
 
 // Helper functions for generating complete system data
-const generateCompleteGameSystem = (partial: Partial<GameSystemDefinition>): GameSystemDefinition => {
+const generateCompleteGameSystem = (
+  partial: Partial<GameSystemDefinition>,
+): GameSystemDefinition => {
   const emptyCombat = {} as unknown as CombatSystem;
   const emptyMagic = {} as unknown as MagicSystem;
   const emptySkills = {} as unknown as SkillSystem;
@@ -663,13 +795,18 @@ const generateCompleteGameSystem = (partial: Partial<GameSystemDefinition>): Gam
   // This would generate a complete game system based on the partial data provided
   return {
     core: partial.core || {
-      name: 'Basic System',
-      genre: 'fantasy',
-      complexity: 'moderate',
+      name: "Basic System",
+      genre: "fantasy",
+      complexity: "moderate",
       baseRules: [],
-      dice: { type: 'd20', description: 'Roll 1d20 + modifier', modifiers: [], criticals: [] },
+      dice: {
+        type: "d20",
+        description: "Roll 1d20 + modifier",
+        modifiers: [],
+        criticals: [],
+      },
       attributes: [],
-      coreLoop: 'Standard gameplay loop'
+      coreLoop: "Standard gameplay loop",
     },
     combat: emptyCombat,
     magic: emptyMagic,
@@ -678,63 +815,63 @@ const generateCompleteGameSystem = (partial: Partial<GameSystemDefinition>): Gam
     character: emptyCharacter,
     progression: emptyProgression,
     economy: emptyEconomy,
-    social: emptySocial
+    social: emptySocial,
   };
 };
 
 const generateDocumentation = () => ({
   quickReference: { sections: [], tables: [], formulas: [] },
   playerGuide: {
-    introduction: '',
-    characterCreation: '',
-    basicRules: '',
-    combat: '',
-    magic: '',
-    advancement: '',
-    equipment: '',
-    appendices: []
+    introduction: "",
+    characterCreation: "",
+    basicRules: "",
+    combat: "",
+    magic: "",
+    advancement: "",
+    equipment: "",
+    appendices: [],
   },
   gmGuide: {
-    introduction: '',
-    worldBuilding: '',
-    npcs: '',
-    encounters: '',
-    campaigns: '',
-    customization: '',
-    troubleshooting: '',
-    resources: []
+    introduction: "",
+    worldBuilding: "",
+    npcs: "",
+    encounters: "",
+    campaigns: "",
+    customization: "",
+    troubleshooting: "",
+    resources: [],
   },
   examples: [],
-  appendices: []
+  appendices: [],
 });
 
 const generateTemplates = () => [];
 
 const generateExportFormats = (): ExportFormat[] => [
   {
-    name: 'PDF',
-    description: 'Professional PDF document',
-    fileExtension: 'pdf',
-    mimeType: 'application/pdf',
+    name: "PDF",
+    description: "Professional PDF document",
+    fileExtension: "pdf",
+    mimeType: "application/pdf",
     options: [],
-    template: ''
+    template: "",
   },
   {
-    name: 'HTML',
-    description: 'Web-friendly HTML document',
-    fileExtension: 'html',
-    mimeType: 'text/html',
+    name: "HTML",
+    description: "Web-friendly HTML document",
+    fileExtension: "html",
+    mimeType: "text/html",
     options: [],
-    template: ''
+    template: "",
   },
   {
-    name: 'Markdown',
-    description: 'Markdown format for easy editing',
-    fileExtension: 'md',
-    mimeType: 'text/markdown',
+    name: "Markdown",
+    description: "Markdown format for easy editing",
+    fileExtension: "md",
+    mimeType: "text/markdown",
     options: [],
-    template: ''
-  }
+    template: "",
+  },
 ];
 
 export default SystemBibleGenerator;

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type {
   LootTable,
   LootEntry,
@@ -8,37 +8,43 @@ import type {
   LootItemRarity,
   TestResult,
   LootRollResult,
-  GeneratedItem
-} from '../types/lootTable';
+  GeneratedItem,
+} from "../types/lootTable";
 
 interface LootTableDesignerProps {
   onSave?: (table: LootTable) => void;
 }
 
-type LootDesignerTab = 'design' | 'test' | 'balance' | 'export';
+type LootDesignerTab = "design" | "test" | "balance" | "export";
 
-const lootDesignerTabs: Array<{ id: LootDesignerTab; label: string; icon: string }> = [
-  { id: 'design', label: 'Design', icon: '🎨' },
-  { id: 'test', label: 'Test & Roll', icon: '🎲' },
-  { id: 'balance', label: 'Balance Analysis', icon: '⚖️' },
-  { id: 'export', label: 'Export', icon: '📤' }
+const lootDesignerTabs: Array<{
+  id: LootDesignerTab;
+  label: string;
+  icon: string;
+}> = [
+  { id: "design", label: "Design", icon: "🎨" },
+  { id: "test", label: "Test & Roll", icon: "🎲" },
+  { id: "balance", label: "Balance Analysis", icon: "⚖️" },
+  { id: "export", label: "Export", icon: "📤" },
 ];
 
-export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) => {
-  const [activeTab, setActiveTab] = useState<LootDesignerTab>('design');
+export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({
+  onSave,
+}) => {
+  const [activeTab, setActiveTab] = useState<LootDesignerTab>("design");
   const [lootTable, setLootTable] = useState<Partial<LootTable>>({
-    name: 'New Loot Table',
-    description: '',
-    category: 'monster',
-    type: 'weighted',
+    name: "New Loot Table",
+    description: "",
+    category: "monster",
+    type: "weighted",
     entries: [],
     conditions: [],
     modifiers: [],
     metadata: {
-      version: '1.0',
-      author: '',
+      version: "1.0",
+      author: "",
       tags: [],
-      difficulty: 'normal',
+      difficulty: "normal",
       recommendedLevel: { min: 1, max: 10, optimal: 5 },
       balanceScore: 0,
       totalWeight: 0,
@@ -52,12 +58,12 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
           epic: 0,
           legendary: 0,
           artifact: 0,
-          unique: 0
+          unique: 0,
         },
-        typeDistribution: {}
+        typeDistribution: {},
       },
-      testResults: []
-    }
+      testResults: [],
+    },
   });
 
   const [testResults, setTestResults] = useState<TestResult[]>([]);
@@ -66,29 +72,35 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
   const [showEntryModal, setShowEntryModal] = useState(false);
 
   const totalWeight = useMemo(() => {
-    return lootTable.entries?.reduce((sum, entry) => sum + entry.probability.weight, 0) || 0;
+    return (
+      lootTable.entries?.reduce(
+        (sum, entry) => sum + entry.probability.weight,
+        0,
+      ) || 0
+    );
   }, [lootTable.entries]);
 
   const handleAddEntry = (entry: LootEntry) => {
-    setLootTable(prev => ({
+    setLootTable((prev) => ({
       ...prev,
-      entries: [...(prev.entries || []), entry]
+      entries: [...(prev.entries || []), entry],
     }));
   };
 
   const handleUpdateEntry = (entryId: string, updates: Partial<LootEntry>) => {
-    setLootTable(prev => ({
+    setLootTable((prev) => ({
       ...prev,
-      entries: prev.entries?.map(entry =>
-        entry.id === entryId ? { ...entry, ...updates } : entry
-      ) || []
+      entries:
+        prev.entries?.map((entry) =>
+          entry.id === entryId ? { ...entry, ...updates } : entry,
+        ) || [],
     }));
   };
 
   const handleDeleteEntry = (entryId: string) => {
-    setLootTable(prev => ({
+    setLootTable((prev) => ({
       ...prev,
-      entries: prev.entries?.filter(entry => entry.id !== entryId) || []
+      entries: prev.entries?.filter((entry) => entry.id !== entryId) || [],
     }));
   };
 
@@ -102,7 +114,7 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
 
       // Add delay for visual effect
       if (i % 10 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
     }
 
@@ -112,16 +124,16 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
       sampleSize: iterations,
       results,
       statistics: calculateStatistics(results),
-      balanceAnalysis: analyzeBalance(results)
+      balanceAnalysis: analyzeBalance(results),
     };
 
-    setTestResults(prev => [testResult, ...prev.slice(0, 9)]);
+    setTestResults((prev) => [testResult, ...prev.slice(0, 9)]);
     setIsRolling(false);
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'design':
+      case "design":
         return (
           <DesignTab
             lootTable={lootTable}
@@ -135,7 +147,7 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
             totalWeight={totalWeight}
           />
         );
-      case 'test':
+      case "test":
         return (
           <TestTab
             lootTable={lootTable}
@@ -144,9 +156,9 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
             onRoll={rollLootTable}
           />
         );
-      case 'balance':
+      case "balance":
         return <BalanceTab lootTable={lootTable} testResults={testResults} />;
-      case 'export':
+      case "export":
         return <ExportTab lootTable={lootTable} />;
       default:
         return null;
@@ -170,7 +182,12 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
           <div className="flex items-center gap-3">
             <select
               value={lootTable.category}
-              onChange={(e) => setLootTable(prev => ({ ...prev, category: e.target.value as LootCategory }))}
+              onChange={(e) =>
+                setLootTable((prev) => ({
+                  ...prev,
+                  category: e.target.value as LootCategory,
+                }))
+              }
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="monster">Monster Drop</option>
@@ -199,8 +216,8 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
               <span>{tab.icon}</span>
@@ -233,7 +250,10 @@ export const LootTableDesigner: React.FC<LootTableDesignerProps> = ({ onSave }) 
             if (selectedEntry) {
               handleUpdateEntry(selectedEntry.id, entry);
             } else {
-              handleAddEntry({ ...entry, id: crypto.randomUUID() } as LootEntry);
+              handleAddEntry({
+                ...entry,
+                id: crypto.randomUUID(),
+              } as LootEntry);
             }
             setShowEntryModal(false);
             setSelectedEntry(null);
@@ -256,7 +276,14 @@ const DesignTab: React.FC<{
   onEditEntry: (entry: LootEntry) => void;
   onDeleteEntry: (entryId: string) => void;
   totalWeight: number;
-}> = ({ lootTable, onUpdate, onAddEntry, onEditEntry, onDeleteEntry, totalWeight }) => (
+}> = ({
+  lootTable,
+  onUpdate,
+  onAddEntry,
+  onEditEntry,
+  onDeleteEntry,
+  totalWeight,
+}) => (
   <div className="space-y-6">
     {/* Basic Settings */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -266,7 +293,7 @@ const DesignTab: React.FC<{
         </label>
         <input
           type="text"
-          value={lootTable.name || ''}
+          value={lootTable.name || ""}
           onChange={(e) => onUpdate({ ...lootTable, name: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
@@ -278,7 +305,9 @@ const DesignTab: React.FC<{
         </label>
         <select
           value={lootTable.type}
-          onChange={(e) => onUpdate({ ...lootTable, type: e.target.value as LootTableType })}
+          onChange={(e) =>
+            onUpdate({ ...lootTable, type: e.target.value as LootTableType })
+          }
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         >
           <option value="simple">Simple (Equal chances)</option>
@@ -296,8 +325,10 @@ const DesignTab: React.FC<{
         Description
       </label>
       <textarea
-        value={lootTable.description || ''}
-        onChange={(e) => onUpdate({ ...lootTable, description: e.target.value })}
+        value={lootTable.description || ""}
+        onChange={(e) =>
+          onUpdate({ ...lootTable, description: e.target.value })
+        }
         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         rows={3}
         placeholder="Describe when and how this loot table is used..."
@@ -307,7 +338,9 @@ const DesignTab: React.FC<{
     {/* Loot Entries */}
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Loot Entries</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Loot Entries
+        </h3>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Total Weight: {totalWeight}
@@ -336,7 +369,9 @@ const DesignTab: React.FC<{
       ) : (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
           <p className="text-lg mb-2">No loot entries yet</p>
-          <p className="text-sm mb-4">Add your first loot entry to get started</p>
+          <p className="text-sm mb-4">
+            Add your first loot entry to get started
+          </p>
           <button
             onClick={onAddEntry}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -362,7 +397,9 @@ const TestTab: React.FC<{
     <div className="space-y-6">
       {/* Roll Controls */}
       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Test Rolls</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Test Rolls
+        </h3>
         <div className="flex items-center gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -387,7 +424,7 @@ const TestTab: React.FC<{
               disabled={isRolling || !lootTable.entries?.length}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isRolling ? 'Rolling...' : 'Roll Table'}
+              {isRolling ? "Rolling..." : "Roll Table"}
             </button>
           </div>
         </div>
@@ -395,14 +432,18 @@ const TestTab: React.FC<{
 
       {/* Single Roll Result */}
       <div>
-        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Single Roll Test</h4>
+        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">
+          Single Roll Test
+        </h4>
         <SingleRollTest lootTable={lootTable} />
       </div>
 
       {/* Test Results */}
       {testResults.length > 0 && (
         <div>
-          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Test Results History</h4>
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">
+            Test Results History
+          </h4>
           <div className="space-y-4">
             {testResults.map((result) => (
               <TestResultCard key={result.id} result={result} />
@@ -420,7 +461,9 @@ const BalanceTab: React.FC<{
   testResults: TestResult[];
 }> = ({ lootTable, testResults }) => (
   <div className="space-y-6">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Balance Analysis</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Balance Analysis
+    </h3>
 
     {/* Probability Distribution */}
     <ProbabilityChart entries={lootTable.entries || []} />
@@ -438,20 +481,32 @@ const ExportTab: React.FC<{
   lootTable: Partial<LootTable>;
 }> = ({ lootTable: _lootTable }) => (
   <div className="space-y-6">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Export Options</h3>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      Export Options
+    </h3>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {[
-        { format: 'JSON', description: 'Standard JSON format for web applications' },
-        { format: 'XML', description: 'XML format for enterprise systems' },
-        { format: 'CSV', description: 'Spreadsheet-compatible format' },
-        { format: 'SQL', description: 'Database insert statements' },
-        { format: 'Code', description: 'Generate code for your game engine' },
-        { format: 'PDF', description: 'Printable reference document' }
+        {
+          format: "JSON",
+          description: "Standard JSON format for web applications",
+        },
+        { format: "XML", description: "XML format for enterprise systems" },
+        { format: "CSV", description: "Spreadsheet-compatible format" },
+        { format: "SQL", description: "Database insert statements" },
+        { format: "Code", description: "Generate code for your game engine" },
+        { format: "PDF", description: "Printable reference document" },
       ].map((option) => (
-        <div key={option.format} className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-2">{option.format}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{option.description}</p>
+        <div
+          key={option.format}
+          className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg"
+        >
+          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+            {option.format}
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            {option.description}
+          </p>
           <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm">
             Export as {option.format}
           </button>
@@ -468,14 +523,19 @@ const LootEntryCard: React.FC<{
   onEdit: () => void;
   onDelete: () => void;
 }> = ({ entry, totalWeight, onEdit, onDelete }) => {
-  const probability = totalWeight > 0 ? (entry.probability.weight / totalWeight) * 100 : 0;
+  const probability =
+    totalWeight > 0 ? (entry.probability.weight / totalWeight) * 100 : 0;
 
   return (
     <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
       <div className="flex items-start justify-between mb-2">
         <div>
-          <h4 className="font-medium text-gray-900 dark:text-white">{entry.name}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{entry.description}</p>
+          <h4 className="font-medium text-gray-900 dark:text-white">
+            {entry.name}
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {entry.description}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -496,18 +556,27 @@ const LootEntryCard: React.FC<{
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
           <span className="text-gray-500 dark:text-gray-400">Type:</span>
-          <span className="ml-2 text-gray-900 dark:text-white">{entry.type}</span>
+          <span className="ml-2 text-gray-900 dark:text-white">
+            {entry.type}
+          </span>
         </div>
         <div>
           <span className="text-gray-500 dark:text-gray-400">Rarity:</span>
-          <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-            entry.rarity === 'common' ? 'bg-gray-100 text-gray-800' :
-            entry.rarity === 'uncommon' ? 'bg-green-100 text-green-800' :
-            entry.rarity === 'rare' ? 'bg-blue-100 text-blue-800' :
-            entry.rarity === 'epic' ? 'bg-purple-100 text-purple-800' :
-            entry.rarity === 'legendary' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
-          }`}>
+          <span
+            className={`ml-2 px-2 py-0.5 rounded text-xs ${
+              entry.rarity === "common"
+                ? "bg-gray-100 text-gray-800"
+                : entry.rarity === "uncommon"
+                  ? "bg-green-100 text-green-800"
+                  : entry.rarity === "rare"
+                    ? "bg-blue-100 text-blue-800"
+                    : entry.rarity === "epic"
+                      ? "bg-purple-100 text-purple-800"
+                      : entry.rarity === "legendary"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+            }`}
+          >
             {entry.rarity}
           </span>
         </div>
@@ -516,13 +585,14 @@ const LootEntryCard: React.FC<{
           <span className="ml-2 text-gray-900 dark:text-white">
             {entry.quantity.min === entry.quantity.max
               ? entry.quantity.min
-              : `${entry.quantity.min}-${entry.quantity.max}`
-            }
+              : `${entry.quantity.min}-${entry.quantity.max}`}
           </span>
         </div>
         <div>
           <span className="text-gray-500 dark:text-gray-400">Chance:</span>
-          <span className="ml-2 text-gray-900 dark:text-white">{probability.toFixed(1)}%</span>
+          <span className="ml-2 text-gray-900 dark:text-white">
+            {probability.toFixed(1)}%
+          </span>
         </div>
       </div>
 
@@ -553,7 +623,9 @@ const SingleRollTest: React.FC<{
   return (
     <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
       <div className="flex items-center justify-between mb-4">
-        <h5 className="font-medium text-gray-900 dark:text-white">Quick Roll</h5>
+        <h5 className="font-medium text-gray-900 dark:text-white">
+          Quick Roll
+        </h5>
         <button
           onClick={rollOnce}
           disabled={!lootTable.entries?.length}
@@ -566,19 +638,29 @@ const SingleRollTest: React.FC<{
       {lastRoll.length > 0 ? (
         <div className="space-y-2">
           {lastRoll.map((item, index) => (
-            <div key={index} className="flex items-center justify-between py-2 px-3 bg-white dark:bg-gray-800 rounded">
+            <div
+              key={index}
+              className="flex items-center justify-between py-2 px-3 bg-white dark:bg-gray-800 rounded"
+            >
               <span className="text-gray-900 dark:text-white">
                 {item.quantity > 1 && `${item.quantity}x `}
                 {item.name}
               </span>
-              <span className={`px-2 py-0.5 rounded text-xs ${
-                item.rarity === 'common' ? 'bg-gray-100 text-gray-800' :
-                item.rarity === 'uncommon' ? 'bg-green-100 text-green-800' :
-                item.rarity === 'rare' ? 'bg-blue-100 text-blue-800' :
-                item.rarity === 'epic' ? 'bg-purple-100 text-purple-800' :
-                item.rarity === 'legendary' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+              <span
+                className={`px-2 py-0.5 rounded text-xs ${
+                  item.rarity === "common"
+                    ? "bg-gray-100 text-gray-800"
+                    : item.rarity === "uncommon"
+                      ? "bg-green-100 text-green-800"
+                      : item.rarity === "rare"
+                        ? "bg-blue-100 text-blue-800"
+                        : item.rarity === "epic"
+                          ? "bg-purple-100 text-purple-800"
+                          : item.rarity === "legendary"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                }`}
+              >
                 {item.rarity}
               </span>
             </div>
@@ -628,11 +710,15 @@ const TestResultCard: React.FC<{
       </div>
       <div>
         <span className="text-gray-500 dark:text-gray-400">Balance:</span>
-        <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-          result.balanceAnalysis.balanceScore >= 80 ? 'bg-green-100 text-green-800' :
-          result.balanceAnalysis.balanceScore >= 60 ? 'bg-yellow-100 text-yellow-800' :
-          'bg-red-100 text-red-800'
-        }`}>
+        <span
+          className={`ml-2 px-2 py-0.5 rounded text-xs ${
+            result.balanceAnalysis.balanceScore >= 80
+              ? "bg-green-100 text-green-800"
+              : result.balanceAnalysis.balanceScore >= 60
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+          }`}
+        >
           {result.balanceAnalysis.balanceScore}%
         </span>
       </div>
@@ -647,13 +733,13 @@ const LootEntryModal: React.FC<{
   onClose: () => void;
 }> = ({ entry, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: entry?.name || '',
-    type: entry?.type || 'item' as const,
-    rarity: entry?.rarity || 'common' as LootItemRarity,
+    name: entry?.name || "",
+    type: entry?.type || ("item" as const),
+    rarity: entry?.rarity || ("common" as LootItemRarity),
     weight: entry?.probability.weight || 10,
     minQuantity: entry?.quantity.min || 1,
     maxQuantity: entry?.quantity.max || 1,
-    description: entry?.description || ''
+    description: entry?.description || "",
   });
 
   const handleSave = () => {
@@ -662,11 +748,22 @@ const LootEntryModal: React.FC<{
       type: formData.type,
       rarity: formData.rarity,
       description: formData.description,
-      quantity: { min: formData.minQuantity, max: formData.maxQuantity, modifiers: [] },
-      probability: { weight: formData.weight, baseChance: 0, scalingFactor: 1, conditions: [], rollType: 'simple', rollModifier: 0 },
+      quantity: {
+        min: formData.minQuantity,
+        max: formData.maxQuantity,
+        modifiers: [],
+      },
+      probability: {
+        weight: formData.weight,
+        baseChance: 0,
+        scalingFactor: 1,
+        conditions: [],
+        rollType: "simple",
+        rollModifier: 0,
+      },
       conditions: [],
-      category: '',
-      tags: []
+      category: "",
+      tags: [],
     });
   };
 
@@ -674,7 +771,7 @@ const LootEntryModal: React.FC<{
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          {entry ? 'Edit' : 'Add'} Loot Entry
+          {entry ? "Edit" : "Add"} Loot Entry
         </h3>
 
         <div className="space-y-4">
@@ -685,7 +782,9 @@ const LootEntryModal: React.FC<{
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -697,7 +796,12 @@ const LootEntryModal: React.FC<{
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as LootEntry['type'] })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    type: e.target.value as LootEntry["type"],
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="item">Item</option>
@@ -713,7 +817,12 @@ const LootEntryModal: React.FC<{
               </label>
               <select
                 value={formData.rarity}
-                onChange={(e) => setFormData({ ...formData, rarity: e.target.value as LootItemRarity })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    rarity: e.target.value as LootItemRarity,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="common">Common</option>
@@ -734,7 +843,12 @@ const LootEntryModal: React.FC<{
               <input
                 type="number"
                 value={formData.weight}
-                onChange={(e) => setFormData({ ...formData, weight: parseInt(e.target.value) || 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    weight: parseInt(e.target.value) || 0,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 min="0"
               />
@@ -747,7 +861,12 @@ const LootEntryModal: React.FC<{
               <input
                 type="number"
                 value={formData.minQuantity}
-                onChange={(e) => setFormData({ ...formData, minQuantity: parseInt(e.target.value) || 1 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    minQuantity: parseInt(e.target.value) || 1,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 min="0"
               />
@@ -760,7 +879,12 @@ const LootEntryModal: React.FC<{
               <input
                 type="number"
                 value={formData.maxQuantity}
-                onChange={(e) => setFormData({ ...formData, maxQuantity: parseInt(e.target.value) || 1 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    maxQuantity: parseInt(e.target.value) || 1,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 min={formData.minQuantity}
               />
@@ -773,7 +897,9 @@ const LootEntryModal: React.FC<{
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               rows={3}
             />
@@ -791,7 +917,7 @@ const LootEntryModal: React.FC<{
             onClick={handleSave}
             className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            {entry ? 'Update' : 'Add'} Entry
+            {entry ? "Update" : "Add"} Entry
           </button>
         </div>
       </div>
@@ -802,22 +928,39 @@ const LootEntryModal: React.FC<{
 // Placeholder components for complex analysis features
 const ProbabilityChart: React.FC<{ entries: LootEntry[] }> = () => (
   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Probability Distribution</h4>
-    <div className="text-gray-500 dark:text-gray-400">Chart visualization would go here...</div>
+    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+      Probability Distribution
+    </h4>
+    <div className="text-gray-500 dark:text-gray-400">
+      Chart visualization would go here...
+    </div>
   </div>
 );
 
-const BalanceRecommendations: React.FC<{ lootTable: Partial<LootTable>; testResults: TestResult[] }> = ({ lootTable: _lootTable, testResults: _testResults }) => (
+const BalanceRecommendations: React.FC<{
+  lootTable: Partial<LootTable>;
+  testResults: TestResult[];
+}> = ({ lootTable: _lootTable, testResults: _testResults }) => (
   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Balance Recommendations</h4>
-    <div className="text-gray-500 dark:text-gray-400">Analysis and recommendations would go here...</div>
+    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+      Balance Recommendations
+    </h4>
+    <div className="text-gray-500 dark:text-gray-400">
+      Analysis and recommendations would go here...
+    </div>
   </div>
 );
 
-const IndustryComparison: React.FC<{ lootTable: Partial<LootTable> }> = ({ lootTable: _lootTable }) => (
+const IndustryComparison: React.FC<{ lootTable: Partial<LootTable> }> = ({
+  lootTable: _lootTable,
+}) => (
   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Industry Standards</h4>
-    <div className="text-gray-500 dark:text-gray-400">Comparison data would go here...</div>
+    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+      Industry Standards
+    </h4>
+    <div className="text-gray-500 dark:text-gray-400">
+      Comparison data would go here...
+    </div>
   </div>
 );
 
@@ -829,22 +972,28 @@ const simulateLootRoll = (lootTable: LootTable): LootRollResult => {
 
   // Simple weighted random selection
   if (lootTable.entries && lootTable.entries.length > 0) {
-    const totalWeight = lootTable.entries.reduce((sum, entry) => sum + entry.probability.weight, 0);
+    const totalWeight = lootTable.entries.reduce(
+      (sum, entry) => sum + entry.probability.weight,
+      0,
+    );
     const random = Math.random() * totalWeight;
     let currentWeight = 0;
 
     for (const entry of lootTable.entries) {
       currentWeight += entry.probability.weight;
       if (random <= currentWeight) {
-        if (entry.type !== 'nothing') {
-          const quantity = Math.floor(Math.random() * (entry.quantity.max - entry.quantity.min + 1)) + entry.quantity.min;
+        if (entry.type !== "nothing") {
+          const quantity =
+            Math.floor(
+              Math.random() * (entry.quantity.max - entry.quantity.min + 1),
+            ) + entry.quantity.min;
           const item: GeneratedItem = {
             name: entry.name,
             quantity,
             rarity: entry.rarity,
             value: quantity * 10, // Placeholder value calculation
             source: entry.id,
-            modifiers: []
+            modifiers: [],
           };
           items.push(item);
           totalValue += item.value;
@@ -861,20 +1010,23 @@ const simulateLootRoll = (lootTable: LootTable): LootRollResult => {
     conditions: {},
     items,
     totalValue,
-    rollTime: endTime - startTime
+    rollTime: endTime - startTime,
   };
 };
 
 const calculateStatistics = (results: LootRollResult[]) => {
-  const values = results.map(r => r.totalValue);
+  const values = results.map((r) => r.totalValue);
   const sum = values.reduce((a, b) => a + b, 0);
   const average = sum / values.length;
-  const nothingCount = results.filter(r => r.items.length === 0).length;
+  const nothingCount = results.filter((r) => r.items.length === 0).length;
 
   return {
     averageValue: average,
     medianValue: values.sort((a, b) => a - b)[Math.floor(values.length / 2)],
-    standardDeviation: Math.sqrt(values.map(v => Math.pow(v - average, 2)).reduce((a, b) => a + b, 0) / values.length),
+    standardDeviation: Math.sqrt(
+      values.map((v) => Math.pow(v - average, 2)).reduce((a, b) => a + b, 0) /
+        values.length,
+    ),
     minValue: Math.min(...values),
     maxValue: Math.max(...values),
     rarityDistribution: {
@@ -884,10 +1036,11 @@ const calculateStatistics = (results: LootRollResult[]) => {
       epic: 0,
       legendary: 0,
       artifact: 0,
-      unique: 0
+      unique: 0,
     },
     nothingPercentage: (nothingCount / results.length) * 100,
-    averageRollTime: results.reduce((sum, r) => sum + r.rollTime, 0) / results.length
+    averageRollTime:
+      results.reduce((sum, r) => sum + r.rollTime, 0) / results.length,
   };
 };
 
@@ -903,8 +1056,14 @@ const analyzeBalance = (results: LootRollResult[]) => {
   return {
     balanceScore,
     issues: [],
-    recommendations: ['Consider adjusting probability weights for better balance'],
-    comparisonData: { similarTables: [], industryStandards: {}, playerExpectations: {} }
+    recommendations: [
+      "Consider adjusting probability weights for better balance",
+    ],
+    comparisonData: {
+      similarTables: [],
+      industryStandards: {},
+      playerExpectations: {},
+    },
   };
 };
 

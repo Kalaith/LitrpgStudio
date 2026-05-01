@@ -1,17 +1,27 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { Location, Faction, WorldTimelineEvent, WorldDetails } from '../types/story';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import type {
+  Location,
+  Faction,
+  WorldTimelineEvent,
+  WorldDetails,
+} from "../types/story";
 
 interface WorldBuildingToolsProps {
   worldDetails: Partial<WorldDetails>;
   onUpdate: (updates: Partial<WorldDetails>) => void;
 }
 
-type ActiveTab = 'locations' | 'factions' | 'maps' | 'timeline' | 'overview';
+type ActiveTab = "locations" | "factions" | "maps" | "timeline" | "overview";
 
-export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuildingToolsProps) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+export default function WorldBuildingTools({
+  worldDetails,
+  onUpdate,
+}: WorldBuildingToolsProps) {
+  const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
   const [selectedFaction, setSelectedFaction] = useState<Faction | null>(null);
 
   const locations = worldDetails?.locations || [];
@@ -20,11 +30,16 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
   const timeline = worldDetails?.timeline || [];
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: '🌍' },
-    { id: 'locations', label: 'Locations', icon: '🏰', count: locations.length },
-    { id: 'factions', label: 'Factions', icon: '⚔️', count: factions.length },
-    { id: 'maps', label: 'Maps', icon: '🗺️', count: maps.length },
-    { id: 'timeline', label: 'Timeline', icon: '⏰', count: timeline.length },
+    { id: "overview", label: "Overview", icon: "🌍" },
+    {
+      id: "locations",
+      label: "Locations",
+      icon: "🏰",
+      count: locations.length,
+    },
+    { id: "factions", label: "Factions", icon: "⚔️", count: factions.length },
+    { id: "maps", label: "Maps", icon: "🗺️", count: maps.length },
+    { id: "timeline", label: "Timeline", icon: "⏰", count: timeline.length },
   ];
 
   const renderOverviewTab = () => (
@@ -34,7 +49,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
           <label className="block text-sm font-medium mb-2">World Name</label>
           <input
             type="text"
-            value={worldDetails?.name || ''}
+            value={worldDetails?.name || ""}
             onChange={(e) => onUpdate({ name: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
             placeholder="Enter world name..."
@@ -44,7 +59,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         <div>
           <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
-            value={worldDetails?.description || ''}
+            value={worldDetails?.description || ""}
             onChange={(e) => onUpdate({ description: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded h-24"
             placeholder="Describe your world..."
@@ -54,7 +69,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         <div>
           <label className="block text-sm font-medium mb-2">Magic System</label>
           <textarea
-            value={worldDetails?.magicSystem || ''}
+            value={worldDetails?.magicSystem || ""}
             onChange={(e) => onUpdate({ magicSystem: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded h-20"
             placeholder="How does magic work in your world?"
@@ -64,9 +79,11 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Technology Level</label>
+          <label className="block text-sm font-medium mb-2">
+            Technology Level
+          </label>
           <select
-            value={worldDetails?.technology || ''}
+            value={worldDetails?.technology || ""}
             onChange={(e) => onUpdate({ technology: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
           >
@@ -84,9 +101,11 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Political Structure</label>
+          <label className="block text-sm font-medium mb-2">
+            Political Structure
+          </label>
           <textarea
-            value={worldDetails?.politics || ''}
+            value={worldDetails?.politics || ""}
             onChange={(e) => onUpdate({ politics: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded h-20"
             placeholder="Describe the political landscape..."
@@ -96,7 +115,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
         <div>
           <label className="block text-sm font-medium mb-2">Geography</label>
           <textarea
-            value={worldDetails?.geography || ''}
+            value={worldDetails?.geography || ""}
             onChange={(e) => onUpdate({ geography: e.target.value })}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded h-20"
             placeholder="Describe the physical world..."
@@ -130,10 +149,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
       <div className="w-1/3">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold">Locations</h3>
-          <button
-            onClick={() => {}}
-            className="btn-primary text-sm"
-          >
+          <button onClick={() => {}} className="btn-primary text-sm">
             Add Location
           </button>
         </div>
@@ -145,9 +161,10 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
               onClick={() => setSelectedLocation(location)}
               className={`
                 p-3 border rounded cursor-pointer transition-colors
-                ${selectedLocation?.id === location.id
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                ${
+                  selectedLocation?.id === location.id
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }
               `}
             >
@@ -173,9 +190,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
 
       <div className="flex-1">
         {selectedLocation ? (
-          <LocationDetails
-            location={selectedLocation}
-          />
+          <LocationDetails location={selectedLocation} />
         ) : (
           <div className="flex items-center justify-center h-64 text-gray-500">
             Select a location to view details
@@ -190,10 +205,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
       <div className="w-1/3">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold">Factions</h3>
-          <button
-            onClick={() => {}}
-            className="btn-primary text-sm"
-          >
+          <button onClick={() => {}} className="btn-primary text-sm">
             Add Faction
           </button>
         </div>
@@ -205,9 +217,10 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
               onClick={() => setSelectedFaction(faction)}
               className={`
                 p-3 border rounded cursor-pointer transition-colors
-                ${selectedFaction?.id === faction.id
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                ${
+                  selectedFaction?.id === faction.id
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }
               `}
             >
@@ -215,7 +228,9 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
               <div className="text-sm text-gray-600 dark:text-gray-400 capitalize">
                 {faction.type} • Influence: {faction.influence}/100
               </div>
-              <div className="text-xs text-gray-500 capitalize">{faction.status}</div>
+              <div className="text-xs text-gray-500 capitalize">
+                {faction.status}
+              </div>
             </div>
           ))}
 
@@ -229,9 +244,7 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
 
       <div className="flex-1">
         {selectedFaction ? (
-          <FactionDetails
-            faction={selectedFaction}
-          />
+          <FactionDetails faction={selectedFaction} />
         ) : (
           <div className="flex items-center justify-center h-64 text-gray-500">
             Select a faction to view details
@@ -262,13 +275,20 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
               {event.description}
             </p>
             <div className="flex flex-wrap gap-2">
-              <span className={`
+              <span
+                className={`
                 px-2 py-1 text-xs rounded-full
-                ${event.type === 'war' ? 'bg-red-100 text-red-800' :
-                  event.type === 'discovery' ? 'bg-blue-100 text-blue-800' :
-                  event.type === 'political' ? 'bg-purple-100 text-purple-800' :
-                  'bg-gray-100 text-gray-800'}
-              `}>
+                ${
+                  event.type === "war"
+                    ? "bg-red-100 text-red-800"
+                    : event.type === "discovery"
+                      ? "bg-blue-100 text-blue-800"
+                      : event.type === "political"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-gray-100 text-gray-800"
+                }
+              `}
+              >
                 {event.type}
               </span>
               {event.era && (
@@ -300,9 +320,10 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
               onClick={() => setActiveTab(tab.id as ActiveTab)}
               className={`
                 flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm
-                ${activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ${
+                  activeTab === tab.id
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }
               `}
             >
@@ -328,10 +349,10 @@ export default function WorldBuildingTools({ worldDetails, onUpdate }: WorldBuil
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === 'overview' && renderOverviewTab()}
-            {activeTab === 'locations' && renderLocationsTab()}
-            {activeTab === 'factions' && renderFactionsTab()}
-            {activeTab === 'timeline' && renderTimelineTab()}
+            {activeTab === "overview" && renderOverviewTab()}
+            {activeTab === "locations" && renderLocationsTab()}
+            {activeTab === "factions" && renderFactionsTab()}
+            {activeTab === "timeline" && renderTimelineTab()}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -380,7 +401,7 @@ function LocationDetails({ location }: { location: Location }) {
           <label className="block text-sm font-medium mb-1">Population</label>
           <input
             type="number"
-            value={location.population || ''}
+            value={location.population || ""}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
             readOnly
           />
@@ -389,7 +410,7 @@ function LocationDetails({ location }: { location: Location }) {
           <label className="block text-sm font-medium mb-1">Government</label>
           <input
             type="text"
-            value={location.government || ''}
+            value={location.government || ""}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
             readOnly
           />
@@ -398,7 +419,9 @@ function LocationDetails({ location }: { location: Location }) {
 
       {location.notableFeatures && location.notableFeatures.length > 0 && (
         <div>
-          <label className="block text-sm font-medium mb-1">Notable Features</label>
+          <label className="block text-sm font-medium mb-1">
+            Notable Features
+          </label>
           <div className="flex flex-wrap gap-2">
             {location.notableFeatures.map((feature, index) => (
               <span
@@ -451,7 +474,9 @@ function FactionDetails({ faction }: { faction: Faction }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Influence: {faction.influence}/100</label>
+        <label className="block text-sm font-medium mb-1">
+          Influence: {faction.influence}/100
+        </label>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full"
