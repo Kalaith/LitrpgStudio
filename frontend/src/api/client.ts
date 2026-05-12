@@ -1,4 +1,5 @@
 // API Client for Writers Studio Backend
+import { optionalEnv, requiredEnv } from "../config/env";
 
 // Type definitions - using class instead of interface to survive compilation
 export class ApiResponse<T = unknown> {
@@ -67,8 +68,8 @@ class ApiClient {
   private version: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-    this.version = import.meta.env.VITE_API_VERSION || "v1";
+    this.baseUrl = requiredEnv("VITE_API_BASE_URL");
+    this.version = requiredEnv("VITE_API_VERSION");
   }
 
   private getUrl(endpoint: string): string {
@@ -102,7 +103,7 @@ class ApiClient {
       headers,
     };
 
-    if (import.meta.env.VITE_DEBUG_API === "true") {
+    if (optionalEnv("VITE_DEBUG_API") === "true") {
       console.log(`API Request: ${config.method || "GET"} ${url}`, {
         body: config.body,
         headers: config.headers,
@@ -113,7 +114,7 @@ class ApiClient {
       const response = await fetch(url, config);
       const data = await response.json().catch(() => ({}));
 
-      if (import.meta.env.VITE_DEBUG_API === "true") {
+      if (optionalEnv("VITE_DEBUG_API") === "true") {
         console.log(`API Response: ${response.status}`, data);
       }
 

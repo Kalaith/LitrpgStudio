@@ -188,7 +188,7 @@ export function useCharactersWithApi() {
     }
 
     // Fallback to local creation
-    store.createCharacter(characterData);
+    return store.createCharacter(characterData);
   };
 
   const updateCharacter = async (

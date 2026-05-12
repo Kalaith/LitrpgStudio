@@ -12,6 +12,7 @@ import {
   buildApiUrl as buildApiEndpointUrl,
   setTokenProvider,
 } from "../api/client";
+import { requiredEnv } from "../config/env";
 
 interface User {
   id: string;
@@ -84,7 +85,7 @@ const AuthContext = createContext<AuthContextType>({
   refreshUserInfo: async () => undefined,
   loginWithRedirect: () => undefined,
   continueAsGuest: async () => undefined,
-  getLinkAccountUrl: () => "/signup",
+  getLinkAccountUrl: () => "",
   logout: () => undefined,
   getAccessToken: async () => {
     throw new Error("Not authenticated");
@@ -187,12 +188,12 @@ const appendQueryParam = (
 };
 
 const getFrontpageLoginUrl = (): string => {
-  const configured = import.meta.env.VITE_WEBHATCHERY_LOGIN_URL || "/login";
+  const configured = requiredEnv("VITE_WEBHATCHERY_LOGIN_URL");
   return withRedirectParam(configured);
 };
 
 const getFrontpageSignupUrl = (guestUserId?: string): string => {
-  const configured = import.meta.env.VITE_WEBHATCHERY_SIGNUP_URL || "/signup";
+  const configured = requiredEnv("VITE_WEBHATCHERY_SIGNUP_URL");
   const url = withRedirectParam(
     configured,
     guestUserId ? { guest_user_id: guestUserId } : {},
@@ -204,20 +205,20 @@ const getFrontpageSignupUrl = (guestUserId?: string): string => {
 };
 
 const buildCurrentUserUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-  const version = import.meta.env.VITE_API_VERSION || "v1";
+  const baseUrl = requiredEnv("VITE_API_BASE_URL");
+  const version = requiredEnv("VITE_API_VERSION");
   return buildApiEndpointUrl(baseUrl, version, "/auth/current-user");
 };
 
 const buildGuestSessionUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-  const version = import.meta.env.VITE_API_VERSION || "v1";
+  const baseUrl = requiredEnv("VITE_API_BASE_URL");
+  const version = requiredEnv("VITE_API_VERSION");
   return buildApiEndpointUrl(baseUrl, version, "/auth/guest-session");
 };
 
 const buildLinkGuestUrl = (): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-  const version = import.meta.env.VITE_API_VERSION || "v1";
+  const baseUrl = requiredEnv("VITE_API_BASE_URL");
+  const version = requiredEnv("VITE_API_VERSION");
   return buildApiEndpointUrl(baseUrl, version, "/auth/link-guest");
 };
 

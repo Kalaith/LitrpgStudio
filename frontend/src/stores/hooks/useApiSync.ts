@@ -21,7 +21,9 @@ export function useApiSync(seriesId: string | null) {
 
   const syncTimeline = useCallback(
     async (localTimelineEvents: unknown[]) => {
-      if (!seriesId) return;
+      if (!seriesId) {
+        return undefined;
+      }
 
       try {
         setSyncStatus((prev) => ({ ...prev, loading: true, error: null }));
@@ -51,12 +53,16 @@ export function useApiSync(seriesId: string | null) {
           lastSync: null,
         });
       }
+
+      return undefined;
     },
     [seriesId],
   );
 
   const syncCharacters = useCallback(async () => {
-    if (!seriesId) return;
+    if (!seriesId) {
+      return undefined;
+    }
 
     try {
       setSyncStatus((prev) => ({ ...prev, loading: true, error: null }));
@@ -79,6 +85,8 @@ export function useApiSync(seriesId: string | null) {
         lastSync: null,
       });
     }
+
+    return undefined;
   }, [seriesId]);
 
   const syncSeries = useCallback(async () => {
@@ -103,6 +111,8 @@ export function useApiSync(seriesId: string | null) {
         lastSync: null,
       });
     }
+
+    return undefined;
   }, []);
 
   // Auto-sync on mount if seriesId is available

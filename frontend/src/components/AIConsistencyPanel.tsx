@@ -83,13 +83,15 @@ export const AIConsistencyPanel: React.FC<AIConsistencyPanelProps> = ({
 
   // Auto-analysis effect
   useEffect(() => {
-    if (autoAnalysis && isEnabled && content.length > 100) {
-      const debounceTimer = setTimeout(() => {
-        runAnalysis();
-      }, 2000); // Debounce analysis
-
-      return () => clearTimeout(debounceTimer);
+    if (!autoAnalysis || !isEnabled || content.length <= 100) {
+      return undefined;
     }
+
+    const debounceTimer = setTimeout(() => {
+      runAnalysis();
+    }, 2000); // Debounce analysis
+
+    return () => clearTimeout(debounceTimer);
   }, [content, autoAnalysis, isEnabled, worldContext]);
 
   const runAnalysis = useCallback(async () => {
